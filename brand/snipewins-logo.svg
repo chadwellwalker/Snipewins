@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 150" width="880" height="150" role="img" aria-label="SNIPEWINS">
+  <title>SNIPEWINS</title>
+  <defs>
+    <!-- Engineered cut: diagonal negative space through W (mask subtract) -->
+    <mask id="snipewins-w-cut" maskUnits="userSpaceOnUse">
+      <rect x="0" y="0" width="880" height="150" fill="white"/>
+      <path d="M 286 106 L 308 44 L 320 48 L 298 110 Z" fill="black"/>
+    </mask>
+  </defs>
+  <rect width="100%" height="100%" fill="#000000"/>
+  <!-- Wide geometric W; soft white #EAEAEA -->
+  <path
+    mask="url(#snipewins-w-cut)"
+    fill="#EAEAEA"
+    d="
+      M 236 46
+      L 254 108
+      L 270 108
+      L 284 58
+      L 298 108
+      L 314 108
+      L 332 46
+      L 316 46
+      L 302 96
+      L 288 52
+      L 274 96
+      L 260 46
+      Z"/>
+  <!-- SNIPE — tight kerning, horizontal lock -->
+  <text
+    x="22"
+    y="102"
+    fill="#EAEAEA"
+    font-family="Bahnschrift, 'DIN Alternate', 'Arial Narrow', 'Helvetica Neue', Arial, sans-serif"
+    font-size="68"
+    font-weight="700"
+    font-stretch="condensed"
+    letter-spacing="-4.2"
+    style="text-rendering: geometricPrecision">SNIPE</text>
+  <!-- Accent: thin vertical bar only (second I in WINS) -->
+  <rect x="348" y="48" width="6.5" height="60" fill="#00B874"/>
+  <!-- NS completes WINS -->
+  <text
+    x="364"
+    y="102"
+    fill="#EAEAEA"
+    font-family="Bahnschrift, 'DIN Alternate', 'Arial Narrow', 'Helvetica Neue', Arial, sans-serif"
+    font-size="68"
+    font-weight="700"
+    font-stretch="condensed"
+    letter-spacing="-4.2"
+    style="text-rendering: geometricPrecision">NS</text>
+</svg>

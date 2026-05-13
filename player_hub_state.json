@@ -1,0 +1,5141 @@
+{
+  "version": 8,
+  "player_overrides": {},
+  "signals": {
+    "listing_depth_last_search": {},
+    "listing_depth_last_radar": {},
+    "keyword_search_count": {
+      "bo_nix": 4,
+      "cam_ward": 2,
+      "jaxson_dart": 2,
+      "paul_skenes": 1
+    },
+    "watchlist_card_hits": {
+      "caleb_williams": 0,
+      "drake_maye": 0,
+      "jayden_daniels": 0,
+      "bo_nix": 0,
+      "michael_penix": 0,
+      "marvin_harrison_jr": 0,
+      "malik_nabers": 0,
+      "rome_odunze": 0,
+      "jaxson_dart": 0,
+      "cam_ward": 0,
+      "cj_stroud": 0,
+      "anthony_richardson": 0,
+      "bijan_robinson": 0,
+      "puka_nacua": 0,
+      "paul_skenes": 0,
+      "jackson_holliday": 0,
+      "jackson_chourio": 0,
+      "victor_wembanyama": 0,
+      "paolo_banchero": 0,
+      "chet_holmgren": 0,
+      "cooper_flagg": 0,
+      "kon_knueppel": 0
+    },
+    "opportunity_hits": {},
+    "cockpit_strong_hits_last": {},
+    "cockpit_snipe_hits_last": {}
+  },
+  "monitoring": {
+    "per_player": {
+      "bo_nix": {
+        "snapshots": [
+          {
+            "ts": "2026-03-26T18:09:34Z",
+            "source": "search",
+            "strong_board": 0,
+            "snipe_board": 0,
+            "watchlist_import": 0,
+            "listing_depth": 10,
+            "keyword_hit": 1
+          },
+          {
+            "ts": "2026-03-26T18:09:34Z",
+            "source": "player_scan",
+            "listing_depth": 10,
+            "strong_board": 0,
+            "snipe_board": 0,
+            "watchlist_import": 0,
+            "scan_hit": 1,
+            "scan_source": "player_hub"
+          },
+          {
+            "ts": "2026-03-26T18:27:21Z",
+            "source": "search",
+            "strong_board": 0,
+            "snipe_board": 0,
+            "watchlist_import": 0,
+            "listing_depth": 10,
+            "keyword_hit": 1
+          },
+          {
+            "ts": "2026-03-26T18:27:21Z",
+            "source": "player_scan",
+            "listing_depth": 10,
+            "strong_board": 0,
+            "snipe_board": 0,
+            "watchlist_import": 0,
+            "scan_hit": 1,
+            "scan_source": "player_hub"
+          },
+          {
+            "ts": "2026-03-26T18:28:45Z",
+            "source": "cockpit_board",
+            "listing_depth": 10,
+            "strong_board": 8,
+            "snipe_board": 8,
+            "keyword_hit": 0,
+            "watchlist_import": 0
+          },
+          {
+            "ts": "2026-03-26T18:30:45Z",
+            "source": "manual_my_players",
+            "my_players": true
+          },
+          {
+            "ts": "2026-03-26T19:20:27Z",
+            "source": "search",
+            "strong_board": 0,
+            "snipe_board": 0,
+            "watchlist_import": 0,
+            "listing_depth": 10,
+            "keyword_hit": 1
+          },
+          {
+            "ts": "2026-03-26T19:20:27Z",
+            "source": "player_scan",
+            "listing_depth": 10,
+            "strong_board": 0,
+            "snipe_board": 0,
+            "watchlist_import": 0,
+            "scan_hit": 1,
+            "scan_source": "player_hub"
+          },
+          {
+            "ts": "2026-03-26T20:01:29Z",
+            "source": "search",
+            "strong_board": 0,
+            "snipe_board": 0,
+            "watchlist_import": 0,
+            "listing_depth": 10,
+            "keyword_hit": 1
+          },
+          {
+            "ts": "2026-03-26T20:01:29Z",
+            "source": "player_scan",
+            "listing_depth": 10,
+            "strong_board": 0,
+            "snipe_board": 0,
+            "watchlist_import": 0,
+            "scan_hit": 1,
+            "scan_source": "player_hub"
+          }
+        ],
+        "last_checked_ts": "2026-03-26T20:01:29Z"
+      },
+      "cam_ward": {
+        "snapshots": [
+          {
+            "ts": "2026-03-26T19:17:34Z",
+            "source": "active_scan",
+            "active_scan": true
+          },
+          {
+            "ts": "2026-03-26T19:17:39Z",
+            "source": "manual_my_players",
+            "my_players": true
+          },
+          {
+            "ts": "2026-03-26T19:17:45Z",
+            "source": "active_scan",
+            "active_scan": false
+          },
+          {
+            "ts": "2026-03-26T19:20:31Z",
+            "source": "search",
+            "strong_board": 0,
+            "snipe_board": 0,
+            "watchlist_import": 0,
+            "listing_depth": 10,
+            "keyword_hit": 1
+          },
+          {
+            "ts": "2026-03-26T19:20:31Z",
+            "source": "player_scan",
+            "listing_depth": 10,
+            "strong_board": 0,
+            "snipe_board": 0,
+            "watchlist_import": 0,
+            "scan_hit": 1,
+            "scan_source": "player_hub"
+          },
+          {
+            "ts": "2026-03-26T20:01:30Z",
+            "source": "search",
+            "strong_board": 0,
+            "snipe_board": 0,
+            "watchlist_import": 0,
+            "listing_depth": 10,
+            "keyword_hit": 1
+          },
+          {
+            "ts": "2026-03-26T20:01:30Z",
+            "source": "player_scan",
+            "listing_depth": 10,
+            "strong_board": 0,
+            "snipe_board": 0,
+            "watchlist_import": 0,
+            "scan_hit": 1,
+            "scan_source": "player_hub"
+          }
+        ],
+        "last_checked_ts": "2026-03-26T20:01:30Z"
+      },
+      "jaxson_dart": {
+        "snapshots": [
+          {
+            "ts": "2026-03-26T19:17:55Z",
+            "source": "active_scan",
+            "active_scan": true
+          },
+          {
+            "ts": "2026-03-26T19:20:36Z",
+            "source": "search",
+            "strong_board": 0,
+            "snipe_board": 0,
+            "watchlist_import": 0,
+            "listing_depth": 10,
+            "keyword_hit": 1
+          },
+          {
+            "ts": "2026-03-26T19:20:36Z",
+            "source": "player_scan",
+            "listing_depth": 10,
+            "strong_board": 0,
+            "snipe_board": 0,
+            "watchlist_import": 0,
+            "scan_hit": 1,
+            "scan_source": "player_hub"
+          },
+          {
+            "ts": "2026-03-26T19:21:59Z",
+            "source": "cockpit_board",
+            "listing_depth": 10,
+            "strong_board": 5,
+            "snipe_board": 5,
+            "keyword_hit": 0,
+            "watchlist_import": 0
+          },
+          {
+            "ts": "2026-03-26T20:01:32Z",
+            "source": "search",
+            "strong_board": 0,
+            "snipe_board": 0,
+            "watchlist_import": 0,
+            "listing_depth": 10,
+            "keyword_hit": 1
+          },
+          {
+            "ts": "2026-03-26T20:01:32Z",
+            "source": "player_scan",
+            "listing_depth": 10,
+            "strong_board": 0,
+            "snipe_board": 0,
+            "watchlist_import": 0,
+            "scan_hit": 1,
+            "scan_source": "player_hub"
+          },
+          {
+            "ts": "2026-03-26T20:02:06Z",
+            "source": "cockpit_board",
+            "listing_depth": 10,
+            "strong_board": 5,
+            "snipe_board": 5,
+            "keyword_hit": 0,
+            "watchlist_import": 0
+          }
+        ],
+        "last_checked_ts": "2026-03-26T20:02:06Z"
+      },
+      "paul_skenes": {
+        "snapshots": [
+          {
+            "ts": "2026-03-26T20:25:34Z",
+            "source": "search",
+            "strong_board": 0,
+            "snipe_board": 0,
+            "watchlist_import": 0,
+            "listing_depth": 10,
+            "keyword_hit": 1
+          },
+          {
+            "ts": "2026-03-26T20:26:23Z",
+            "source": "cockpit_board",
+            "listing_depth": 10,
+            "strong_board": 7,
+            "snipe_board": 7,
+            "keyword_hit": 0,
+            "watchlist_import": 0
+          }
+        ],
+        "last_checked_ts": "2026-03-26T20:26:23Z"
+      },
+      "bijan_robinson": {
+        "snapshots": [
+          {
+            "ts": "2026-03-26T22:44:00Z",
+            "source": "active_scan",
+            "active_scan": true
+          }
+        ],
+        "last_checked_ts": "2026-03-26T22:44:00Z"
+      },
+      "caleb_williams": {
+        "snapshots": [
+          {
+            "ts": "2026-03-26T22:44:12Z",
+            "source": "active_scan",
+            "active_scan": true
+          }
+        ],
+        "last_checked_ts": "2026-03-26T22:44:12Z"
+      },
+      "cooper_flagg": {
+        "snapshots": [
+          {
+            "ts": "2026-03-26T22:44:20Z",
+            "source": "active_scan",
+            "active_scan": true
+          }
+        ],
+        "last_checked_ts": "2026-03-26T22:44:20Z"
+      },
+      "drake_maye": {
+        "snapshots": [
+          {
+            "ts": "2026-03-26T22:44:27Z",
+            "source": "active_scan",
+            "active_scan": true
+          }
+        ],
+        "last_checked_ts": "2026-03-26T22:44:27Z"
+      },
+      "jackson_chourio": {
+        "snapshots": [
+          {
+            "ts": "2026-03-26T22:44:32Z",
+            "source": "active_scan",
+            "active_scan": true
+          }
+        ],
+        "last_checked_ts": "2026-03-26T22:44:32Z"
+      },
+      "jayden_daniels": {
+        "snapshots": [
+          {
+            "ts": "2026-03-26T22:44:38Z",
+            "source": "active_scan",
+            "active_scan": true
+          }
+        ],
+        "last_checked_ts": "2026-03-26T22:44:38Z"
+      },
+      "kon_knueppel": {
+        "snapshots": [
+          {
+            "ts": "2026-03-26T22:44:46Z",
+            "source": "active_scan",
+            "active_scan": true
+          }
+        ],
+        "last_checked_ts": "2026-03-26T22:44:46Z"
+      },
+      "malik_nabers": {
+        "snapshots": [
+          {
+            "ts": "2026-03-26T22:44:53Z",
+            "source": "active_scan",
+            "active_scan": true
+          }
+        ],
+        "last_checked_ts": "2026-03-26T22:44:53Z"
+      },
+      "michael_penix": {
+        "snapshots": [
+          {
+            "ts": "2026-03-26T22:45:26Z",
+            "source": "active_scan",
+            "active_scan": true
+          }
+        ],
+        "last_checked_ts": "2026-03-26T22:45:26Z"
+      },
+      "victor_wembanyama": {
+        "snapshots": [
+          {
+            "ts": "2026-03-26T22:45:34Z",
+            "source": "active_scan",
+            "active_scan": true
+          }
+        ],
+        "last_checked_ts": "2026-03-26T22:45:34Z"
+      },
+      "rome_odunze": {
+        "snapshots": [
+          {
+            "ts": "2026-03-26T22:45:40Z",
+            "source": "active_scan",
+            "active_scan": true
+          }
+        ],
+        "last_checked_ts": "2026-03-26T22:45:40Z"
+      },
+      "marvin_harrison_jr": {
+        "snapshots": [
+          {
+            "ts": "2026-03-26T22:45:44Z",
+            "source": "active_scan",
+            "active_scan": true
+          }
+        ],
+        "last_checked_ts": "2026-03-26T22:45:44Z"
+      }
+    },
+    "meta": {
+      "last_board_signature": ""
+    }
+  },
+  "scan_meta": {
+    "bo_nix": {
+      "scan_count": 4,
+      "last_scan_ts": "2026-03-26T20:01:29Z",
+      "last_scan_time": "2026-03-26T20:01:29Z",
+      "last_keyword": "Bo Nix rookie card",
+      "last_result_count": 10,
+      "last_opportunity_groups": 8,
+      "last_scan_had_listings": true,
+      "last_scan_source": "player_hub",
+      "last_scan_query": "Bo Nix rookie card"
+    },
+    "cam_ward": {
+      "scan_count": 2,
+      "last_scan_ts": "2026-03-26T20:01:30Z",
+      "last_scan_time": "2026-03-26T20:01:30Z",
+      "last_keyword": "Cam Ward rookie card",
+      "last_scan_query": "Cam Ward rookie card",
+      "last_result_count": 10,
+      "last_opportunity_groups": 8,
+      "last_scan_had_listings": true,
+      "last_scan_source": "player_hub"
+    },
+    "jaxson_dart": {
+      "scan_count": 2,
+      "last_scan_ts": "2026-03-26T20:01:32Z",
+      "last_scan_time": "2026-03-26T20:01:32Z",
+      "last_keyword": "Jaxson Dart rookie card",
+      "last_scan_query": "Jaxson Dart rookie card",
+      "last_result_count": 10,
+      "last_opportunity_groups": 8,
+      "last_scan_had_listings": true,
+      "last_scan_source": "player_hub"
+    }
+  },
+  "active_scan_player_ids": [
+    "bo_nix",
+    "cam_ward",
+    "jaxson_dart",
+    "bijan_robinson",
+    "caleb_williams",
+    "cooper_flagg",
+    "drake_maye",
+    "jackson_chourio",
+    "jayden_daniels",
+    "kon_knueppel",
+    "malik_nabers",
+    "michael_penix",
+    "victor_wembanyama",
+    "rome_odunze",
+    "marvin_harrison_jr"
+  ],
+  "meta": {
+    "last_watchlist_rescan": "2026-03-26T19:17:20Z",
+    "category_source": "player_hub_seed.SEED_PLAYERS"
+  },
+  "buy_universe": {
+    "groups": {
+      "young_gun_nfl": {
+        "label": "Young Gun \u00b7 NFL",
+        "sport": "NFL",
+        "kind": "young_gun"
+      },
+      "young_gun_nba": {
+        "label": "Young Gun \u00b7 NBA",
+        "sport": "NBA",
+        "kind": "young_gun"
+      },
+      "young_gun_mlb": {
+        "label": "Young Gun \u00b7 MLB",
+        "sport": "MLB",
+        "kind": "young_gun"
+      },
+      "nfl_all": {
+        "label": "NFL All Players",
+        "sport": "NFL",
+        "kind": "sport_bucket"
+      },
+      "mlb_all": {
+        "label": "MLB All Players",
+        "sport": "MLB",
+        "kind": "sport_bucket"
+      },
+      "nba_all": {
+        "label": "NBA All Players",
+        "sport": "NBA",
+        "kind": "sport_bucket"
+      },
+      "whatnot_t1": {
+        "label": "Whatnot T1 \u2013 Instant Sellers",
+        "sport": "",
+        "kind": "whatnot_velocity"
+      },
+      "whatnot_t2": {
+        "label": "Whatnot T2 \u2013 Fast Movers",
+        "sport": "",
+        "kind": "whatnot_velocity"
+      },
+      "whatnot_t3": {
+        "label": "Whatnot T3 \u2013 Steady Movers",
+        "sport": "",
+        "kind": "whatnot_velocity"
+      }
+    },
+    "product_targets": {
+      "prizm_nfl": {
+        "target_id": "prizm_nfl",
+        "label": "Panini Prizm NFL",
+        "sport": "NFL",
+        "brand": "Panini",
+        "product_family_id": "prizm_nfl",
+        "set_name": "Prizm",
+        "release_year": null,
+        "parallel_rule_ids": [],
+        "card_scope": "Panini Prizm NFL \u2014 raw singles, refractors, numbered parallels.",
+        "include_terms": [],
+        "exclude_terms": [
+          "lot",
+          "break",
+          "case",
+          "jumbo",
+          "hobby box"
+        ],
+        "default_grade_filter": "",
+        "active": true
+      },
+      "select_nfl": {
+        "target_id": "select_nfl",
+        "label": "Panini Select NFL",
+        "sport": "NFL",
+        "brand": "Panini",
+        "product_family_id": "select_nfl",
+        "set_name": "Select",
+        "release_year": null,
+        "parallel_rule_ids": [],
+        "card_scope": "Panini Select NFL \u2014 raw singles, refractors, numbered parallels.",
+        "include_terms": [],
+        "exclude_terms": [
+          "lot",
+          "break",
+          "case",
+          "jumbo",
+          "hobby box"
+        ],
+        "default_grade_filter": "",
+        "active": true
+      },
+      "mosaic_nfl": {
+        "target_id": "mosaic_nfl",
+        "label": "Panini Mosaic NFL",
+        "sport": "NFL",
+        "brand": "Panini",
+        "product_family_id": "mosaic_nfl",
+        "set_name": "Mosaic",
+        "release_year": null,
+        "parallel_rule_ids": [],
+        "card_scope": "Panini Mosaic NFL \u2014 raw singles, refractors, numbered parallels.",
+        "include_terms": [],
+        "exclude_terms": [
+          "lot",
+          "break",
+          "case",
+          "jumbo",
+          "hobby box"
+        ],
+        "default_grade_filter": "",
+        "active": true
+      },
+      "optic_nfl": {
+        "target_id": "optic_nfl",
+        "label": "Donruss Optic NFL",
+        "sport": "NFL",
+        "brand": "Panini",
+        "product_family_id": "optic_nfl",
+        "set_name": "Donruss Optic",
+        "release_year": null,
+        "parallel_rule_ids": [],
+        "card_scope": "Donruss Optic NFL \u2014 raw singles, refractors, numbered parallels.",
+        "include_terms": [],
+        "exclude_terms": [
+          "lot",
+          "break",
+          "case",
+          "jumbo",
+          "hobby box"
+        ],
+        "default_grade_filter": "",
+        "active": true
+      },
+      "contenders_nfl": {
+        "target_id": "contenders_nfl",
+        "label": "Panini Contenders NFL",
+        "sport": "NFL",
+        "brand": "Panini",
+        "product_family_id": "contenders_nfl",
+        "set_name": "Contenders",
+        "release_year": null,
+        "parallel_rule_ids": [],
+        "card_scope": "Panini Contenders NFL \u2014 raw singles, refractors, numbered parallels.",
+        "include_terms": [],
+        "exclude_terms": [
+          "lot",
+          "break",
+          "case",
+          "jumbo",
+          "hobby box"
+        ],
+        "default_grade_filter": "",
+        "active": true
+      },
+      "chronicles_nfl": {
+        "target_id": "chronicles_nfl",
+        "label": "Panini Chronicles NFL",
+        "sport": "NFL",
+        "brand": "Panini",
+        "product_family_id": "chronicles_nfl",
+        "set_name": "Chronicles",
+        "release_year": null,
+        "parallel_rule_ids": [],
+        "card_scope": "Panini Chronicles NFL \u2014 raw singles, refractors, numbered parallels.",
+        "include_terms": [],
+        "exclude_terms": [
+          "lot",
+          "break",
+          "case",
+          "jumbo",
+          "hobby box"
+        ],
+        "default_grade_filter": "",
+        "active": true
+      },
+      "absolute_nfl": {
+        "target_id": "absolute_nfl",
+        "label": "Panini Absolute NFL",
+        "sport": "NFL",
+        "brand": "Panini",
+        "product_family_id": "absolute_nfl",
+        "set_name": "Absolute",
+        "release_year": null,
+        "parallel_rule_ids": [],
+        "card_scope": "Panini Absolute NFL \u2014 raw singles, refractors, numbered parallels.",
+        "include_terms": [],
+        "exclude_terms": [
+          "lot",
+          "break",
+          "case",
+          "jumbo",
+          "hobby box"
+        ],
+        "default_grade_filter": "",
+        "active": true
+      },
+      "score_nfl": {
+        "target_id": "score_nfl",
+        "label": "Panini Score NFL",
+        "sport": "NFL",
+        "brand": "Panini",
+        "product_family_id": "score_nfl",
+        "set_name": "Score",
+        "release_year": null,
+        "parallel_rule_ids": [],
+        "card_scope": "Panini Score NFL \u2014 raw singles, refractors, numbered parallels.",
+        "include_terms": [],
+        "exclude_terms": [
+          "lot",
+          "break",
+          "case",
+          "jumbo",
+          "hobby box"
+        ],
+        "default_grade_filter": "",
+        "active": true
+      },
+      "illusions_nfl": {
+        "target_id": "illusions_nfl",
+        "label": "Panini Illusions NFL",
+        "sport": "NFL",
+        "brand": "Panini",
+        "product_family_id": "illusions_nfl",
+        "set_name": "Illusions",
+        "release_year": null,
+        "parallel_rule_ids": [],
+        "card_scope": "Panini Illusions NFL \u2014 raw singles, refractors, numbered parallels.",
+        "include_terms": [],
+        "exclude_terms": [
+          "lot",
+          "break",
+          "case",
+          "jumbo",
+          "hobby box"
+        ],
+        "default_grade_filter": "",
+        "active": true
+      },
+      "luminance_nfl": {
+        "target_id": "luminance_nfl",
+        "label": "Panini Luminance NFL",
+        "sport": "NFL",
+        "brand": "Panini",
+        "product_family_id": "luminance_nfl",
+        "set_name": "Luminance",
+        "release_year": null,
+        "parallel_rule_ids": [],
+        "card_scope": "Panini Luminance NFL \u2014 raw singles, refractors, numbered parallels.",
+        "include_terms": [],
+        "exclude_terms": [
+          "lot",
+          "break",
+          "case",
+          "jumbo",
+          "hobby box"
+        ],
+        "default_grade_filter": "",
+        "active": true
+      },
+      "topps_chrome_mlb": {
+        "target_id": "topps_chrome_mlb",
+        "label": "Topps Chrome MLB",
+        "sport": "MLB",
+        "brand": "Topps",
+        "product_family_id": "topps_chrome_mlb",
+        "set_name": "Chrome",
+        "release_year": null,
+        "parallel_rule_ids": [],
+        "card_scope": "Topps Chrome MLB \u2014 raw singles, refractors, numbered parallels.",
+        "include_terms": [],
+        "exclude_terms": [
+          "lot",
+          "break",
+          "case",
+          "jumbo",
+          "hobby box"
+        ],
+        "default_grade_filter": "",
+        "active": true
+      },
+      "topps_series1_mlb": {
+        "target_id": "topps_series1_mlb",
+        "label": "Topps Series 1 MLB",
+        "sport": "MLB",
+        "brand": "Topps",
+        "product_family_id": "topps_series1_mlb",
+        "set_name": "Series 1",
+        "release_year": null,
+        "parallel_rule_ids": [],
+        "card_scope": "Topps Series 1 MLB \u2014 raw singles, refractors, numbered parallels.",
+        "include_terms": [],
+        "exclude_terms": [
+          "lot",
+          "break",
+          "case",
+          "jumbo",
+          "hobby box"
+        ],
+        "default_grade_filter": "",
+        "active": true
+      },
+      "topps_series2_mlb": {
+        "target_id": "topps_series2_mlb",
+        "label": "Topps Series 2 MLB",
+        "sport": "MLB",
+        "brand": "Topps",
+        "product_family_id": "topps_series2_mlb",
+        "set_name": "Series 2",
+        "release_year": null,
+        "parallel_rule_ids": [],
+        "card_scope": "Topps Series 2 MLB \u2014 raw singles, refractors, numbered parallels.",
+        "include_terms": [],
+        "exclude_terms": [
+          "lot",
+          "break",
+          "case",
+          "jumbo",
+          "hobby box"
+        ],
+        "default_grade_filter": "",
+        "active": true
+      },
+      "topps_update_mlb": {
+        "target_id": "topps_update_mlb",
+        "label": "Topps Update MLB",
+        "sport": "MLB",
+        "brand": "Topps",
+        "product_family_id": "topps_update_mlb",
+        "set_name": "Update",
+        "release_year": null,
+        "parallel_rule_ids": [],
+        "card_scope": "Topps Update MLB \u2014 raw singles, refractors, numbered parallels.",
+        "include_terms": [],
+        "exclude_terms": [
+          "lot",
+          "break",
+          "case",
+          "jumbo",
+          "hobby box"
+        ],
+        "default_grade_filter": "",
+        "active": true
+      },
+      "bowman_chrome_mlb": {
+        "target_id": "bowman_chrome_mlb",
+        "label": "Bowman Chrome MLB",
+        "sport": "MLB",
+        "brand": "Topps",
+        "product_family_id": "bowman_chrome_mlb",
+        "set_name": "Bowman Chrome",
+        "release_year": null,
+        "parallel_rule_ids": [],
+        "card_scope": "Bowman Chrome MLB \u2014 raw singles, refractors, numbered parallels.",
+        "include_terms": [],
+        "exclude_terms": [
+          "lot",
+          "break",
+          "case",
+          "jumbo",
+          "hobby box"
+        ],
+        "default_grade_filter": "",
+        "active": true
+      },
+      "bowman_draft_mlb": {
+        "target_id": "bowman_draft_mlb",
+        "label": "Bowman Draft MLB",
+        "sport": "MLB",
+        "brand": "Topps",
+        "product_family_id": "bowman_draft_mlb",
+        "set_name": "Bowman Draft",
+        "release_year": null,
+        "parallel_rule_ids": [],
+        "card_scope": "Bowman Draft MLB \u2014 raw singles, refractors, numbered parallels.",
+        "include_terms": [],
+        "exclude_terms": [
+          "lot",
+          "break",
+          "case",
+          "jumbo",
+          "hobby box"
+        ],
+        "default_grade_filter": "",
+        "active": true
+      },
+      "bowman_platinum_mlb": {
+        "target_id": "bowman_platinum_mlb",
+        "label": "Bowman Platinum MLB",
+        "sport": "MLB",
+        "brand": "Topps",
+        "product_family_id": "bowman_platinum_mlb",
+        "set_name": "Bowman Platinum",
+        "release_year": null,
+        "parallel_rule_ids": [],
+        "card_scope": "Bowman Platinum MLB \u2014 raw singles, refractors, numbered parallels.",
+        "include_terms": [],
+        "exclude_terms": [
+          "lot",
+          "break",
+          "case",
+          "jumbo",
+          "hobby box"
+        ],
+        "default_grade_filter": "",
+        "active": true
+      },
+      "topps_heritage_mlb": {
+        "target_id": "topps_heritage_mlb",
+        "label": "Topps Heritage MLB",
+        "sport": "MLB",
+        "brand": "Topps",
+        "product_family_id": "topps_heritage_mlb",
+        "set_name": "Heritage",
+        "release_year": null,
+        "parallel_rule_ids": [],
+        "card_scope": "Topps Heritage MLB \u2014 raw singles, refractors, numbered parallels.",
+        "include_terms": [],
+        "exclude_terms": [
+          "lot",
+          "break",
+          "case",
+          "jumbo",
+          "hobby box"
+        ],
+        "default_grade_filter": "",
+        "active": true
+      },
+      "topps_stadium_club_mlb": {
+        "target_id": "topps_stadium_club_mlb",
+        "label": "Topps Stadium Club MLB",
+        "sport": "MLB",
+        "brand": "Topps",
+        "product_family_id": "topps_stadium_club_mlb",
+        "set_name": "Stadium Club",
+        "release_year": null,
+        "parallel_rule_ids": [],
+        "card_scope": "Topps Stadium Club MLB \u2014 raw singles, refractors, numbered parallels.",
+        "include_terms": [],
+        "exclude_terms": [
+          "lot",
+          "break",
+          "case",
+          "jumbo",
+          "hobby box"
+        ],
+        "default_grade_filter": "",
+        "active": true
+      },
+      "topps_finest_mlb": {
+        "target_id": "topps_finest_mlb",
+        "label": "Topps Finest MLB",
+        "sport": "MLB",
+        "brand": "Topps",
+        "product_family_id": "topps_finest_mlb",
+        "set_name": "Finest",
+        "release_year": null,
+        "parallel_rule_ids": [],
+        "card_scope": "Topps Finest MLB \u2014 raw singles, refractors, numbered parallels.",
+        "include_terms": [],
+        "exclude_terms": [
+          "lot",
+          "break",
+          "case",
+          "jumbo",
+          "hobby box"
+        ],
+        "default_grade_filter": "",
+        "active": true
+      },
+      "prizm_mlb": {
+        "target_id": "prizm_mlb",
+        "label": "Panini Prizm Baseball",
+        "sport": "MLB",
+        "brand": "Panini",
+        "product_family_id": "prizm_mlb",
+        "set_name": "Prizm",
+        "release_year": null,
+        "parallel_rule_ids": [],
+        "card_scope": "Panini Prizm Baseball \u2014 raw singles, refractors, numbered parallels.",
+        "include_terms": [],
+        "exclude_terms": [
+          "lot",
+          "break",
+          "case",
+          "jumbo",
+          "hobby box"
+        ],
+        "default_grade_filter": "",
+        "active": true
+      },
+      "allen_ginter_mlb": {
+        "target_id": "allen_ginter_mlb",
+        "label": "Allen & Ginter MLB",
+        "sport": "MLB",
+        "brand": "Topps",
+        "product_family_id": "allen_ginter_mlb",
+        "set_name": "Allen Ginter",
+        "release_year": null,
+        "parallel_rule_ids": [],
+        "card_scope": "Allen & Ginter MLB \u2014 raw singles, refractors, numbered parallels.",
+        "include_terms": [],
+        "exclude_terms": [
+          "lot",
+          "break",
+          "case",
+          "jumbo",
+          "hobby box"
+        ],
+        "default_grade_filter": "",
+        "active": true
+      },
+      "topps_gold_label_mlb": {
+        "target_id": "topps_gold_label_mlb",
+        "label": "Topps Gold Label MLB",
+        "sport": "MLB",
+        "brand": "Topps",
+        "product_family_id": "topps_gold_label_mlb",
+        "set_name": "Gold Label",
+        "release_year": null,
+        "parallel_rule_ids": [],
+        "card_scope": "Topps Gold Label MLB \u2014 raw singles, refractors, numbered parallels.",
+        "include_terms": [],
+        "exclude_terms": [
+          "lot",
+          "break",
+          "case",
+          "jumbo",
+          "hobby box"
+        ],
+        "default_grade_filter": "",
+        "active": true
+      },
+      "topps_clearly_auth_mlb": {
+        "target_id": "topps_clearly_auth_mlb",
+        "label": "Topps Clearly Authentic MLB",
+        "sport": "MLB",
+        "brand": "Topps",
+        "product_family_id": "topps_clearly_auth_mlb",
+        "set_name": "Clearly Authentic",
+        "release_year": null,
+        "parallel_rule_ids": [],
+        "card_scope": "Topps Clearly Authentic MLB \u2014 raw singles, refractors, numbered parallels.",
+        "include_terms": [],
+        "exclude_terms": [
+          "lot",
+          "break",
+          "case",
+          "jumbo",
+          "hobby box"
+        ],
+        "default_grade_filter": "",
+        "active": true
+      },
+      "prizm_nba": {
+        "target_id": "prizm_nba",
+        "label": "Panini Prizm NBA",
+        "sport": "NBA",
+        "brand": "Panini",
+        "product_family_id": "prizm_nba",
+        "set_name": "Prizm",
+        "release_year": null,
+        "parallel_rule_ids": [],
+        "card_scope": "Panini Prizm NBA \u2014 raw singles, refractors, numbered parallels.",
+        "include_terms": [],
+        "exclude_terms": [
+          "lot",
+          "break",
+          "case",
+          "jumbo",
+          "hobby box"
+        ],
+        "default_grade_filter": "",
+        "active": true
+      },
+      "select_nba": {
+        "target_id": "select_nba",
+        "label": "Panini Select NBA",
+        "sport": "NBA",
+        "brand": "Panini",
+        "product_family_id": "select_nba",
+        "set_name": "Select",
+        "release_year": null,
+        "parallel_rule_ids": [],
+        "card_scope": "Panini Select NBA \u2014 raw singles, refractors, numbered parallels.",
+        "include_terms": [],
+        "exclude_terms": [
+          "lot",
+          "break",
+          "case",
+          "jumbo",
+          "hobby box"
+        ],
+        "default_grade_filter": "",
+        "active": true
+      },
+      "mosaic_nba": {
+        "target_id": "mosaic_nba",
+        "label": "Panini Mosaic NBA",
+        "sport": "NBA",
+        "brand": "Panini",
+        "product_family_id": "mosaic_nba",
+        "set_name": "Mosaic",
+        "release_year": null,
+        "parallel_rule_ids": [],
+        "card_scope": "Panini Mosaic NBA \u2014 raw singles, refractors, numbered parallels.",
+        "include_terms": [],
+        "exclude_terms": [
+          "lot",
+          "break",
+          "case",
+          "jumbo",
+          "hobby box"
+        ],
+        "default_grade_filter": "",
+        "active": true
+      },
+      "optic_nba": {
+        "target_id": "optic_nba",
+        "label": "Donruss Optic NBA",
+        "sport": "NBA",
+        "brand": "Panini",
+        "product_family_id": "optic_nba",
+        "set_name": "Donruss Optic",
+        "release_year": null,
+        "parallel_rule_ids": [],
+        "card_scope": "Donruss Optic NBA \u2014 raw singles, refractors, numbered parallels.",
+        "include_terms": [],
+        "exclude_terms": [
+          "lot",
+          "break",
+          "case",
+          "jumbo",
+          "hobby box"
+        ],
+        "default_grade_filter": "",
+        "active": true
+      },
+      "hoops_nba": {
+        "target_id": "hoops_nba",
+        "label": "Panini Hoops NBA",
+        "sport": "NBA",
+        "brand": "Panini",
+        "product_family_id": "hoops_nba",
+        "set_name": "Hoops",
+        "release_year": null,
+        "parallel_rule_ids": [],
+        "card_scope": "Panini Hoops NBA \u2014 raw singles, refractors, numbered parallels.",
+        "include_terms": [],
+        "exclude_terms": [
+          "lot",
+          "break",
+          "case",
+          "jumbo",
+          "hobby box"
+        ],
+        "default_grade_filter": "",
+        "active": true
+      },
+      "chronicles_nba": {
+        "target_id": "chronicles_nba",
+        "label": "Panini Chronicles NBA",
+        "sport": "NBA",
+        "brand": "Panini",
+        "product_family_id": "chronicles_nba",
+        "set_name": "Chronicles",
+        "release_year": null,
+        "parallel_rule_ids": [],
+        "card_scope": "Panini Chronicles NBA \u2014 raw singles, refractors, numbered parallels.",
+        "include_terms": [],
+        "exclude_terms": [
+          "lot",
+          "break",
+          "case",
+          "jumbo",
+          "hobby box"
+        ],
+        "default_grade_filter": "",
+        "active": true
+      },
+      "revolution_nba": {
+        "target_id": "revolution_nba",
+        "label": "Revolution NBA",
+        "sport": "NBA",
+        "brand": "Panini",
+        "product_family_id": "revolution_nba",
+        "set_name": "Revolution",
+        "release_year": null,
+        "parallel_rule_ids": [],
+        "card_scope": "Revolution NBA \u2014 raw singles, refractors, numbered parallels.",
+        "include_terms": [],
+        "exclude_terms": [
+          "lot",
+          "break",
+          "case",
+          "jumbo",
+          "hobby box"
+        ],
+        "default_grade_filter": "",
+        "active": true
+      },
+      "court_kings_nba": {
+        "target_id": "court_kings_nba",
+        "label": "Court Kings NBA",
+        "sport": "NBA",
+        "brand": "Panini",
+        "product_family_id": "court_kings_nba",
+        "set_name": "Court Kings",
+        "release_year": null,
+        "parallel_rule_ids": [],
+        "card_scope": "Court Kings NBA \u2014 raw singles, refractors, numbered parallels.",
+        "include_terms": [],
+        "exclude_terms": [
+          "lot",
+          "break",
+          "case",
+          "jumbo",
+          "hobby box"
+        ],
+        "default_grade_filter": "",
+        "active": true
+      },
+      "national_treasures_nba": {
+        "target_id": "national_treasures_nba",
+        "label": "National Treasures NBA",
+        "sport": "NBA",
+        "brand": "Panini",
+        "product_family_id": "national_treasures_nba",
+        "set_name": "National Treasures",
+        "release_year": null,
+        "parallel_rule_ids": [],
+        "card_scope": "National Treasures NBA \u2014 raw singles, refractors, numbered parallels.",
+        "include_terms": [],
+        "exclude_terms": [
+          "lot",
+          "break",
+          "case",
+          "jumbo",
+          "hobby box"
+        ],
+        "default_grade_filter": "",
+        "active": true
+      },
+      "immaculate_nba": {
+        "target_id": "immaculate_nba",
+        "label": "Immaculate Collection NBA",
+        "sport": "NBA",
+        "brand": "Panini",
+        "product_family_id": "immaculate_nba",
+        "set_name": "Immaculate",
+        "release_year": null,
+        "parallel_rule_ids": [],
+        "card_scope": "Immaculate Collection NBA \u2014 raw singles, refractors, numbered parallels.",
+        "include_terms": [],
+        "exclude_terms": [
+          "lot",
+          "break",
+          "case",
+          "jumbo",
+          "hobby box"
+        ],
+        "default_grade_filter": "",
+        "active": true
+      },
+      "contenders_nba": {
+        "target_id": "contenders_nba",
+        "label": "Panini Contenders NBA",
+        "sport": "NBA",
+        "brand": "Panini",
+        "product_family_id": "contenders_nba",
+        "set_name": "Contenders",
+        "release_year": null,
+        "parallel_rule_ids": [],
+        "card_scope": "Panini Contenders NBA \u2014 raw singles, refractors, numbered parallels.",
+        "include_terms": [],
+        "exclude_terms": [
+          "lot",
+          "break",
+          "case",
+          "jumbo",
+          "hobby box"
+        ],
+        "default_grade_filter": "",
+        "active": true
+      },
+      "flux_nba": {
+        "target_id": "flux_nba",
+        "label": "Panini Flux NBA",
+        "sport": "NBA",
+        "brand": "Panini",
+        "product_family_id": "flux_nba",
+        "set_name": "Flux",
+        "release_year": null,
+        "parallel_rule_ids": [],
+        "card_scope": "Panini Flux NBA \u2014 raw singles, refractors, numbered parallels.",
+        "include_terms": [],
+        "exclude_terms": [
+          "lot",
+          "break",
+          "case",
+          "jumbo",
+          "hobby box"
+        ],
+        "default_grade_filter": "",
+        "active": true
+      }
+    },
+    "player_memberships": {
+      "patrick_mahomes": [
+        "nfl_all",
+        "whatnot_t1"
+      ],
+      "josh_allen": [
+        "nfl_all",
+        "whatnot_t1"
+      ],
+      "lamar_jackson": [
+        "nfl_all",
+        "whatnot_t1"
+      ],
+      "jalen_hurts": [
+        "nfl_all",
+        "whatnot_t2"
+      ],
+      "joe_burrow": [
+        "nfl_all",
+        "whatnot_t2"
+      ],
+      "cj_stroud": [
+        "nfl_all",
+        "whatnot_t2"
+      ],
+      "bryce_young": [
+        "nfl_all",
+        "whatnot_t2"
+      ],
+      "caleb_williams": [
+        "nfl_all",
+        "whatnot_t1"
+      ],
+      "drake_maye": [
+        "nfl_all",
+        "whatnot_t2"
+      ],
+      "jayden_daniels": [
+        "nfl_all",
+        "whatnot_t1"
+      ],
+      "kyler_murray": [
+        "nfl_all",
+        "whatnot_t3"
+      ],
+      "michael_penix": [
+        "nfl_all",
+        "whatnot_t3"
+      ],
+      "dak_prescott": [
+        "nfl_all",
+        "whatnot_t3"
+      ],
+      "justin_herbert": [
+        "nfl_all",
+        "whatnot_t3"
+      ],
+      "trevor_lawrence": [
+        "nfl_all",
+        "whatnot_t3"
+      ],
+      "justin_jefferson": [
+        "nfl_all",
+        "whatnot_t1"
+      ],
+      "ceedee_lamb": [
+        "nfl_all",
+        "whatnot_t1"
+      ],
+      "davante_adams": [
+        "nfl_all",
+        "whatnot_t3"
+      ],
+      "jamarrchase": [
+        "nfl_all",
+        "whatnot_t2"
+      ],
+      "puka_nacua": [
+        "nfl_all",
+        "whatnot_t3"
+      ],
+      "malik_nabers": [
+        "nfl_all",
+        "whatnot_t3"
+      ],
+      "bijan_robinson": [
+        "nfl_all",
+        "whatnot_t3"
+      ],
+      "breece_hall": [
+        "nfl_all",
+        "whatnot_t3"
+      ],
+      "sauce_gardner": [
+        "nfl_all",
+        "whatnot_t3"
+      ],
+      "drake_london": [
+        "nfl_all",
+        "whatnot_t3"
+      ],
+      "garrett_wilson": [
+        "nfl_all",
+        "whatnot_t3"
+      ],
+      "chris_olave": [
+        "nfl_all",
+        "whatnot_t3"
+      ],
+      "rashee_rice": [
+        "nfl_all",
+        "whatnot_t3"
+      ],
+      "travis_kelce": [
+        "nfl_all",
+        "whatnot_t3"
+      ],
+      "sam_laporta": [
+        "nfl_all",
+        "whatnot_t3"
+      ],
+      "shohei_ohtani": [
+        "mlb_all",
+        "whatnot_t1"
+      ],
+      "paul_skenes": [
+        "mlb_all",
+        "whatnot_t1"
+      ],
+      "juan_soto": [
+        "mlb_all",
+        "whatnot_t2"
+      ],
+      "gunnar_henderson": [
+        "mlb_all",
+        "whatnot_t2"
+      ],
+      "jackson_holliday": [
+        "mlb_all",
+        "whatnot_t3"
+      ],
+      "elly_de_la_cruz": [
+        "mlb_all",
+        "whatnot_t3"
+      ],
+      "corbin_carroll": [
+        "mlb_all",
+        "whatnot_t3"
+      ],
+      "bobby_witt_jr": [
+        "mlb_all",
+        "whatnot_t2"
+      ],
+      "julio_rodriguez": [
+        "mlb_all",
+        "whatnot_t3"
+      ],
+      "francisco_lindor": [
+        "mlb_all",
+        "whatnot_t3"
+      ],
+      "ronald_acuna_jr": [
+        "mlb_all",
+        "whatnot_t3"
+      ],
+      "freddie_freeman": [
+        "mlb_all",
+        "whatnot_t3"
+      ],
+      "mookie_betts": [
+        "mlb_all",
+        "whatnot_t3"
+      ],
+      "yordan_alvarez": [
+        "mlb_all",
+        "whatnot_t3"
+      ],
+      "spencer_strider": [
+        "mlb_all",
+        "whatnot_t3"
+      ],
+      "pete_crow_armstrong": [
+        "mlb_all",
+        "whatnot_t3"
+      ],
+      "jackson_chourio": [
+        "mlb_all",
+        "whatnot_t3"
+      ],
+      "dylan_crews": [
+        "mlb_all",
+        "whatnot_t3"
+      ],
+      "james_wood": [
+        "mlb_all",
+        "whatnot_t3"
+      ],
+      "wyatt_langford": [
+        "mlb_all",
+        "whatnot_t3"
+      ],
+      "coby_mayo": [
+        "mlb_all",
+        "whatnot_t3"
+      ],
+      "evan_carter": [
+        "mlb_all",
+        "whatnot_t3"
+      ],
+      "junior_caminero": [
+        "mlb_all",
+        "whatnot_t3"
+      ],
+      "kyle_harrison": [
+        "mlb_all",
+        "whatnot_t3"
+      ],
+      "roki_sasaki": [
+        "mlb_all",
+        "whatnot_t3"
+      ],
+      "victor_wembanyama": [
+        "nba_all",
+        "whatnot_t1"
+      ],
+      "stephen_curry": [
+        "nba_all",
+        "whatnot_t1"
+      ],
+      "lebron_james": [
+        "nba_all",
+        "whatnot_t1"
+      ],
+      "stephon_castle": [
+        "nba_all",
+        "whatnot_t3"
+      ],
+      "cooper_flagg": [
+        "nba_all",
+        "whatnot_t1"
+      ],
+      "kon_knueppel": [
+        "nba_all",
+        "whatnot_t2"
+      ],
+      "anthony_edwards": [
+        "nba_all",
+        "whatnot_t2"
+      ],
+      "luka_doncic": [
+        "nba_all",
+        "whatnot_t2"
+      ],
+      "jayson_tatum": [
+        "nba_all",
+        "whatnot_t2"
+      ],
+      "paolo_banchero": [
+        "nba_all",
+        "whatnot_t3"
+      ],
+      "chet_holmgren": [
+        "nba_all",
+        "whatnot_t3"
+      ],
+      "scottie_barnes": [
+        "nba_all",
+        "whatnot_t3"
+      ],
+      "tyrese_haliburton": [
+        "nba_all",
+        "whatnot_t3"
+      ],
+      "tyrese_maxey": [
+        "nba_all",
+        "whatnot_t3"
+      ],
+      "franz_wagner": [
+        "nba_all",
+        "whatnot_t3"
+      ],
+      "keyonte_george": [
+        "nba_all",
+        "whatnot_t3"
+      ],
+      "jalen_duren": [
+        "nba_all",
+        "whatnot_t3"
+      ],
+      "jabari_smith_jr": [
+        "nba_all",
+        "whatnot_t3"
+      ],
+      "ausar_thompson": [
+        "nba_all",
+        "whatnot_t3"
+      ],
+      "amen_thompson": [
+        "nba_all",
+        "whatnot_t3"
+      ],
+      "jaime_jaquez_jr": [
+        "nba_all",
+        "whatnot_t3"
+      ],
+      "derrick_whitehead": [
+        "nba_all",
+        "whatnot_t3"
+      ],
+      "isaiah_collier": [
+        "nba_all",
+        "whatnot_t3"
+      ],
+      "dalton_knecht": [
+        "nba_all",
+        "whatnot_t3"
+      ],
+      "tristan_da_silva": [
+        "nba_all",
+        "whatnot_t3"
+      ],
+      "uni_patrick_mahomes": [
+        "nfl_all",
+        "whatnot_t3"
+      ],
+      "uni_josh_allen": [
+        "nfl_all",
+        "whatnot_t3"
+      ],
+      "uni_joe_burrow": [
+        "nfl_all",
+        "whatnot_t3"
+      ],
+      "uni_lamar_jackson": [
+        "nfl_all",
+        "whatnot_t3"
+      ],
+      "uni_justin_herbert": [
+        "nfl_all",
+        "whatnot_t3"
+      ],
+      "uni_jalen_hurts": [
+        "nfl_all",
+        "whatnot_t3"
+      ],
+      "uni_jordan_love": [
+        "nfl_all",
+        "whatnot_t3"
+      ],
+      "uni_dak_prescott": [
+        "nfl_all",
+        "whatnot_t3"
+      ],
+      "uni_justin_jefferson": [
+        "nfl_all",
+        "whatnot_t3"
+      ],
+      "uni_ja_marr_chase": [
+        "nfl_all",
+        "whatnot_t3"
+      ],
+      "uni_tyreek_hill": [
+        "nfl_all",
+        "whatnot_t3"
+      ],
+      "uni_micah_parsons": [
+        "nfl_all",
+        "whatnot_t3"
+      ],
+      "uni_trevor_lawrence": [
+        "nfl_all",
+        "whatnot_t3"
+      ],
+      "uni_michael_jordan": [
+        "nba_all",
+        "whatnot_t3"
+      ],
+      "uni_lebron_james": [
+        "nba_all",
+        "whatnot_t3"
+      ],
+      "uni_stephen_curry": [
+        "nba_all",
+        "whatnot_t3"
+      ],
+      "uni_kevin_durant": [
+        "nba_all",
+        "whatnot_t3"
+      ],
+      "uni_giannis": [
+        "nba_all",
+        "whatnot_t3"
+      ],
+      "uni_luka_doncic": [
+        "nba_all",
+        "whatnot_t3"
+      ],
+      "uni_jayson_tatum": [
+        "nba_all",
+        "whatnot_t3"
+      ],
+      "uni_shai_gilgeous": [
+        "nba_all",
+        "whatnot_t3"
+      ],
+      "uni_anthony_edwards": [
+        "nba_all",
+        "whatnot_t3"
+      ],
+      "uni_tyrese_haliburton": [
+        "nba_all",
+        "whatnot_t3"
+      ],
+      "uni_shohei_ohtani": [
+        "mlb_all",
+        "whatnot_t3"
+      ],
+      "uni_aaron_judge": [
+        "mlb_all",
+        "whatnot_t3"
+      ],
+      "uni_ronald_acuna": [
+        "mlb_all",
+        "whatnot_t3"
+      ],
+      "uni_juan_soto": [
+        "mlb_all",
+        "whatnot_t3"
+      ],
+      "uni_mookie_betts": [
+        "mlb_all",
+        "whatnot_t3"
+      ],
+      "uni_freddie_freeman": [
+        "mlb_all",
+        "whatnot_t3"
+      ],
+      "uni_spencer_strider": [
+        "mlb_all",
+        "whatnot_t3"
+      ],
+      "uni_yoshinobu_yamamoto": [
+        "mlb_all",
+        "whatnot_t3"
+      ],
+      "uni_eloy_jimenez": [
+        "mlb_all",
+        "whatnot_t3"
+      ],
+      "uni_jazz_chisholm": [
+        "mlb_all",
+        "whatnot_t3"
+      ],
+      "uni_bobby_witt": [
+        "mlb_all",
+        "whatnot_t3"
+      ],
+      "uni_julio_rodriguez": [
+        "mlb_all",
+        "whatnot_t3"
+      ],
+      "uni_elly_de_la_cruz": [
+        "mlb_all",
+        "whatnot_t3"
+      ],
+      "uni_corbin_carroll": [
+        "mlb_all",
+        "whatnot_t3"
+      ],
+      "uni_gunnar_henderson": [
+        "mlb_all",
+        "whatnot_t3"
+      ],
+      "uni_nikola_jokic": [
+        "nba_all",
+        "whatnot_t3"
+      ],
+      "uni_joel_embiid": [
+        "nba_all",
+        "whatnot_t3"
+      ],
+      "uni_devin_booker": [
+        "nba_all",
+        "whatnot_t3"
+      ],
+      "uni_ceedee_lamb": [
+        "nfl_all",
+        "whatnot_t3"
+      ],
+      "uni_saquon_barkley": [
+        "nfl_all",
+        "whatnot_t3"
+      ],
+      "uni_travis_kelce": [
+        "nfl_all",
+        "whatnot_t3"
+      ]
+    },
+    "target_group_links": {
+      "prizm_nfl": [
+        "nfl_all"
+      ],
+      "select_nfl": [
+        "nfl_all"
+      ],
+      "mosaic_nfl": [
+        "nfl_all"
+      ],
+      "optic_nfl": [
+        "nfl_all"
+      ],
+      "contenders_nfl": [
+        "nfl_all"
+      ],
+      "chronicles_nfl": [
+        "nfl_all"
+      ],
+      "absolute_nfl": [
+        "nfl_all"
+      ],
+      "score_nfl": [
+        "nfl_all"
+      ],
+      "illusions_nfl": [
+        "nfl_all"
+      ],
+      "luminance_nfl": [
+        "nfl_all"
+      ],
+      "topps_chrome_mlb": [
+        "mlb_all"
+      ],
+      "topps_series1_mlb": [
+        "mlb_all"
+      ],
+      "topps_series2_mlb": [
+        "mlb_all"
+      ],
+      "topps_update_mlb": [
+        "mlb_all"
+      ],
+      "bowman_chrome_mlb": [
+        "mlb_all"
+      ],
+      "bowman_draft_mlb": [
+        "mlb_all"
+      ],
+      "bowman_platinum_mlb": [
+        "mlb_all"
+      ],
+      "topps_heritage_mlb": [
+        "mlb_all"
+      ],
+      "topps_stadium_club_mlb": [
+        "mlb_all"
+      ],
+      "topps_finest_mlb": [
+        "mlb_all"
+      ],
+      "prizm_mlb": [
+        "mlb_all"
+      ],
+      "allen_ginter_mlb": [
+        "mlb_all"
+      ],
+      "topps_gold_label_mlb": [
+        "mlb_all"
+      ],
+      "topps_clearly_auth_mlb": [
+        "mlb_all"
+      ],
+      "prizm_nba": [
+        "nba_all"
+      ],
+      "select_nba": [
+        "nba_all"
+      ],
+      "mosaic_nba": [
+        "nba_all"
+      ],
+      "optic_nba": [
+        "nba_all"
+      ],
+      "hoops_nba": [
+        "nba_all"
+      ],
+      "chronicles_nba": [
+        "nba_all"
+      ],
+      "revolution_nba": [
+        "nba_all"
+      ],
+      "court_kings_nba": [
+        "nba_all"
+      ],
+      "national_treasures_nba": [
+        "nba_all"
+      ],
+      "immaculate_nba": [
+        "nba_all"
+      ],
+      "contenders_nba": [
+        "nba_all"
+      ],
+      "flux_nba": [
+        "nba_all"
+      ]
+    },
+    "target_scan_runs": [
+      {
+        "run_id": "cts_2109a83229f44e",
+        "target_id": "luminance_nfl",
+        "target_label": "Panini Luminance NFL",
+        "started_at": "2026-03-31T05:22:04Z",
+        "finished_at": "2026-03-31T05:22:08Z",
+        "query_count": 3,
+        "listing_count_raw": 0,
+        "listing_count_bin_raw": 0,
+        "listing_count_non_bin_raw": 0,
+        "listing_count_missing_price_raw": 0,
+        "listing_count_validated_pre_dedupe": 0,
+        "listing_count_rejected": 0,
+        "listing_count_deduped": 0,
+        "status": "failed",
+        "queries_executed": [
+          {
+            "query": "Bijan Robinson Panini Luminance",
+            "player_name": "Bijan Robinson",
+            "player_id": "bijan_robinson",
+            "fetch_mode": "browse_fixed_price",
+            "fetch_filter": "buyingOptions:{FIXED_PRICE}",
+            "ok": false,
+            "error": "eBay rate limit (429) on query 'Bijan Robinson Panini Luminance'. Wait a few minutes before scanning again.",
+            "hits": 0,
+            "raw_hits": 0,
+            "bin_hits": 0,
+            "non_bin_hits": 0,
+            "missing_price_hits": 0,
+            "validated_hits": 0,
+            "rejected_hits": 0,
+            "rejection_reasons": {},
+            "error_type": "EbayRateLimitError"
+          },
+          {
+            "query": "Breece Hall Panini Luminance",
+            "player_name": "Breece Hall",
+            "player_id": "breece_hall",
+            "fetch_mode": "browse_fixed_price",
+            "fetch_filter": "buyingOptions:{FIXED_PRICE}",
+            "ok": false,
+            "error": "eBay rate limit (429) on query 'Breece Hall Panini Luminance'. Wait a few minutes before scanning again.",
+            "hits": 0,
+            "raw_hits": 0,
+            "bin_hits": 0,
+            "non_bin_hits": 0,
+            "missing_price_hits": 0,
+            "validated_hits": 0,
+            "rejected_hits": 0,
+            "rejection_reasons": {},
+            "error_type": "EbayRateLimitError"
+          },
+          {
+            "query": "Bryce Young Panini Luminance",
+            "player_name": "Bryce Young",
+            "player_id": "bryce_young",
+            "fetch_mode": "browse_fixed_price",
+            "fetch_filter": "buyingOptions:{FIXED_PRICE}",
+            "ok": false,
+            "error": "eBay rate limit (429) on query 'Bryce Young Panini Luminance'. Wait a few minutes before scanning again.",
+            "hits": 0,
+            "raw_hits": 0,
+            "bin_hits": 0,
+            "non_bin_hits": 0,
+            "missing_price_hits": 0,
+            "validated_hits": 0,
+            "rejected_hits": 0,
+            "rejection_reasons": {},
+            "error_type": "EbayRateLimitError"
+          }
+        ],
+        "results": [],
+        "errors": [
+          "Bijan Robinson Panini Luminance: eBay rate limit (429) on query 'Bijan Robinson Panini Luminance'. Wait a few minutes before scanning again.",
+          "Breece Hall Panini Luminance: eBay rate limit (429) on query 'Breece Hall Panini Luminance'. Wait a few minutes before scanning again.",
+          "Bryce Young Panini Luminance: eBay rate limit (429) on query 'Bryce Young Panini Luminance'. Wait a few minutes before scanning again."
+        ],
+        "rejection_reasons_aggregate": {},
+        "rejected_samples": [],
+        "result_summary": {
+          "queries_ok": 0,
+          "queries_failed": 3,
+          "phrase_used": "panini luminance",
+          "raw_listings": 0,
+          "bin_raw": 0,
+          "non_bin_raw": 0,
+          "missing_price_raw": 0,
+          "validated_pre_dedupe": 0,
+          "rejected": 0,
+          "deduped": 0
+        }
+      },
+      {
+        "run_id": "cts_1cc7626bd2a04c",
+        "target_id": "topps_chrome_mlb",
+        "target_label": "Topps Chrome MLB",
+        "started_at": "2026-03-31T05:22:08Z",
+        "finished_at": "2026-03-31T05:22:14Z",
+        "query_count": 3,
+        "listing_count_raw": 0,
+        "listing_count_bin_raw": 0,
+        "listing_count_non_bin_raw": 0,
+        "listing_count_missing_price_raw": 0,
+        "listing_count_validated_pre_dedupe": 0,
+        "listing_count_rejected": 0,
+        "listing_count_deduped": 0,
+        "status": "failed",
+        "queries_executed": [
+          {
+            "query": "Aaron Judge Topps Chrome Baseball",
+            "player_name": "Aaron Judge",
+            "player_id": "uni_aaron_judge",
+            "fetch_mode": "browse_fixed_price",
+            "fetch_filter": "buyingOptions:{FIXED_PRICE}",
+            "ok": false,
+            "error": "eBay rate limit (429) on query 'Aaron Judge Topps Chrome Baseball'. Wait a few minutes before scanning again.",
+            "hits": 0,
+            "raw_hits": 0,
+            "bin_hits": 0,
+            "non_bin_hits": 0,
+            "missing_price_hits": 0,
+            "validated_hits": 0,
+            "rejected_hits": 0,
+            "rejection_reasons": {},
+            "error_type": "EbayRateLimitError"
+          },
+          {
+            "query": "Bobby Witt Jr. Topps Chrome Baseball",
+            "player_name": "Bobby Witt Jr.",
+            "player_id": "bobby_witt_jr",
+            "fetch_mode": "browse_fixed_price",
+            "fetch_filter": "buyingOptions:{FIXED_PRICE}",
+            "ok": false,
+            "error": "eBay rate limit (429) on query 'Bobby Witt Jr. Topps Chrome Baseball'. Wait a few minutes before scanning again.",
+            "hits": 0,
+            "raw_hits": 0,
+            "bin_hits": 0,
+            "non_bin_hits": 0,
+            "missing_price_hits": 0,
+            "validated_hits": 0,
+            "rejected_hits": 0,
+            "rejection_reasons": {},
+            "error_type": "EbayRateLimitError"
+          },
+          {
+            "query": "Bobby Witt Jr. Topps Chrome Baseball",
+            "player_name": "Bobby Witt Jr.",
+            "player_id": "uni_bobby_witt",
+            "fetch_mode": "browse_fixed_price",
+            "fetch_filter": "buyingOptions:{FIXED_PRICE}",
+            "ok": false,
+            "error": "eBay rate limit (429) on query 'Bobby Witt Jr. Topps Chrome Baseball'. Wait a few minutes before scanning again.",
+            "hits": 0,
+            "raw_hits": 0,
+            "bin_hits": 0,
+            "non_bin_hits": 0,
+            "missing_price_hits": 0,
+            "validated_hits": 0,
+            "rejected_hits": 0,
+            "rejection_reasons": {},
+            "error_type": "EbayRateLimitError"
+          }
+        ],
+        "results": [],
+        "errors": [
+          "Aaron Judge Topps Chrome Baseball: eBay rate limit (429) on query 'Aaron Judge Topps Chrome Baseball'. Wait a few minutes before scanning again.",
+          "Bobby Witt Jr. Topps Chrome Baseball: eBay rate limit (429) on query 'Bobby Witt Jr. Topps Chrome Baseball'. Wait a few minutes before scanning again.",
+          "Bobby Witt Jr. Topps Chrome Baseball: eBay rate limit (429) on query 'Bobby Witt Jr. Topps Chrome Baseball'. Wait a few minutes before scanning again."
+        ],
+        "rejection_reasons_aggregate": {},
+        "rejected_samples": [],
+        "result_summary": {
+          "queries_ok": 0,
+          "queries_failed": 3,
+          "phrase_used": "topps chrome baseball",
+          "raw_listings": 0,
+          "bin_raw": 0,
+          "non_bin_raw": 0,
+          "missing_price_raw": 0,
+          "validated_pre_dedupe": 0,
+          "rejected": 0,
+          "deduped": 0
+        }
+      },
+      {
+        "run_id": "cts_4a231ed4ff304b",
+        "target_id": "topps_series1_mlb",
+        "target_label": "Topps Series 1 MLB",
+        "started_at": "2026-03-31T05:22:14Z",
+        "finished_at": "2026-03-31T05:22:19Z",
+        "query_count": 3,
+        "listing_count_raw": 0,
+        "listing_count_bin_raw": 0,
+        "listing_count_non_bin_raw": 0,
+        "listing_count_missing_price_raw": 0,
+        "listing_count_validated_pre_dedupe": 0,
+        "listing_count_rejected": 0,
+        "listing_count_deduped": 0,
+        "status": "failed",
+        "queries_executed": [
+          {
+            "query": "Aaron Judge Topps Series 1 Baseball",
+            "player_name": "Aaron Judge",
+            "player_id": "uni_aaron_judge",
+            "fetch_mode": "browse_fixed_price",
+            "fetch_filter": "buyingOptions:{FIXED_PRICE}",
+            "ok": false,
+            "error": "eBay rate limit (429) on query 'Aaron Judge Topps Series 1 Baseball'. Wait a few minutes before scanning again.",
+            "hits": 0,
+            "raw_hits": 0,
+            "bin_hits": 0,
+            "non_bin_hits": 0,
+            "missing_price_hits": 0,
+            "validated_hits": 0,
+            "rejected_hits": 0,
+            "rejection_reasons": {},
+            "error_type": "EbayRateLimitError"
+          },
+          {
+            "query": "Bobby Witt Jr. Topps Series 1 Baseball",
+            "player_name": "Bobby Witt Jr.",
+            "player_id": "bobby_witt_jr",
+            "fetch_mode": "browse_fixed_price",
+            "fetch_filter": "buyingOptions:{FIXED_PRICE}",
+            "ok": false,
+            "error": "eBay rate limit (429) on query 'Bobby Witt Jr. Topps Series 1 Baseball'. Wait a few minutes before scanning again.",
+            "hits": 0,
+            "raw_hits": 0,
+            "bin_hits": 0,
+            "non_bin_hits": 0,
+            "missing_price_hits": 0,
+            "validated_hits": 0,
+            "rejected_hits": 0,
+            "rejection_reasons": {},
+            "error_type": "EbayRateLimitError"
+          },
+          {
+            "query": "Bobby Witt Jr. Topps Series 1 Baseball",
+            "player_name": "Bobby Witt Jr.",
+            "player_id": "uni_bobby_witt",
+            "fetch_mode": "browse_fixed_price",
+            "fetch_filter": "buyingOptions:{FIXED_PRICE}",
+            "ok": false,
+            "error": "eBay rate limit (429) on query 'Bobby Witt Jr. Topps Series 1 Baseball'. Wait a few minutes before scanning again.",
+            "hits": 0,
+            "raw_hits": 0,
+            "bin_hits": 0,
+            "non_bin_hits": 0,
+            "missing_price_hits": 0,
+            "validated_hits": 0,
+            "rejected_hits": 0,
+            "rejection_reasons": {},
+            "error_type": "EbayRateLimitError"
+          }
+        ],
+        "results": [],
+        "errors": [
+          "Aaron Judge Topps Series 1 Baseball: eBay rate limit (429) on query 'Aaron Judge Topps Series 1 Baseball'. Wait a few minutes before scanning again.",
+          "Bobby Witt Jr. Topps Series 1 Baseball: eBay rate limit (429) on query 'Bobby Witt Jr. Topps Series 1 Baseball'. Wait a few minutes before scanning again.",
+          "Bobby Witt Jr. Topps Series 1 Baseball: eBay rate limit (429) on query 'Bobby Witt Jr. Topps Series 1 Baseball'. Wait a few minutes before scanning again."
+        ],
+        "rejection_reasons_aggregate": {},
+        "rejected_samples": [],
+        "result_summary": {
+          "queries_ok": 0,
+          "queries_failed": 3,
+          "phrase_used": "topps series 1 baseball",
+          "raw_listings": 0,
+          "bin_raw": 0,
+          "non_bin_raw": 0,
+          "missing_price_raw": 0,
+          "validated_pre_dedupe": 0,
+          "rejected": 0,
+          "deduped": 0
+        }
+      },
+      {
+        "run_id": "cts_020a1827175b4f",
+        "target_id": "topps_series2_mlb",
+        "target_label": "Topps Series 2 MLB",
+        "started_at": "2026-03-31T05:22:19Z",
+        "finished_at": "2026-03-31T05:22:25Z",
+        "query_count": 3,
+        "listing_count_raw": 0,
+        "listing_count_bin_raw": 0,
+        "listing_count_non_bin_raw": 0,
+        "listing_count_missing_price_raw": 0,
+        "listing_count_validated_pre_dedupe": 0,
+        "listing_count_rejected": 0,
+        "listing_count_deduped": 0,
+        "status": "failed",
+        "queries_executed": [
+          {
+            "query": "Aaron Judge Topps Series 2 Baseball",
+            "player_name": "Aaron Judge",
+            "player_id": "uni_aaron_judge",
+            "fetch_mode": "browse_fixed_price",
+            "fetch_filter": "buyingOptions:{FIXED_PRICE}",
+            "ok": false,
+            "error": "eBay rate limit (429) on query 'Aaron Judge Topps Series 2 Baseball'. Wait a few minutes before scanning again.",
+            "hits": 0,
+            "raw_hits": 0,
+            "bin_hits": 0,
+            "non_bin_hits": 0,
+            "missing_price_hits": 0,
+            "validated_hits": 0,
+            "rejected_hits": 0,
+            "rejection_reasons": {},
+            "error_type": "EbayRateLimitError"
+          },
+          {
+            "query": "Bobby Witt Jr. Topps Series 2 Baseball",
+            "player_name": "Bobby Witt Jr.",
+            "player_id": "bobby_witt_jr",
+            "fetch_mode": "browse_fixed_price",
+            "fetch_filter": "buyingOptions:{FIXED_PRICE}",
+            "ok": false,
+            "error": "eBay rate limit (429) on query 'Bobby Witt Jr. Topps Series 2 Baseball'. Wait a few minutes before scanning again.",
+            "hits": 0,
+            "raw_hits": 0,
+            "bin_hits": 0,
+            "non_bin_hits": 0,
+            "missing_price_hits": 0,
+            "validated_hits": 0,
+            "rejected_hits": 0,
+            "rejection_reasons": {},
+            "error_type": "EbayRateLimitError"
+          },
+          {
+            "query": "Bobby Witt Jr. Topps Series 2 Baseball",
+            "player_name": "Bobby Witt Jr.",
+            "player_id": "uni_bobby_witt",
+            "fetch_mode": "browse_fixed_price",
+            "fetch_filter": "buyingOptions:{FIXED_PRICE}",
+            "ok": false,
+            "error": "eBay rate limit (429) on query 'Bobby Witt Jr. Topps Series 2 Baseball'. Wait a few minutes before scanning again.",
+            "hits": 0,
+            "raw_hits": 0,
+            "bin_hits": 0,
+            "non_bin_hits": 0,
+            "missing_price_hits": 0,
+            "validated_hits": 0,
+            "rejected_hits": 0,
+            "rejection_reasons": {},
+            "error_type": "EbayRateLimitError"
+          }
+        ],
+        "results": [],
+        "errors": [
+          "Aaron Judge Topps Series 2 Baseball: eBay rate limit (429) on query 'Aaron Judge Topps Series 2 Baseball'. Wait a few minutes before scanning again.",
+          "Bobby Witt Jr. Topps Series 2 Baseball: eBay rate limit (429) on query 'Bobby Witt Jr. Topps Series 2 Baseball'. Wait a few minutes before scanning again.",
+          "Bobby Witt Jr. Topps Series 2 Baseball: eBay rate limit (429) on query 'Bobby Witt Jr. Topps Series 2 Baseball'. Wait a few minutes before scanning again."
+        ],
+        "rejection_reasons_aggregate": {},
+        "rejected_samples": [],
+        "result_summary": {
+          "queries_ok": 0,
+          "queries_failed": 3,
+          "phrase_used": "topps series 2 baseball",
+          "raw_listings": 0,
+          "bin_raw": 0,
+          "non_bin_raw": 0,
+          "missing_price_raw": 0,
+          "validated_pre_dedupe": 0,
+          "rejected": 0,
+          "deduped": 0
+        }
+      },
+      {
+        "run_id": "cts_0e7d0020c9ee47",
+        "target_id": "topps_update_mlb",
+        "target_label": "Topps Update MLB",
+        "started_at": "2026-03-31T05:22:25Z",
+        "finished_at": "2026-03-31T05:22:31Z",
+        "query_count": 3,
+        "listing_count_raw": 0,
+        "listing_count_bin_raw": 0,
+        "listing_count_non_bin_raw": 0,
+        "listing_count_missing_price_raw": 0,
+        "listing_count_validated_pre_dedupe": 0,
+        "listing_count_rejected": 0,
+        "listing_count_deduped": 0,
+        "status": "failed",
+        "queries_executed": [
+          {
+            "query": "Aaron Judge Topps Update",
+            "player_name": "Aaron Judge",
+            "player_id": "uni_aaron_judge",
+            "fetch_mode": "browse_fixed_price",
+            "fetch_filter": "buyingOptions:{FIXED_PRICE}",
+            "ok": false,
+            "error": "eBay rate limit (429) on query 'Aaron Judge Topps Update'. Wait a few minutes before scanning again.",
+            "hits": 0,
+            "raw_hits": 0,
+            "bin_hits": 0,
+            "non_bin_hits": 0,
+            "missing_price_hits": 0,
+            "validated_hits": 0,
+            "rejected_hits": 0,
+            "rejection_reasons": {},
+            "error_type": "EbayRateLimitError"
+          },
+          {
+            "query": "Bobby Witt Jr. Topps Update",
+            "player_name": "Bobby Witt Jr.",
+            "player_id": "bobby_witt_jr",
+            "fetch_mode": "browse_fixed_price",
+            "fetch_filter": "buyingOptions:{FIXED_PRICE}",
+            "ok": false,
+            "error": "eBay rate limit (429) on query 'Bobby Witt Jr. Topps Update'. Wait a few minutes before scanning again.",
+            "hits": 0,
+            "raw_hits": 0,
+            "bin_hits": 0,
+            "non_bin_hits": 0,
+            "missing_price_hits": 0,
+            "validated_hits": 0,
+            "rejected_hits": 0,
+            "rejection_reasons": {},
+            "error_type": "EbayRateLimitError"
+          },
+          {
+            "query": "Bobby Witt Jr. Topps Update",
+            "player_name": "Bobby Witt Jr.",
+            "player_id": "uni_bobby_witt",
+            "fetch_mode": "browse_fixed_price",
+            "fetch_filter": "buyingOptions:{FIXED_PRICE}",
+            "ok": false,
+            "error": "eBay rate limit (429) on query 'Bobby Witt Jr. Topps Update'. Wait a few minutes before scanning again.",
+            "hits": 0,
+            "raw_hits": 0,
+            "bin_hits": 0,
+            "non_bin_hits": 0,
+            "missing_price_hits": 0,
+            "validated_hits": 0,
+            "rejected_hits": 0,
+            "rejection_reasons": {},
+            "error_type": "EbayRateLimitError"
+          }
+        ],
+        "results": [],
+        "errors": [
+          "Aaron Judge Topps Update: eBay rate limit (429) on query 'Aaron Judge Topps Update'. Wait a few minutes before scanning again.",
+          "Bobby Witt Jr. Topps Update: eBay rate limit (429) on query 'Bobby Witt Jr. Topps Update'. Wait a few minutes before scanning again.",
+          "Bobby Witt Jr. Topps Update: eBay rate limit (429) on query 'Bobby Witt Jr. Topps Update'. Wait a few minutes before scanning again."
+        ],
+        "rejection_reasons_aggregate": {},
+        "rejected_samples": [],
+        "result_summary": {
+          "queries_ok": 0,
+          "queries_failed": 3,
+          "phrase_used": "topps update",
+          "raw_listings": 0,
+          "bin_raw": 0,
+          "non_bin_raw": 0,
+          "missing_price_raw": 0,
+          "validated_pre_dedupe": 0,
+          "rejected": 0,
+          "deduped": 0
+        }
+      },
+      {
+        "run_id": "cts_64166412bdd742",
+        "target_id": "bowman_chrome_mlb",
+        "target_label": "Bowman Chrome MLB",
+        "started_at": "2026-03-31T05:56:43Z",
+        "finished_at": "2026-03-31T05:56:55Z",
+        "query_count": 3,
+        "listing_count_raw": 0,
+        "listing_count_bin_raw": 0,
+        "listing_count_non_bin_raw": 0,
+        "listing_count_missing_price_raw": 0,
+        "listing_count_validated_pre_dedupe": 0,
+        "listing_count_rejected": 0,
+        "listing_count_deduped": 0,
+        "status": "failed",
+        "queries_executed": [
+          {
+            "query": "Aaron Judge Bowman Chrome Baseball",
+            "player_name": "Aaron Judge",
+            "player_id": "uni_aaron_judge",
+            "fetch_mode": "browse_fixed_price",
+            "fetch_filter": "buyingOptions:{FIXED_PRICE}",
+            "ok": false,
+            "error": "eBay rate limit (429) on query 'Aaron Judge Bowman Chrome Baseball'. Wait a few minutes before scanning again.",
+            "hits": 0,
+            "raw_hits": 0,
+            "bin_hits": 0,
+            "non_bin_hits": 0,
+            "missing_price_hits": 0,
+            "validated_hits": 0,
+            "rejected_hits": 0,
+            "rejection_reasons": {},
+            "error_type": "EbayRateLimitError"
+          },
+          {
+            "query": "Bobby Witt Jr. Bowman Chrome Baseball",
+            "player_name": "Bobby Witt Jr.",
+            "player_id": "bobby_witt_jr",
+            "fetch_mode": "browse_fixed_price",
+            "fetch_filter": "buyingOptions:{FIXED_PRICE}",
+            "ok": false,
+            "error": "eBay rate limit (429) on query 'Bobby Witt Jr. Bowman Chrome Baseball'. Wait a few minutes before scanning again.",
+            "hits": 0,
+            "raw_hits": 0,
+            "bin_hits": 0,
+            "non_bin_hits": 0,
+            "missing_price_hits": 0,
+            "validated_hits": 0,
+            "rejected_hits": 0,
+            "rejection_reasons": {},
+            "error_type": "EbayRateLimitError"
+          },
+          {
+            "query": "Bobby Witt Jr. Bowman Chrome Baseball",
+            "player_name": "Bobby Witt Jr.",
+            "player_id": "uni_bobby_witt",
+            "fetch_mode": "browse_fixed_price",
+            "fetch_filter": "buyingOptions:{FIXED_PRICE}",
+            "ok": false,
+            "error": "eBay rate limit (429) on query 'Bobby Witt Jr. Bowman Chrome Baseball'. Wait a few minutes before scanning again.",
+            "hits": 0,
+            "raw_hits": 0,
+            "bin_hits": 0,
+            "non_bin_hits": 0,
+            "missing_price_hits": 0,
+            "validated_hits": 0,
+            "rejected_hits": 0,
+            "rejection_reasons": {},
+            "error_type": "EbayRateLimitError"
+          }
+        ],
+        "results": [],
+        "errors": [
+          "Aaron Judge Bowman Chrome Baseball: eBay rate limit (429) on query 'Aaron Judge Bowman Chrome Baseball'. Wait a few minutes before scanning again.",
+          "Bobby Witt Jr. Bowman Chrome Baseball: eBay rate limit (429) on query 'Bobby Witt Jr. Bowman Chrome Baseball'. Wait a few minutes before scanning again.",
+          "Bobby Witt Jr. Bowman Chrome Baseball: eBay rate limit (429) on query 'Bobby Witt Jr. Bowman Chrome Baseball'. Wait a few minutes before scanning again."
+        ],
+        "rejection_reasons_aggregate": {},
+        "rejected_samples": [],
+        "result_summary": {
+          "queries_ok": 0,
+          "queries_failed": 3,
+          "phrase_used": "bowman chrome baseball",
+          "raw_listings": 0,
+          "bin_raw": 0,
+          "non_bin_raw": 0,
+          "missing_price_raw": 0,
+          "validated_pre_dedupe": 0,
+          "rejected": 0,
+          "deduped": 0
+        }
+      },
+      {
+        "run_id": "cts_29fa9c1be72b45",
+        "target_id": "bowman_draft_mlb",
+        "target_label": "Bowman Draft MLB",
+        "started_at": "2026-03-31T05:56:55Z",
+        "finished_at": "2026-03-31T05:57:07Z",
+        "query_count": 3,
+        "listing_count_raw": 0,
+        "listing_count_bin_raw": 0,
+        "listing_count_non_bin_raw": 0,
+        "listing_count_missing_price_raw": 0,
+        "listing_count_validated_pre_dedupe": 0,
+        "listing_count_rejected": 0,
+        "listing_count_deduped": 0,
+        "status": "failed",
+        "queries_executed": [
+          {
+            "query": "Aaron Judge Bowman Draft Baseball",
+            "player_name": "Aaron Judge",
+            "player_id": "uni_aaron_judge",
+            "fetch_mode": "browse_fixed_price",
+            "fetch_filter": "buyingOptions:{FIXED_PRICE}",
+            "ok": false,
+            "error": "eBay rate limit (429) on query 'Aaron Judge Bowman Draft Baseball'. Wait a few minutes before scanning again.",
+            "hits": 0,
+            "raw_hits": 0,
+            "bin_hits": 0,
+            "non_bin_hits": 0,
+            "missing_price_hits": 0,
+            "validated_hits": 0,
+            "rejected_hits": 0,
+            "rejection_reasons": {},
+            "error_type": "EbayRateLimitError"
+          },
+          {
+            "query": "Bobby Witt Jr. Bowman Draft Baseball",
+            "player_name": "Bobby Witt Jr.",
+            "player_id": "bobby_witt_jr",
+            "fetch_mode": "browse_fixed_price",
+            "fetch_filter": "buyingOptions:{FIXED_PRICE}",
+            "ok": false,
+            "error": "eBay rate limit (429) on query 'Bobby Witt Jr. Bowman Draft Baseball'. Wait a few minutes before scanning again.",
+            "hits": 0,
+            "raw_hits": 0,
+            "bin_hits": 0,
+            "non_bin_hits": 0,
+            "missing_price_hits": 0,
+            "validated_hits": 0,
+            "rejected_hits": 0,
+            "rejection_reasons": {},
+            "error_type": "EbayRateLimitError"
+          },
+          {
+            "query": "Bobby Witt Jr. Bowman Draft Baseball",
+            "player_name": "Bobby Witt Jr.",
+            "player_id": "uni_bobby_witt",
+            "fetch_mode": "browse_fixed_price",
+            "fetch_filter": "buyingOptions:{FIXED_PRICE}",
+            "ok": false,
+            "error": "eBay rate limit (429) on query 'Bobby Witt Jr. Bowman Draft Baseball'. Wait a few minutes before scanning again.",
+            "hits": 0,
+            "raw_hits": 0,
+            "bin_hits": 0,
+            "non_bin_hits": 0,
+            "missing_price_hits": 0,
+            "validated_hits": 0,
+            "rejected_hits": 0,
+            "rejection_reasons": {},
+            "error_type": "EbayRateLimitError"
+          }
+        ],
+        "results": [],
+        "errors": [
+          "Aaron Judge Bowman Draft Baseball: eBay rate limit (429) on query 'Aaron Judge Bowman Draft Baseball'. Wait a few minutes before scanning again.",
+          "Bobby Witt Jr. Bowman Draft Baseball: eBay rate limit (429) on query 'Bobby Witt Jr. Bowman Draft Baseball'. Wait a few minutes before scanning again.",
+          "Bobby Witt Jr. Bowman Draft Baseball: eBay rate limit (429) on query 'Bobby Witt Jr. Bowman Draft Baseball'. Wait a few minutes before scanning again."
+        ],
+        "rejection_reasons_aggregate": {},
+        "rejected_samples": [],
+        "result_summary": {
+          "queries_ok": 0,
+          "queries_failed": 3,
+          "phrase_used": "bowman draft baseball",
+          "raw_listings": 0,
+          "bin_raw": 0,
+          "non_bin_raw": 0,
+          "missing_price_raw": 0,
+          "validated_pre_dedupe": 0,
+          "rejected": 0,
+          "deduped": 0
+        }
+      },
+      {
+        "run_id": "cts_574aafadd73f4d",
+        "target_id": "bowman_platinum_mlb",
+        "target_label": "Bowman Platinum MLB",
+        "started_at": "2026-03-31T05:57:07Z",
+        "finished_at": "2026-03-31T05:57:17Z",
+        "query_count": 3,
+        "listing_count_raw": 0,
+        "listing_count_bin_raw": 0,
+        "listing_count_non_bin_raw": 0,
+        "listing_count_missing_price_raw": 0,
+        "listing_count_validated_pre_dedupe": 0,
+        "listing_count_rejected": 0,
+        "listing_count_deduped": 0,
+        "status": "failed",
+        "queries_executed": [
+          {
+            "query": "Aaron Judge Topps Bowman Platinum",
+            "player_name": "Aaron Judge",
+            "player_id": "uni_aaron_judge",
+            "fetch_mode": "browse_fixed_price",
+            "fetch_filter": "buyingOptions:{FIXED_PRICE}",
+            "ok": false,
+            "error": "eBay rate limit (429) on query 'Aaron Judge Topps Bowman Platinum'. Wait a few minutes before scanning again.",
+            "hits": 0,
+            "raw_hits": 0,
+            "bin_hits": 0,
+            "non_bin_hits": 0,
+            "missing_price_hits": 0,
+            "validated_hits": 0,
+            "rejected_hits": 0,
+            "rejection_reasons": {},
+            "error_type": "EbayRateLimitError"
+          },
+          {
+            "query": "Bobby Witt Jr. Topps Bowman Platinum",
+            "player_name": "Bobby Witt Jr.",
+            "player_id": "bobby_witt_jr",
+            "fetch_mode": "browse_fixed_price",
+            "fetch_filter": "buyingOptions:{FIXED_PRICE}",
+            "ok": false,
+            "error": "eBay rate limit (429) on query 'Bobby Witt Jr. Topps Bowman Platinum'. Wait a few minutes before scanning again.",
+            "hits": 0,
+            "raw_hits": 0,
+            "bin_hits": 0,
+            "non_bin_hits": 0,
+            "missing_price_hits": 0,
+            "validated_hits": 0,
+            "rejected_hits": 0,
+            "rejection_reasons": {},
+            "error_type": "EbayRateLimitError"
+          },
+          {
+            "query": "Bobby Witt Jr. Topps Bowman Platinum",
+            "player_name": "Bobby Witt Jr.",
+            "player_id": "uni_bobby_witt",
+            "fetch_mode": "browse_fixed_price",
+            "fetch_filter": "buyingOptions:{FIXED_PRICE}",
+            "ok": false,
+            "error": "eBay rate limit (429) on query 'Bobby Witt Jr. Topps Bowman Platinum'. Wait a few minutes before scanning again.",
+            "hits": 0,
+            "raw_hits": 0,
+            "bin_hits": 0,
+            "non_bin_hits": 0,
+            "missing_price_hits": 0,
+            "validated_hits": 0,
+            "rejected_hits": 0,
+            "rejection_reasons": {},
+            "error_type": "EbayRateLimitError"
+          }
+        ],
+        "results": [],
+        "errors": [
+          "Aaron Judge Topps Bowman Platinum: eBay rate limit (429) on query 'Aaron Judge Topps Bowman Platinum'. Wait a few minutes before scanning again.",
+          "Bobby Witt Jr. Topps Bowman Platinum: eBay rate limit (429) on query 'Bobby Witt Jr. Topps Bowman Platinum'. Wait a few minutes before scanning again.",
+          "Bobby Witt Jr. Topps Bowman Platinum: eBay rate limit (429) on query 'Bobby Witt Jr. Topps Bowman Platinum'. Wait a few minutes before scanning again."
+        ],
+        "rejection_reasons_aggregate": {},
+        "rejected_samples": [],
+        "result_summary": {
+          "queries_ok": 0,
+          "queries_failed": 3,
+          "phrase_used": "topps bowman platinum",
+          "raw_listings": 0,
+          "bin_raw": 0,
+          "non_bin_raw": 0,
+          "missing_price_raw": 0,
+          "validated_pre_dedupe": 0,
+          "rejected": 0,
+          "deduped": 0
+        }
+      },
+      {
+        "run_id": "cts_d786bb329dc841",
+        "target_id": "topps_heritage_mlb",
+        "target_label": "Topps Heritage MLB",
+        "started_at": "2026-03-31T05:57:17Z",
+        "finished_at": "2026-03-31T05:57:28Z",
+        "query_count": 3,
+        "listing_count_raw": 0,
+        "listing_count_bin_raw": 0,
+        "listing_count_non_bin_raw": 0,
+        "listing_count_missing_price_raw": 0,
+        "listing_count_validated_pre_dedupe": 0,
+        "listing_count_rejected": 0,
+        "listing_count_deduped": 0,
+        "status": "failed",
+        "queries_executed": [
+          {
+            "query": "Aaron Judge Topps Heritage",
+            "player_name": "Aaron Judge",
+            "player_id": "uni_aaron_judge",
+            "fetch_mode": "browse_fixed_price",
+            "fetch_filter": "buyingOptions:{FIXED_PRICE}",
+            "ok": false,
+            "error": "eBay rate limit (429) on query 'Aaron Judge Topps Heritage'. Wait a few minutes before scanning again.",
+            "hits": 0,
+            "raw_hits": 0,
+            "bin_hits": 0,
+            "non_bin_hits": 0,
+            "missing_price_hits": 0,
+            "validated_hits": 0,
+            "rejected_hits": 0,
+            "rejection_reasons": {},
+            "error_type": "EbayRateLimitError"
+          },
+          {
+            "query": "Bobby Witt Jr. Topps Heritage",
+            "player_name": "Bobby Witt Jr.",
+            "player_id": "bobby_witt_jr",
+            "fetch_mode": "browse_fixed_price",
+            "fetch_filter": "buyingOptions:{FIXED_PRICE}",
+            "ok": false,
+            "error": "eBay rate limit (429) on query 'Bobby Witt Jr. Topps Heritage'. Wait a few minutes before scanning again.",
+            "hits": 0,
+            "raw_hits": 0,
+            "bin_hits": 0,
+            "non_bin_hits": 0,
+            "missing_price_hits": 0,
+            "validated_hits": 0,
+            "rejected_hits": 0,
+            "rejection_reasons": {},
+            "error_type": "EbayRateLimitError"
+          },
+          {
+            "query": "Bobby Witt Jr. Topps Heritage",
+            "player_name": "Bobby Witt Jr.",
+            "player_id": "uni_bobby_witt",
+            "fetch_mode": "browse_fixed_price",
+            "fetch_filter": "buyingOptions:{FIXED_PRICE}",
+            "ok": false,
+            "error": "eBay rate limit (429) on query 'Bobby Witt Jr. Topps Heritage'. Wait a few minutes before scanning again.",
+            "hits": 0,
+            "raw_hits": 0,
+            "bin_hits": 0,
+            "non_bin_hits": 0,
+            "missing_price_hits": 0,
+            "validated_hits": 0,
+            "rejected_hits": 0,
+            "rejection_reasons": {},
+            "error_type": "EbayRateLimitError"
+          }
+        ],
+        "results": [],
+        "errors": [
+          "Aaron Judge Topps Heritage: eBay rate limit (429) on query 'Aaron Judge Topps Heritage'. Wait a few minutes before scanning again.",
+          "Bobby Witt Jr. Topps Heritage: eBay rate limit (429) on query 'Bobby Witt Jr. Topps Heritage'. Wait a few minutes before scanning again.",
+          "Bobby Witt Jr. Topps Heritage: eBay rate limit (429) on query 'Bobby Witt Jr. Topps Heritage'. Wait a few minutes before scanning again."
+        ],
+        "rejection_reasons_aggregate": {},
+        "rejected_samples": [],
+        "result_summary": {
+          "queries_ok": 0,
+          "queries_failed": 3,
+          "phrase_used": "topps heritage",
+          "raw_listings": 0,
+          "bin_raw": 0,
+          "non_bin_raw": 0,
+          "missing_price_raw": 0,
+          "validated_pre_dedupe": 0,
+          "rejected": 0,
+          "deduped": 0
+        }
+      },
+      {
+        "run_id": "cts_55135700aa7241",
+        "target_id": "topps_stadium_club_mlb",
+        "target_label": "Topps Stadium Club MLB",
+        "started_at": "2026-03-31T05:57:28Z",
+        "finished_at": "2026-03-31T05:57:38Z",
+        "query_count": 3,
+        "listing_count_raw": 0,
+        "listing_count_bin_raw": 0,
+        "listing_count_non_bin_raw": 0,
+        "listing_count_missing_price_raw": 0,
+        "listing_count_validated_pre_dedupe": 0,
+        "listing_count_rejected": 0,
+        "listing_count_deduped": 0,
+        "status": "failed",
+        "queries_executed": [
+          {
+            "query": "Aaron Judge Topps Stadium Club",
+            "player_name": "Aaron Judge",
+            "player_id": "uni_aaron_judge",
+            "fetch_mode": "browse_fixed_price",
+            "fetch_filter": "buyingOptions:{FIXED_PRICE}",
+            "ok": false,
+            "error": "eBay rate limit (429) on query 'Aaron Judge Topps Stadium Club'. Wait a few minutes before scanning again.",
+            "hits": 0,
+            "raw_hits": 0,
+            "bin_hits": 0,
+            "non_bin_hits": 0,
+            "missing_price_hits": 0,
+            "validated_hits": 0,
+            "rejected_hits": 0,
+            "rejection_reasons": {},
+            "error_type": "EbayRateLimitError"
+          },
+          {
+            "query": "Bobby Witt Jr. Topps Stadium Club",
+            "player_name": "Bobby Witt Jr.",
+            "player_id": "bobby_witt_jr",
+            "fetch_mode": "browse_fixed_price",
+            "fetch_filter": "buyingOptions:{FIXED_PRICE}",
+            "ok": false,
+            "error": "eBay rate limit (429) on query 'Bobby Witt Jr. Topps Stadium Club'. Wait a few minutes before scanning again.",
+            "hits": 0,
+            "raw_hits": 0,
+            "bin_hits": 0,
+            "non_bin_hits": 0,
+            "missing_price_hits": 0,
+            "validated_hits": 0,
+            "rejected_hits": 0,
+            "rejection_reasons": {},
+            "error_type": "EbayRateLimitError"
+          },
+          {
+            "query": "Bobby Witt Jr. Topps Stadium Club",
+            "player_name": "Bobby Witt Jr.",
+            "player_id": "uni_bobby_witt",
+            "fetch_mode": "browse_fixed_price",
+            "fetch_filter": "buyingOptions:{FIXED_PRICE}",
+            "ok": false,
+            "error": "eBay rate limit (429) on query 'Bobby Witt Jr. Topps Stadium Club'. Wait a few minutes before scanning again.",
+            "hits": 0,
+            "raw_hits": 0,
+            "bin_hits": 0,
+            "non_bin_hits": 0,
+            "missing_price_hits": 0,
+            "validated_hits": 0,
+            "rejected_hits": 0,
+            "rejection_reasons": {},
+            "error_type": "EbayRateLimitError"
+          }
+        ],
+        "results": [],
+        "errors": [
+          "Aaron Judge Topps Stadium Club: eBay rate limit (429) on query 'Aaron Judge Topps Stadium Club'. Wait a few minutes before scanning again.",
+          "Bobby Witt Jr. Topps Stadium Club: eBay rate limit (429) on query 'Bobby Witt Jr. Topps Stadium Club'. Wait a few minutes before scanning again.",
+          "Bobby Witt Jr. Topps Stadium Club: eBay rate limit (429) on query 'Bobby Witt Jr. Topps Stadium Club'. Wait a few minutes before scanning again."
+        ],
+        "rejection_reasons_aggregate": {},
+        "rejected_samples": [],
+        "result_summary": {
+          "queries_ok": 0,
+          "queries_failed": 3,
+          "phrase_used": "topps stadium club",
+          "raw_listings": 0,
+          "bin_raw": 0,
+          "non_bin_raw": 0,
+          "missing_price_raw": 0,
+          "validated_pre_dedupe": 0,
+          "rejected": 0,
+          "deduped": 0
+        }
+      },
+      {
+        "run_id": "cts_dc4eef5babc24e",
+        "target_id": "topps_finest_mlb",
+        "target_label": "Topps Finest MLB",
+        "started_at": "2026-03-31T05:57:38Z",
+        "finished_at": "2026-03-31T05:57:49Z",
+        "query_count": 3,
+        "listing_count_raw": 0,
+        "listing_count_bin_raw": 0,
+        "listing_count_non_bin_raw": 0,
+        "listing_count_missing_price_raw": 0,
+        "listing_count_validated_pre_dedupe": 0,
+        "listing_count_rejected": 0,
+        "listing_count_deduped": 0,
+        "status": "failed",
+        "queries_executed": [
+          {
+            "query": "Aaron Judge Topps Finest Baseball",
+            "player_name": "Aaron Judge",
+            "player_id": "uni_aaron_judge",
+            "fetch_mode": "browse_fixed_price",
+            "fetch_filter": "buyingOptions:{FIXED_PRICE}",
+            "ok": false,
+            "error": "eBay rate limit (429) on query 'Aaron Judge Topps Finest Baseball'. Wait a few minutes before scanning again.",
+            "hits": 0,
+            "raw_hits": 0,
+            "bin_hits": 0,
+            "non_bin_hits": 0,
+            "missing_price_hits": 0,
+            "validated_hits": 0,
+            "rejected_hits": 0,
+            "rejection_reasons": {},
+            "error_type": "EbayRateLimitError"
+          },
+          {
+            "query": "Bobby Witt Jr. Topps Finest Baseball",
+            "player_name": "Bobby Witt Jr.",
+            "player_id": "bobby_witt_jr",
+            "fetch_mode": "browse_fixed_price",
+            "fetch_filter": "buyingOptions:{FIXED_PRICE}",
+            "ok": false,
+            "error": "eBay rate limit (429) on query 'Bobby Witt Jr. Topps Finest Baseball'. Wait a few minutes before scanning again.",
+            "hits": 0,
+            "raw_hits": 0,
+            "bin_hits": 0,
+            "non_bin_hits": 0,
+            "missing_price_hits": 0,
+            "validated_hits": 0,
+            "rejected_hits": 0,
+            "rejection_reasons": {},
+            "error_type": "EbayRateLimitError"
+          },
+          {
+            "query": "Bobby Witt Jr. Topps Finest Baseball",
+            "player_name": "Bobby Witt Jr.",
+            "player_id": "uni_bobby_witt",
+            "fetch_mode": "browse_fixed_price",
+            "fetch_filter": "buyingOptions:{FIXED_PRICE}",
+            "ok": false,
+            "error": "eBay rate limit (429) on query 'Bobby Witt Jr. Topps Finest Baseball'. Wait a few minutes before scanning again.",
+            "hits": 0,
+            "raw_hits": 0,
+            "bin_hits": 0,
+            "non_bin_hits": 0,
+            "missing_price_hits": 0,
+            "validated_hits": 0,
+            "rejected_hits": 0,
+            "rejection_reasons": {},
+            "error_type": "EbayRateLimitError"
+          }
+        ],
+        "results": [],
+        "errors": [
+          "Aaron Judge Topps Finest Baseball: eBay rate limit (429) on query 'Aaron Judge Topps Finest Baseball'. Wait a few minutes before scanning again.",
+          "Bobby Witt Jr. Topps Finest Baseball: eBay rate limit (429) on query 'Bobby Witt Jr. Topps Finest Baseball'. Wait a few minutes before scanning again.",
+          "Bobby Witt Jr. Topps Finest Baseball: eBay rate limit (429) on query 'Bobby Witt Jr. Topps Finest Baseball'. Wait a few minutes before scanning again."
+        ],
+        "rejection_reasons_aggregate": {},
+        "rejected_samples": [],
+        "result_summary": {
+          "queries_ok": 0,
+          "queries_failed": 3,
+          "phrase_used": "topps finest baseball",
+          "raw_listings": 0,
+          "bin_raw": 0,
+          "non_bin_raw": 0,
+          "missing_price_raw": 0,
+          "validated_pre_dedupe": 0,
+          "rejected": 0,
+          "deduped": 0
+        }
+      },
+      {
+        "run_id": "cts_a24781b2e1e647",
+        "target_id": "prizm_nfl",
+        "target_label": "Panini Prizm NFL",
+        "started_at": "2026-03-31T05:57:49Z",
+        "finished_at": "2026-03-31T05:58:12Z",
+        "query_count": 3,
+        "listing_count_raw": 0,
+        "listing_count_bin_raw": 0,
+        "listing_count_non_bin_raw": 0,
+        "listing_count_missing_price_raw": 0,
+        "listing_count_validated_pre_dedupe": 0,
+        "listing_count_rejected": 0,
+        "listing_count_deduped": 0,
+        "status": "failed",
+        "queries_executed": [
+          {
+            "query": "Bijan Robinson Panini Prizm NFL",
+            "player_name": "Bijan Robinson",
+            "player_id": "bijan_robinson",
+            "fetch_mode": "browse_fixed_price",
+            "fetch_filter": "buyingOptions:{FIXED_PRICE}",
+            "ok": false,
+            "error": "eBay rate limit (429) on query 'Bijan Robinson Panini Prizm NFL'. Wait a few minutes before scanning again.",
+            "hits": 0,
+            "raw_hits": 0,
+            "bin_hits": 0,
+            "non_bin_hits": 0,
+            "missing_price_hits": 0,
+            "validated_hits": 0,
+            "rejected_hits": 0,
+            "rejection_reasons": {},
+            "error_type": "EbayRateLimitError"
+          },
+          {
+            "query": "Breece Hall Panini Prizm NFL",
+            "player_name": "Breece Hall",
+            "player_id": "breece_hall",
+            "fetch_mode": "browse_fixed_price",
+            "fetch_filter": "buyingOptions:{FIXED_PRICE}",
+            "ok": false,
+            "error": "eBay rate limit (429) on query 'Breece Hall Panini Prizm NFL'. Wait a few minutes before scanning again.",
+            "hits": 0,
+            "raw_hits": 0,
+            "bin_hits": 0,
+            "non_bin_hits": 0,
+            "missing_price_hits": 0,
+            "validated_hits": 0,
+            "rejected_hits": 0,
+            "rejection_reasons": {},
+            "error_type": "EbayRateLimitError"
+          },
+          {
+            "query": "Bryce Young Panini Prizm NFL",
+            "player_name": "Bryce Young",
+            "player_id": "bryce_young",
+            "fetch_mode": "browse_fixed_price",
+            "fetch_filter": "buyingOptions:{FIXED_PRICE}",
+            "ok": false,
+            "error": "eBay rate limit (429) on query 'Bryce Young Panini Prizm NFL'. Wait a few minutes before scanning again.",
+            "hits": 0,
+            "raw_hits": 0,
+            "bin_hits": 0,
+            "non_bin_hits": 0,
+            "missing_price_hits": 0,
+            "validated_hits": 0,
+            "rejected_hits": 0,
+            "rejection_reasons": {},
+            "error_type": "EbayRateLimitError"
+          }
+        ],
+        "results": [],
+        "errors": [
+          "Bijan Robinson Panini Prizm NFL: eBay rate limit (429) on query 'Bijan Robinson Panini Prizm NFL'. Wait a few minutes before scanning again.",
+          "Breece Hall Panini Prizm NFL: eBay rate limit (429) on query 'Breece Hall Panini Prizm NFL'. Wait a few minutes before scanning again.",
+          "Bryce Young Panini Prizm NFL: eBay rate limit (429) on query 'Bryce Young Panini Prizm NFL'. Wait a few minutes before scanning again."
+        ],
+        "rejection_reasons_aggregate": {},
+        "rejected_samples": [],
+        "result_summary": {
+          "queries_ok": 0,
+          "queries_failed": 3,
+          "phrase_used": "panini prizm nfl",
+          "raw_listings": 0,
+          "bin_raw": 0,
+          "non_bin_raw": 0,
+          "missing_price_raw": 0,
+          "validated_pre_dedupe": 0,
+          "rejected": 0,
+          "deduped": 0
+        }
+      },
+      {
+        "run_id": "cts_287787a9444045",
+        "target_id": "select_nfl",
+        "target_label": "Panini Select NFL",
+        "started_at": "2026-03-31T05:58:12Z",
+        "finished_at": "2026-03-31T05:58:24Z",
+        "query_count": 3,
+        "listing_count_raw": 0,
+        "listing_count_bin_raw": 0,
+        "listing_count_non_bin_raw": 0,
+        "listing_count_missing_price_raw": 0,
+        "listing_count_validated_pre_dedupe": 0,
+        "listing_count_rejected": 0,
+        "listing_count_deduped": 0,
+        "status": "failed",
+        "queries_executed": [
+          {
+            "query": "Bijan Robinson Panini Select NFL",
+            "player_name": "Bijan Robinson",
+            "player_id": "bijan_robinson",
+            "fetch_mode": "browse_fixed_price",
+            "fetch_filter": "buyingOptions:{FIXED_PRICE}",
+            "ok": false,
+            "error": "eBay rate limit (429) on query 'Bijan Robinson Panini Select NFL'. Wait a few minutes before scanning again.",
+            "hits": 0,
+            "raw_hits": 0,
+            "bin_hits": 0,
+            "non_bin_hits": 0,
+            "missing_price_hits": 0,
+            "validated_hits": 0,
+            "rejected_hits": 0,
+            "rejection_reasons": {},
+            "error_type": "EbayRateLimitError"
+          },
+          {
+            "query": "Breece Hall Panini Select NFL",
+            "player_name": "Breece Hall",
+            "player_id": "breece_hall",
+            "fetch_mode": "browse_fixed_price",
+            "fetch_filter": "buyingOptions:{FIXED_PRICE}",
+            "ok": false,
+            "error": "eBay rate limit (429) on query 'Breece Hall Panini Select NFL'. Wait a few minutes before scanning again.",
+            "hits": 0,
+            "raw_hits": 0,
+            "bin_hits": 0,
+            "non_bin_hits": 0,
+            "missing_price_hits": 0,
+            "validated_hits": 0,
+            "rejected_hits": 0,
+            "rejection_reasons": {},
+            "error_type": "EbayRateLimitError"
+          },
+          {
+            "query": "Bryce Young Panini Select NFL",
+            "player_name": "Bryce Young",
+            "player_id": "bryce_young",
+            "fetch_mode": "browse_fixed_price",
+            "fetch_filter": "buyingOptions:{FIXED_PRICE}",
+            "ok": false,
+            "error": "eBay rate limit (429) on query 'Bryce Young Panini Select NFL'. Wait a few minutes before scanning again.",
+            "hits": 0,
+            "raw_hits": 0,
+            "bin_hits": 0,
+            "non_bin_hits": 0,
+            "missing_price_hits": 0,
+            "validated_hits": 0,
+            "rejected_hits": 0,
+            "rejection_reasons": {},
+            "error_type": "EbayRateLimitError"
+          }
+        ],
+        "results": [],
+        "errors": [
+          "Bijan Robinson Panini Select NFL: eBay rate limit (429) on query 'Bijan Robinson Panini Select NFL'. Wait a few minutes before scanning again.",
+          "Breece Hall Panini Select NFL: eBay rate limit (429) on query 'Breece Hall Panini Select NFL'. Wait a few minutes before scanning again.",
+          "Bryce Young Panini Select NFL: eBay rate limit (429) on query 'Bryce Young Panini Select NFL'. Wait a few minutes before scanning again."
+        ],
+        "rejection_reasons_aggregate": {},
+        "rejected_samples": [],
+        "result_summary": {
+          "queries_ok": 0,
+          "queries_failed": 3,
+          "phrase_used": "panini select nfl",
+          "raw_listings": 0,
+          "bin_raw": 0,
+          "non_bin_raw": 0,
+          "missing_price_raw": 0,
+          "validated_pre_dedupe": 0,
+          "rejected": 0,
+          "deduped": 0
+        }
+      },
+      {
+        "run_id": "cts_807a2429916d42",
+        "target_id": "mosaic_nfl",
+        "target_label": "Panini Mosaic NFL",
+        "started_at": "2026-03-31T05:58:24Z",
+        "finished_at": "2026-03-31T05:58:36Z",
+        "query_count": 3,
+        "listing_count_raw": 0,
+        "listing_count_bin_raw": 0,
+        "listing_count_non_bin_raw": 0,
+        "listing_count_missing_price_raw": 0,
+        "listing_count_validated_pre_dedupe": 0,
+        "listing_count_rejected": 0,
+        "listing_count_deduped": 0,
+        "status": "failed",
+        "queries_executed": [
+          {
+            "query": "Bijan Robinson Panini Mosaic NFL",
+            "player_name": "Bijan Robinson",
+            "player_id": "bijan_robinson",
+            "fetch_mode": "browse_fixed_price",
+            "fetch_filter": "buyingOptions:{FIXED_PRICE}",
+            "ok": false,
+            "error": "eBay rate limit (429) on query 'Bijan Robinson Panini Mosaic NFL'. Wait a few minutes before scanning again.",
+            "hits": 0,
+            "raw_hits": 0,
+            "bin_hits": 0,
+            "non_bin_hits": 0,
+            "missing_price_hits": 0,
+            "validated_hits": 0,
+            "rejected_hits": 0,
+            "rejection_reasons": {},
+            "error_type": "EbayRateLimitError"
+          },
+          {
+            "query": "Breece Hall Panini Mosaic NFL",
+            "player_name": "Breece Hall",
+            "player_id": "breece_hall",
+            "fetch_mode": "browse_fixed_price",
+            "fetch_filter": "buyingOptions:{FIXED_PRICE}",
+            "ok": false,
+            "error": "eBay rate limit (429) on query 'Breece Hall Panini Mosaic NFL'. Wait a few minutes before scanning again.",
+            "hits": 0,
+            "raw_hits": 0,
+            "bin_hits": 0,
+            "non_bin_hits": 0,
+            "missing_price_hits": 0,
+            "validated_hits": 0,
+            "rejected_hits": 0,
+            "rejection_reasons": {},
+            "error_type": "EbayRateLimitError"
+          },
+          {
+            "query": "Bryce Young Panini Mosaic NFL",
+            "player_name": "Bryce Young",
+            "player_id": "bryce_young",
+            "fetch_mode": "browse_fixed_price",
+            "fetch_filter": "buyingOptions:{FIXED_PRICE}",
+            "ok": false,
+            "error": "eBay rate limit (429) on query 'Bryce Young Panini Mosaic NFL'. Wait a few minutes before scanning again.",
+            "hits": 0,
+            "raw_hits": 0,
+            "bin_hits": 0,
+            "non_bin_hits": 0,
+            "missing_price_hits": 0,
+            "validated_hits": 0,
+            "rejected_hits": 0,
+            "rejection_reasons": {},
+            "error_type": "EbayRateLimitError"
+          }
+        ],
+        "results": [],
+        "errors": [
+          "Bijan Robinson Panini Mosaic NFL: eBay rate limit (429) on query 'Bijan Robinson Panini Mosaic NFL'. Wait a few minutes before scanning again.",
+          "Breece Hall Panini Mosaic NFL: eBay rate limit (429) on query 'Breece Hall Panini Mosaic NFL'. Wait a few minutes before scanning again.",
+          "Bryce Young Panini Mosaic NFL: eBay rate limit (429) on query 'Bryce Young Panini Mosaic NFL'. Wait a few minutes before scanning again."
+        ],
+        "rejection_reasons_aggregate": {},
+        "rejected_samples": [],
+        "result_summary": {
+          "queries_ok": 0,
+          "queries_failed": 3,
+          "phrase_used": "panini mosaic nfl",
+          "raw_listings": 0,
+          "bin_raw": 0,
+          "non_bin_raw": 0,
+          "missing_price_raw": 0,
+          "validated_pre_dedupe": 0,
+          "rejected": 0,
+          "deduped": 0
+        }
+      },
+      {
+        "run_id": "cts_dc57ac96650142",
+        "target_id": "optic_nfl",
+        "target_label": "Donruss Optic NFL",
+        "started_at": "2026-03-31T05:58:36Z",
+        "finished_at": "2026-03-31T05:58:51Z",
+        "query_count": 3,
+        "listing_count_raw": 0,
+        "listing_count_bin_raw": 0,
+        "listing_count_non_bin_raw": 0,
+        "listing_count_missing_price_raw": 0,
+        "listing_count_validated_pre_dedupe": 0,
+        "listing_count_rejected": 0,
+        "listing_count_deduped": 0,
+        "status": "failed",
+        "queries_executed": [
+          {
+            "query": "Bijan Robinson Panini Donruss Optic NFL",
+            "player_name": "Bijan Robinson",
+            "player_id": "bijan_robinson",
+            "fetch_mode": "browse_fixed_price",
+            "fetch_filter": "buyingOptions:{FIXED_PRICE}",
+            "ok": false,
+            "error": "eBay rate limit (429) on query 'Bijan Robinson Panini Donruss Optic NFL'. Wait a few minutes before scanning again.",
+            "hits": 0,
+            "raw_hits": 0,
+            "bin_hits": 0,
+            "non_bin_hits": 0,
+            "missing_price_hits": 0,
+            "validated_hits": 0,
+            "rejected_hits": 0,
+            "rejection_reasons": {},
+            "error_type": "EbayRateLimitError"
+          },
+          {
+            "query": "Breece Hall Panini Donruss Optic NFL",
+            "player_name": "Breece Hall",
+            "player_id": "breece_hall",
+            "fetch_mode": "browse_fixed_price",
+            "fetch_filter": "buyingOptions:{FIXED_PRICE}",
+            "ok": false,
+            "error": "eBay rate limit (429) on query 'Breece Hall Panini Donruss Optic NFL'. Wait a few minutes before scanning again.",
+            "hits": 0,
+            "raw_hits": 0,
+            "bin_hits": 0,
+            "non_bin_hits": 0,
+            "missing_price_hits": 0,
+            "validated_hits": 0,
+            "rejected_hits": 0,
+            "rejection_reasons": {},
+            "error_type": "EbayRateLimitError"
+          },
+          {
+            "query": "Bryce Young Panini Donruss Optic NFL",
+            "player_name": "Bryce Young",
+            "player_id": "bryce_young",
+            "fetch_mode": "browse_fixed_price",
+            "fetch_filter": "buyingOptions:{FIXED_PRICE}",
+            "ok": false,
+            "error": "eBay rate limit (429) on query 'Bryce Young Panini Donruss Optic NFL'. Wait a few minutes before scanning again.",
+            "hits": 0,
+            "raw_hits": 0,
+            "bin_hits": 0,
+            "non_bin_hits": 0,
+            "missing_price_hits": 0,
+            "validated_hits": 0,
+            "rejected_hits": 0,
+            "rejection_reasons": {},
+            "error_type": "EbayRateLimitError"
+          }
+        ],
+        "results": [],
+        "errors": [
+          "Bijan Robinson Panini Donruss Optic NFL: eBay rate limit (429) on query 'Bijan Robinson Panini Donruss Optic NFL'. Wait a few minutes before scanning again.",
+          "Breece Hall Panini Donruss Optic NFL: eBay rate limit (429) on query 'Breece Hall Panini Donruss Optic NFL'. Wait a few minutes before scanning again.",
+          "Bryce Young Panini Donruss Optic NFL: eBay rate limit (429) on query 'Bryce Young Panini Donruss Optic NFL'. Wait a few minutes before scanning again."
+        ],
+        "rejection_reasons_aggregate": {},
+        "rejected_samples": [],
+        "result_summary": {
+          "queries_ok": 0,
+          "queries_failed": 3,
+          "phrase_used": "panini donruss optic nfl",
+          "raw_listings": 0,
+          "bin_raw": 0,
+          "non_bin_raw": 0,
+          "missing_price_raw": 0,
+          "validated_pre_dedupe": 0,
+          "rejected": 0,
+          "deduped": 0
+        }
+      },
+      {
+        "run_id": "cts_99927c60fdd742",
+        "target_id": "contenders_nfl",
+        "target_label": "Panini Contenders NFL",
+        "started_at": "2026-03-31T05:58:51Z",
+        "finished_at": "2026-03-31T05:59:01Z",
+        "query_count": 3,
+        "listing_count_raw": 0,
+        "listing_count_bin_raw": 0,
+        "listing_count_non_bin_raw": 0,
+        "listing_count_missing_price_raw": 0,
+        "listing_count_validated_pre_dedupe": 0,
+        "listing_count_rejected": 0,
+        "listing_count_deduped": 0,
+        "status": "failed",
+        "queries_executed": [
+          {
+            "query": "Bijan Robinson Panini Contenders",
+            "player_name": "Bijan Robinson",
+            "player_id": "bijan_robinson",
+            "fetch_mode": "browse_fixed_price",
+            "fetch_filter": "buyingOptions:{FIXED_PRICE}",
+            "ok": false,
+            "error": "eBay rate limit (429) on query 'Bijan Robinson Panini Contenders'. Wait a few minutes before scanning again.",
+            "hits": 0,
+            "raw_hits": 0,
+            "bin_hits": 0,
+            "non_bin_hits": 0,
+            "missing_price_hits": 0,
+            "validated_hits": 0,
+            "rejected_hits": 0,
+            "rejection_reasons": {},
+            "error_type": "EbayRateLimitError"
+          },
+          {
+            "query": "Breece Hall Panini Contenders",
+            "player_name": "Breece Hall",
+            "player_id": "breece_hall",
+            "fetch_mode": "browse_fixed_price",
+            "fetch_filter": "buyingOptions:{FIXED_PRICE}",
+            "ok": false,
+            "error": "eBay rate limit (429) on query 'Breece Hall Panini Contenders'. Wait a few minutes before scanning again.",
+            "hits": 0,
+            "raw_hits": 0,
+            "bin_hits": 0,
+            "non_bin_hits": 0,
+            "missing_price_hits": 0,
+            "validated_hits": 0,
+            "rejected_hits": 0,
+            "rejection_reasons": {},
+            "error_type": "EbayRateLimitError"
+          },
+          {
+            "query": "Bryce Young Panini Contenders",
+            "player_name": "Bryce Young",
+            "player_id": "bryce_young",
+            "fetch_mode": "browse_fixed_price",
+            "fetch_filter": "buyingOptions:{FIXED_PRICE}",
+            "ok": false,
+            "error": "eBay rate limit (429) on query 'Bryce Young Panini Contenders'. Wait a few minutes before scanning again.",
+            "hits": 0,
+            "raw_hits": 0,
+            "bin_hits": 0,
+            "non_bin_hits": 0,
+            "missing_price_hits": 0,
+            "validated_hits": 0,
+            "rejected_hits": 0,
+            "rejection_reasons": {},
+            "error_type": "EbayRateLimitError"
+          }
+        ],
+        "results": [],
+        "errors": [
+          "Bijan Robinson Panini Contenders: eBay rate limit (429) on query 'Bijan Robinson Panini Contenders'. Wait a few minutes before scanning again.",
+          "Breece Hall Panini Contenders: eBay rate limit (429) on query 'Breece Hall Panini Contenders'. Wait a few minutes before scanning again.",
+          "Bryce Young Panini Contenders: eBay rate limit (429) on query 'Bryce Young Panini Contenders'. Wait a few minutes before scanning again."
+        ],
+        "rejection_reasons_aggregate": {},
+        "rejected_samples": [],
+        "result_summary": {
+          "queries_ok": 0,
+          "queries_failed": 3,
+          "phrase_used": "panini contenders",
+          "raw_listings": 0,
+          "bin_raw": 0,
+          "non_bin_raw": 0,
+          "missing_price_raw": 0,
+          "validated_pre_dedupe": 0,
+          "rejected": 0,
+          "deduped": 0
+        }
+      },
+      {
+        "run_id": "cts_e16a10754dce47",
+        "target_id": "chronicles_nfl",
+        "target_label": "Panini Chronicles NFL",
+        "started_at": "2026-03-31T05:59:01Z",
+        "finished_at": "2026-03-31T05:59:12Z",
+        "query_count": 3,
+        "listing_count_raw": 0,
+        "listing_count_bin_raw": 0,
+        "listing_count_non_bin_raw": 0,
+        "listing_count_missing_price_raw": 0,
+        "listing_count_validated_pre_dedupe": 0,
+        "listing_count_rejected": 0,
+        "listing_count_deduped": 0,
+        "status": "failed",
+        "queries_executed": [
+          {
+            "query": "Bijan Robinson Panini Chronicles",
+            "player_name": "Bijan Robinson",
+            "player_id": "bijan_robinson",
+            "fetch_mode": "browse_fixed_price",
+            "fetch_filter": "buyingOptions:{FIXED_PRICE}",
+            "ok": false,
+            "error": "eBay rate limit (429) on query 'Bijan Robinson Panini Chronicles'. Wait a few minutes before scanning again.",
+            "hits": 0,
+            "raw_hits": 0,
+            "bin_hits": 0,
+            "non_bin_hits": 0,
+            "missing_price_hits": 0,
+            "validated_hits": 0,
+            "rejected_hits": 0,
+            "rejection_reasons": {},
+            "error_type": "EbayRateLimitError"
+          },
+          {
+            "query": "Breece Hall Panini Chronicles",
+            "player_name": "Breece Hall",
+            "player_id": "breece_hall",
+            "fetch_mode": "browse_fixed_price",
+            "fetch_filter": "buyingOptions:{FIXED_PRICE}",
+            "ok": false,
+            "error": "eBay rate limit (429) on query 'Breece Hall Panini Chronicles'. Wait a few minutes before scanning again.",
+            "hits": 0,
+            "raw_hits": 0,
+            "bin_hits": 0,
+            "non_bin_hits": 0,
+            "missing_price_hits": 0,
+            "validated_hits": 0,
+            "rejected_hits": 0,
+            "rejection_reasons": {},
+            "error_type": "EbayRateLimitError"
+          },
+          {
+            "query": "Bryce Young Panini Chronicles",
+            "player_name": "Bryce Young",
+            "player_id": "bryce_young",
+            "fetch_mode": "browse_fixed_price",
+            "fetch_filter": "buyingOptions:{FIXED_PRICE}",
+            "ok": false,
+            "error": "eBay rate limit (429) on query 'Bryce Young Panini Chronicles'. Wait a few minutes before scanning again.",
+            "hits": 0,
+            "raw_hits": 0,
+            "bin_hits": 0,
+            "non_bin_hits": 0,
+            "missing_price_hits": 0,
+            "validated_hits": 0,
+            "rejected_hits": 0,
+            "rejection_reasons": {},
+            "error_type": "EbayRateLimitError"
+          }
+        ],
+        "results": [],
+        "errors": [
+          "Bijan Robinson Panini Chronicles: eBay rate limit (429) on query 'Bijan Robinson Panini Chronicles'. Wait a few minutes before scanning again.",
+          "Breece Hall Panini Chronicles: eBay rate limit (429) on query 'Breece Hall Panini Chronicles'. Wait a few minutes before scanning again.",
+          "Bryce Young Panini Chronicles: eBay rate limit (429) on query 'Bryce Young Panini Chronicles'. Wait a few minutes before scanning again."
+        ],
+        "rejection_reasons_aggregate": {},
+        "rejected_samples": [],
+        "result_summary": {
+          "queries_ok": 0,
+          "queries_failed": 3,
+          "phrase_used": "panini chronicles",
+          "raw_listings": 0,
+          "bin_raw": 0,
+          "non_bin_raw": 0,
+          "missing_price_raw": 0,
+          "validated_pre_dedupe": 0,
+          "rejected": 0,
+          "deduped": 0
+        }
+      },
+      {
+        "run_id": "cts_48a878b79a6143",
+        "target_id": "absolute_nfl",
+        "target_label": "Panini Absolute NFL",
+        "started_at": "2026-03-31T05:59:12Z",
+        "finished_at": "2026-03-31T05:59:24Z",
+        "query_count": 3,
+        "listing_count_raw": 0,
+        "listing_count_bin_raw": 0,
+        "listing_count_non_bin_raw": 0,
+        "listing_count_missing_price_raw": 0,
+        "listing_count_validated_pre_dedupe": 0,
+        "listing_count_rejected": 0,
+        "listing_count_deduped": 0,
+        "status": "failed",
+        "queries_executed": [
+          {
+            "query": "Bijan Robinson Panini Absolute",
+            "player_name": "Bijan Robinson",
+            "player_id": "bijan_robinson",
+            "fetch_mode": "browse_fixed_price",
+            "fetch_filter": "buyingOptions:{FIXED_PRICE}",
+            "ok": false,
+            "error": "eBay rate limit (429) on query 'Bijan Robinson Panini Absolute'. Wait a few minutes before scanning again.",
+            "hits": 0,
+            "raw_hits": 0,
+            "bin_hits": 0,
+            "non_bin_hits": 0,
+            "missing_price_hits": 0,
+            "validated_hits": 0,
+            "rejected_hits": 0,
+            "rejection_reasons": {},
+            "error_type": "EbayRateLimitError"
+          },
+          {
+            "query": "Breece Hall Panini Absolute",
+            "player_name": "Breece Hall",
+            "player_id": "breece_hall",
+            "fetch_mode": "browse_fixed_price",
+            "fetch_filter": "buyingOptions:{FIXED_PRICE}",
+            "ok": false,
+            "error": "eBay rate limit (429) on query 'Breece Hall Panini Absolute'. Wait a few minutes before scanning again.",
+            "hits": 0,
+            "raw_hits": 0,
+            "bin_hits": 0,
+            "non_bin_hits": 0,
+            "missing_price_hits": 0,
+            "validated_hits": 0,
+            "rejected_hits": 0,
+            "rejection_reasons": {},
+            "error_type": "EbayRateLimitError"
+          },
+          {
+            "query": "Bryce Young Panini Absolute",
+            "player_name": "Bryce Young",
+            "player_id": "bryce_young",
+            "fetch_mode": "browse_fixed_price",
+            "fetch_filter": "buyingOptions:{FIXED_PRICE}",
+            "ok": false,
+            "error": "eBay rate limit (429) on query 'Bryce Young Panini Absolute'. Wait a few minutes before scanning again.",
+            "hits": 0,
+            "raw_hits": 0,
+            "bin_hits": 0,
+            "non_bin_hits": 0,
+            "missing_price_hits": 0,
+            "validated_hits": 0,
+            "rejected_hits": 0,
+            "rejection_reasons": {},
+            "error_type": "EbayRateLimitError"
+          }
+        ],
+        "results": [],
+        "errors": [
+          "Bijan Robinson Panini Absolute: eBay rate limit (429) on query 'Bijan Robinson Panini Absolute'. Wait a few minutes before scanning again.",
+          "Breece Hall Panini Absolute: eBay rate limit (429) on query 'Breece Hall Panini Absolute'. Wait a few minutes before scanning again.",
+          "Bryce Young Panini Absolute: eBay rate limit (429) on query 'Bryce Young Panini Absolute'. Wait a few minutes before scanning again."
+        ],
+        "rejection_reasons_aggregate": {},
+        "rejected_samples": [],
+        "result_summary": {
+          "queries_ok": 0,
+          "queries_failed": 3,
+          "phrase_used": "panini absolute",
+          "raw_listings": 0,
+          "bin_raw": 0,
+          "non_bin_raw": 0,
+          "missing_price_raw": 0,
+          "validated_pre_dedupe": 0,
+          "rejected": 0,
+          "deduped": 0
+        }
+      },
+      {
+        "run_id": "cts_4580e70636994a",
+        "target_id": "score_nfl",
+        "target_label": "Panini Score NFL",
+        "started_at": "2026-03-31T05:59:24Z",
+        "finished_at": "2026-03-31T05:59:33Z",
+        "query_count": 3,
+        "listing_count_raw": 0,
+        "listing_count_bin_raw": 0,
+        "listing_count_non_bin_raw": 0,
+        "listing_count_missing_price_raw": 0,
+        "listing_count_validated_pre_dedupe": 0,
+        "listing_count_rejected": 0,
+        "listing_count_deduped": 0,
+        "status": "failed",
+        "queries_executed": [
+          {
+            "query": "Bijan Robinson Panini Score",
+            "player_name": "Bijan Robinson",
+            "player_id": "bijan_robinson",
+            "fetch_mode": "browse_fixed_price",
+            "fetch_filter": "buyingOptions:{FIXED_PRICE}",
+            "ok": false,
+            "error": "eBay rate limit (429) on query 'Bijan Robinson Panini Score'. Wait a few minutes before scanning again.",
+            "hits": 0,
+            "raw_hits": 0,
+            "bin_hits": 0,
+            "non_bin_hits": 0,
+            "missing_price_hits": 0,
+            "validated_hits": 0,
+            "rejected_hits": 0,
+            "rejection_reasons": {},
+            "error_type": "EbayRateLimitError"
+          },
+          {
+            "query": "Breece Hall Panini Score",
+            "player_name": "Breece Hall",
+            "player_id": "breece_hall",
+            "fetch_mode": "browse_fixed_price",
+            "fetch_filter": "buyingOptions:{FIXED_PRICE}",
+            "ok": false,
+            "error": "eBay rate limit (429) on query 'Breece Hall Panini Score'. Wait a few minutes before scanning again.",
+            "hits": 0,
+            "raw_hits": 0,
+            "bin_hits": 0,
+            "non_bin_hits": 0,
+            "missing_price_hits": 0,
+            "validated_hits": 0,
+            "rejected_hits": 0,
+            "rejection_reasons": {},
+            "error_type": "EbayRateLimitError"
+          },
+          {
+            "query": "Bryce Young Panini Score",
+            "player_name": "Bryce Young",
+            "player_id": "bryce_young",
+            "fetch_mode": "browse_fixed_price",
+            "fetch_filter": "buyingOptions:{FIXED_PRICE}",
+            "ok": false,
+            "error": "eBay rate limit (429) on query 'Bryce Young Panini Score'. Wait a few minutes before scanning again.",
+            "hits": 0,
+            "raw_hits": 0,
+            "bin_hits": 0,
+            "non_bin_hits": 0,
+            "missing_price_hits": 0,
+            "validated_hits": 0,
+            "rejected_hits": 0,
+            "rejection_reasons": {},
+            "error_type": "EbayRateLimitError"
+          }
+        ],
+        "results": [],
+        "errors": [
+          "Bijan Robinson Panini Score: eBay rate limit (429) on query 'Bijan Robinson Panini Score'. Wait a few minutes before scanning again.",
+          "Breece Hall Panini Score: eBay rate limit (429) on query 'Breece Hall Panini Score'. Wait a few minutes before scanning again.",
+          "Bryce Young Panini Score: eBay rate limit (429) on query 'Bryce Young Panini Score'. Wait a few minutes before scanning again."
+        ],
+        "rejection_reasons_aggregate": {},
+        "rejected_samples": [],
+        "result_summary": {
+          "queries_ok": 0,
+          "queries_failed": 3,
+          "phrase_used": "panini score",
+          "raw_listings": 0,
+          "bin_raw": 0,
+          "non_bin_raw": 0,
+          "missing_price_raw": 0,
+          "validated_pre_dedupe": 0,
+          "rejected": 0,
+          "deduped": 0
+        }
+      },
+      {
+        "run_id": "cts_ba442068f0f34a",
+        "target_id": "illusions_nfl",
+        "target_label": "Panini Illusions NFL",
+        "started_at": "2026-03-31T05:59:33Z",
+        "finished_at": "2026-03-31T05:59:42Z",
+        "query_count": 3,
+        "listing_count_raw": 0,
+        "listing_count_bin_raw": 0,
+        "listing_count_non_bin_raw": 0,
+        "listing_count_missing_price_raw": 0,
+        "listing_count_validated_pre_dedupe": 0,
+        "listing_count_rejected": 0,
+        "listing_count_deduped": 0,
+        "status": "failed",
+        "queries_executed": [
+          {
+            "query": "Bijan Robinson Panini Illusions",
+            "player_name": "Bijan Robinson",
+            "player_id": "bijan_robinson",
+            "fetch_mode": "browse_fixed_price",
+            "fetch_filter": "buyingOptions:{FIXED_PRICE}",
+            "ok": false,
+            "error": "eBay rate limit (429) on query 'Bijan Robinson Panini Illusions'. Wait a few minutes before scanning again.",
+            "hits": 0,
+            "raw_hits": 0,
+            "bin_hits": 0,
+            "non_bin_hits": 0,
+            "missing_price_hits": 0,
+            "validated_hits": 0,
+            "rejected_hits": 0,
+            "rejection_reasons": {},
+            "error_type": "EbayRateLimitError"
+          },
+          {
+            "query": "Breece Hall Panini Illusions",
+            "player_name": "Breece Hall",
+            "player_id": "breece_hall",
+            "fetch_mode": "browse_fixed_price",
+            "fetch_filter": "buyingOptions:{FIXED_PRICE}",
+            "ok": false,
+            "error": "eBay rate limit (429) on query 'Breece Hall Panini Illusions'. Wait a few minutes before scanning again.",
+            "hits": 0,
+            "raw_hits": 0,
+            "bin_hits": 0,
+            "non_bin_hits": 0,
+            "missing_price_hits": 0,
+            "validated_hits": 0,
+            "rejected_hits": 0,
+            "rejection_reasons": {},
+            "error_type": "EbayRateLimitError"
+          },
+          {
+            "query": "Bryce Young Panini Illusions",
+            "player_name": "Bryce Young",
+            "player_id": "bryce_young",
+            "fetch_mode": "browse_fixed_price",
+            "fetch_filter": "buyingOptions:{FIXED_PRICE}",
+            "ok": false,
+            "error": "eBay rate limit (429) on query 'Bryce Young Panini Illusions'. Wait a few minutes before scanning again.",
+            "hits": 0,
+            "raw_hits": 0,
+            "bin_hits": 0,
+            "non_bin_hits": 0,
+            "missing_price_hits": 0,
+            "validated_hits": 0,
+            "rejected_hits": 0,
+            "rejection_reasons": {},
+            "error_type": "EbayRateLimitError"
+          }
+        ],
+        "results": [],
+        "errors": [
+          "Bijan Robinson Panini Illusions: eBay rate limit (429) on query 'Bijan Robinson Panini Illusions'. Wait a few minutes before scanning again.",
+          "Breece Hall Panini Illusions: eBay rate limit (429) on query 'Breece Hall Panini Illusions'. Wait a few minutes before scanning again.",
+          "Bryce Young Panini Illusions: eBay rate limit (429) on query 'Bryce Young Panini Illusions'. Wait a few minutes before scanning again."
+        ],
+        "rejection_reasons_aggregate": {},
+        "rejected_samples": [],
+        "result_summary": {
+          "queries_ok": 0,
+          "queries_failed": 3,
+          "phrase_used": "panini illusions",
+          "raw_listings": 0,
+          "bin_raw": 0,
+          "non_bin_raw": 0,
+          "missing_price_raw": 0,
+          "validated_pre_dedupe": 0,
+          "rejected": 0,
+          "deduped": 0
+        }
+      },
+      {
+        "run_id": "cts_51c1896c5f7142",
+        "target_id": "prizm_mlb",
+        "target_label": "Panini Prizm Baseball",
+        "started_at": "2026-03-31T06:05:10Z",
+        "finished_at": "2026-03-31T06:05:26Z",
+        "query_count": 3,
+        "listing_count_raw": 0,
+        "listing_count_bin_raw": 0,
+        "listing_count_non_bin_raw": 0,
+        "listing_count_missing_price_raw": 0,
+        "listing_count_validated_pre_dedupe": 0,
+        "listing_count_rejected": 0,
+        "listing_count_deduped": 0,
+        "status": "failed",
+        "queries_executed": [
+          {
+            "query": "Aaron Judge Panini Prizm MLB",
+            "player_name": "Aaron Judge",
+            "player_id": "uni_aaron_judge",
+            "fetch_mode": "browse_fixed_price",
+            "fetch_filter": "buyingOptions:{FIXED_PRICE}",
+            "ok": false,
+            "error": "eBay rate limit (429) on query 'Aaron Judge Panini Prizm MLB'. Wait a few minutes before scanning again.",
+            "hits": 0,
+            "raw_hits": 0,
+            "bin_hits": 0,
+            "non_bin_hits": 0,
+            "missing_price_hits": 0,
+            "validated_hits": 0,
+            "rejected_hits": 0,
+            "rejection_reasons": {},
+            "error_type": "EbayRateLimitError"
+          },
+          {
+            "query": "Bobby Witt Jr. Panini Prizm MLB",
+            "player_name": "Bobby Witt Jr.",
+            "player_id": "bobby_witt_jr",
+            "fetch_mode": "browse_fixed_price",
+            "fetch_filter": "buyingOptions:{FIXED_PRICE}",
+            "ok": false,
+            "error": "eBay rate limit (429) on query 'Bobby Witt Jr. Panini Prizm MLB'. Wait a few minutes before scanning again.",
+            "hits": 0,
+            "raw_hits": 0,
+            "bin_hits": 0,
+            "non_bin_hits": 0,
+            "missing_price_hits": 0,
+            "validated_hits": 0,
+            "rejected_hits": 0,
+            "rejection_reasons": {},
+            "error_type": "EbayRateLimitError"
+          },
+          {
+            "query": "Bobby Witt Jr. Panini Prizm MLB",
+            "player_name": "Bobby Witt Jr.",
+            "player_id": "uni_bobby_witt",
+            "fetch_mode": "browse_fixed_price",
+            "fetch_filter": "buyingOptions:{FIXED_PRICE}",
+            "ok": false,
+            "error": "eBay rate limit (429) on query 'Bobby Witt Jr. Panini Prizm MLB'. Wait a few minutes before scanning again.",
+            "hits": 0,
+            "raw_hits": 0,
+            "bin_hits": 0,
+            "non_bin_hits": 0,
+            "missing_price_hits": 0,
+            "validated_hits": 0,
+            "rejected_hits": 0,
+            "rejection_reasons": {},
+            "error_type": "EbayRateLimitError"
+          }
+        ],
+        "results": [],
+        "errors": [
+          "Aaron Judge Panini Prizm MLB: eBay rate limit (429) on query 'Aaron Judge Panini Prizm MLB'. Wait a few minutes before scanning again.",
+          "Bobby Witt Jr. Panini Prizm MLB: eBay rate limit (429) on query 'Bobby Witt Jr. Panini Prizm MLB'. Wait a few minutes before scanning again.",
+          "Bobby Witt Jr. Panini Prizm MLB: eBay rate limit (429) on query 'Bobby Witt Jr. Panini Prizm MLB'. Wait a few minutes before scanning again."
+        ],
+        "rejection_reasons_aggregate": {},
+        "rejected_samples": [],
+        "result_summary": {
+          "queries_ok": 0,
+          "queries_failed": 3,
+          "phrase_used": "panini prizm mlb",
+          "raw_listings": 0,
+          "bin_raw": 0,
+          "non_bin_raw": 0,
+          "missing_price_raw": 0,
+          "validated_pre_dedupe": 0,
+          "rejected": 0,
+          "deduped": 0
+        }
+      },
+      {
+        "run_id": "cts_c0764b672afd40",
+        "target_id": "allen_ginter_mlb",
+        "target_label": "Allen & Ginter MLB",
+        "started_at": "2026-03-31T06:05:26Z",
+        "finished_at": "2026-03-31T06:05:38Z",
+        "query_count": 3,
+        "listing_count_raw": 0,
+        "listing_count_bin_raw": 0,
+        "listing_count_non_bin_raw": 0,
+        "listing_count_missing_price_raw": 0,
+        "listing_count_validated_pre_dedupe": 0,
+        "listing_count_rejected": 0,
+        "listing_count_deduped": 0,
+        "status": "failed",
+        "queries_executed": [
+          {
+            "query": "Aaron Judge Topps Allen Ginter",
+            "player_name": "Aaron Judge",
+            "player_id": "uni_aaron_judge",
+            "fetch_mode": "browse_fixed_price",
+            "fetch_filter": "buyingOptions:{FIXED_PRICE}",
+            "ok": false,
+            "error": "eBay rate limit (429) on query 'Aaron Judge Topps Allen Ginter'. Wait a few minutes before scanning again.",
+            "hits": 0,
+            "raw_hits": 0,
+            "bin_hits": 0,
+            "non_bin_hits": 0,
+            "missing_price_hits": 0,
+            "validated_hits": 0,
+            "rejected_hits": 0,
+            "rejection_reasons": {},
+            "error_type": "EbayRateLimitError"
+          },
+          {
+            "query": "Bobby Witt Jr. Topps Allen Ginter",
+            "player_name": "Bobby Witt Jr.",
+            "player_id": "bobby_witt_jr",
+            "fetch_mode": "browse_fixed_price",
+            "fetch_filter": "buyingOptions:{FIXED_PRICE}",
+            "ok": false,
+            "error": "eBay rate limit (429) on query 'Bobby Witt Jr. Topps Allen Ginter'. Wait a few minutes before scanning again.",
+            "hits": 0,
+            "raw_hits": 0,
+            "bin_hits": 0,
+            "non_bin_hits": 0,
+            "missing_price_hits": 0,
+            "validated_hits": 0,
+            "rejected_hits": 0,
+            "rejection_reasons": {},
+            "error_type": "EbayRateLimitError"
+          },
+          {
+            "query": "Bobby Witt Jr. Topps Allen Ginter",
+            "player_name": "Bobby Witt Jr.",
+            "player_id": "uni_bobby_witt",
+            "fetch_mode": "browse_fixed_price",
+            "fetch_filter": "buyingOptions:{FIXED_PRICE}",
+            "ok": false,
+            "error": "eBay rate limit (429) on query 'Bobby Witt Jr. Topps Allen Ginter'. Wait a few minutes before scanning again.",
+            "hits": 0,
+            "raw_hits": 0,
+            "bin_hits": 0,
+            "non_bin_hits": 0,
+            "missing_price_hits": 0,
+            "validated_hits": 0,
+            "rejected_hits": 0,
+            "rejection_reasons": {},
+            "error_type": "EbayRateLimitError"
+          }
+        ],
+        "results": [],
+        "errors": [
+          "Aaron Judge Topps Allen Ginter: eBay rate limit (429) on query 'Aaron Judge Topps Allen Ginter'. Wait a few minutes before scanning again.",
+          "Bobby Witt Jr. Topps Allen Ginter: eBay rate limit (429) on query 'Bobby Witt Jr. Topps Allen Ginter'. Wait a few minutes before scanning again.",
+          "Bobby Witt Jr. Topps Allen Ginter: eBay rate limit (429) on query 'Bobby Witt Jr. Topps Allen Ginter'. Wait a few minutes before scanning again."
+        ],
+        "rejection_reasons_aggregate": {},
+        "rejected_samples": [],
+        "result_summary": {
+          "queries_ok": 0,
+          "queries_failed": 3,
+          "phrase_used": "topps allen ginter",
+          "raw_listings": 0,
+          "bin_raw": 0,
+          "non_bin_raw": 0,
+          "missing_price_raw": 0,
+          "validated_pre_dedupe": 0,
+          "rejected": 0,
+          "deduped": 0
+        }
+      },
+      {
+        "run_id": "cts_fc67a4f8cd184e",
+        "target_id": "topps_gold_label_mlb",
+        "target_label": "Topps Gold Label MLB",
+        "started_at": "2026-03-31T06:05:38Z",
+        "finished_at": "2026-03-31T06:05:49Z",
+        "query_count": 3,
+        "listing_count_raw": 0,
+        "listing_count_bin_raw": 0,
+        "listing_count_non_bin_raw": 0,
+        "listing_count_missing_price_raw": 0,
+        "listing_count_validated_pre_dedupe": 0,
+        "listing_count_rejected": 0,
+        "listing_count_deduped": 0,
+        "status": "failed",
+        "queries_executed": [
+          {
+            "query": "Aaron Judge Topps Gold Label",
+            "player_name": "Aaron Judge",
+            "player_id": "uni_aaron_judge",
+            "fetch_mode": "browse_fixed_price",
+            "fetch_filter": "buyingOptions:{FIXED_PRICE}",
+            "ok": false,
+            "error": "eBay rate limit (429) on query 'Aaron Judge Topps Gold Label'. Wait a few minutes before scanning again.",
+            "hits": 0,
+            "raw_hits": 0,
+            "bin_hits": 0,
+            "non_bin_hits": 0,
+            "missing_price_hits": 0,
+            "validated_hits": 0,
+            "rejected_hits": 0,
+            "rejection_reasons": {},
+            "error_type": "EbayRateLimitError"
+          },
+          {
+            "query": "Bobby Witt Jr. Topps Gold Label",
+            "player_name": "Bobby Witt Jr.",
+            "player_id": "bobby_witt_jr",
+            "fetch_mode": "browse_fixed_price",
+            "fetch_filter": "buyingOptions:{FIXED_PRICE}",
+            "ok": false,
+            "error": "eBay rate limit (429) on query 'Bobby Witt Jr. Topps Gold Label'. Wait a few minutes before scanning again.",
+            "hits": 0,
+            "raw_hits": 0,
+            "bin_hits": 0,
+            "non_bin_hits": 0,
+            "missing_price_hits": 0,
+            "validated_hits": 0,
+            "rejected_hits": 0,
+            "rejection_reasons": {},
+            "error_type": "EbayRateLimitError"
+          },
+          {
+            "query": "Bobby Witt Jr. Topps Gold Label",
+            "player_name": "Bobby Witt Jr.",
+            "player_id": "uni_bobby_witt",
+            "fetch_mode": "browse_fixed_price",
+            "fetch_filter": "buyingOptions:{FIXED_PRICE}",
+            "ok": false,
+            "error": "eBay rate limit (429) on query 'Bobby Witt Jr. Topps Gold Label'. Wait a few minutes before scanning again.",
+            "hits": 0,
+            "raw_hits": 0,
+            "bin_hits": 0,
+            "non_bin_hits": 0,
+            "missing_price_hits": 0,
+            "validated_hits": 0,
+            "rejected_hits": 0,
+            "rejection_reasons": {},
+            "error_type": "EbayRateLimitError"
+          }
+        ],
+        "results": [],
+        "errors": [
+          "Aaron Judge Topps Gold Label: eBay rate limit (429) on query 'Aaron Judge Topps Gold Label'. Wait a few minutes before scanning again.",
+          "Bobby Witt Jr. Topps Gold Label: eBay rate limit (429) on query 'Bobby Witt Jr. Topps Gold Label'. Wait a few minutes before scanning again.",
+          "Bobby Witt Jr. Topps Gold Label: eBay rate limit (429) on query 'Bobby Witt Jr. Topps Gold Label'. Wait a few minutes before scanning again."
+        ],
+        "rejection_reasons_aggregate": {},
+        "rejected_samples": [],
+        "result_summary": {
+          "queries_ok": 0,
+          "queries_failed": 3,
+          "phrase_used": "topps gold label",
+          "raw_listings": 0,
+          "bin_raw": 0,
+          "non_bin_raw": 0,
+          "missing_price_raw": 0,
+          "validated_pre_dedupe": 0,
+          "rejected": 0,
+          "deduped": 0
+        }
+      },
+      {
+        "run_id": "cts_310137fd2e0246",
+        "target_id": "topps_clearly_auth_mlb",
+        "target_label": "Topps Clearly Authentic MLB",
+        "started_at": "2026-03-31T06:05:49Z",
+        "finished_at": "2026-03-31T06:06:01Z",
+        "query_count": 3,
+        "listing_count_raw": 0,
+        "listing_count_bin_raw": 0,
+        "listing_count_non_bin_raw": 0,
+        "listing_count_missing_price_raw": 0,
+        "listing_count_validated_pre_dedupe": 0,
+        "listing_count_rejected": 0,
+        "listing_count_deduped": 0,
+        "status": "failed",
+        "queries_executed": [
+          {
+            "query": "Aaron Judge Topps Clearly Authentic",
+            "player_name": "Aaron Judge",
+            "player_id": "uni_aaron_judge",
+            "fetch_mode": "browse_fixed_price",
+            "fetch_filter": "buyingOptions:{FIXED_PRICE}",
+            "ok": false,
+            "error": "eBay rate limit (429) on query 'Aaron Judge Topps Clearly Authentic'. Wait a few minutes before scanning again.",
+            "hits": 0,
+            "raw_hits": 0,
+            "bin_hits": 0,
+            "non_bin_hits": 0,
+            "missing_price_hits": 0,
+            "validated_hits": 0,
+            "rejected_hits": 0,
+            "rejection_reasons": {},
+            "error_type": "EbayRateLimitError"
+          },
+          {
+            "query": "Bobby Witt Jr. Topps Clearly Authentic",
+            "player_name": "Bobby Witt Jr.",
+            "player_id": "bobby_witt_jr",
+            "fetch_mode": "browse_fixed_price",
+            "fetch_filter": "buyingOptions:{FIXED_PRICE}",
+            "ok": false,
+            "error": "eBay rate limit (429) on query 'Bobby Witt Jr. Topps Clearly Authentic'. Wait a few minutes before scanning again.",
+            "hits": 0,
+            "raw_hits": 0,
+            "bin_hits": 0,
+            "non_bin_hits": 0,
+            "missing_price_hits": 0,
+            "validated_hits": 0,
+            "rejected_hits": 0,
+            "rejection_reasons": {},
+            "error_type": "EbayRateLimitError"
+          },
+          {
+            "query": "Bobby Witt Jr. Topps Clearly Authentic",
+            "player_name": "Bobby Witt Jr.",
+            "player_id": "uni_bobby_witt",
+            "fetch_mode": "browse_fixed_price",
+            "fetch_filter": "buyingOptions:{FIXED_PRICE}",
+            "ok": false,
+            "error": "eBay rate limit (429) on query 'Bobby Witt Jr. Topps Clearly Authentic'. Wait a few minutes before scanning again.",
+            "hits": 0,
+            "raw_hits": 0,
+            "bin_hits": 0,
+            "non_bin_hits": 0,
+            "missing_price_hits": 0,
+            "validated_hits": 0,
+            "rejected_hits": 0,
+            "rejection_reasons": {},
+            "error_type": "EbayRateLimitError"
+          }
+        ],
+        "results": [],
+        "errors": [
+          "Aaron Judge Topps Clearly Authentic: eBay rate limit (429) on query 'Aaron Judge Topps Clearly Authentic'. Wait a few minutes before scanning again.",
+          "Bobby Witt Jr. Topps Clearly Authentic: eBay rate limit (429) on query 'Bobby Witt Jr. Topps Clearly Authentic'. Wait a few minutes before scanning again.",
+          "Bobby Witt Jr. Topps Clearly Authentic: eBay rate limit (429) on query 'Bobby Witt Jr. Topps Clearly Authentic'. Wait a few minutes before scanning again."
+        ],
+        "rejection_reasons_aggregate": {},
+        "rejected_samples": [],
+        "result_summary": {
+          "queries_ok": 0,
+          "queries_failed": 3,
+          "phrase_used": "topps clearly authentic",
+          "raw_listings": 0,
+          "bin_raw": 0,
+          "non_bin_raw": 0,
+          "missing_price_raw": 0,
+          "validated_pre_dedupe": 0,
+          "rejected": 0,
+          "deduped": 0
+        }
+      },
+      {
+        "run_id": "cts_d5a283a5f97d46",
+        "target_id": "prizm_nba",
+        "target_label": "Panini Prizm NBA",
+        "started_at": "2026-03-31T06:06:01Z",
+        "finished_at": "2026-03-31T06:06:20Z",
+        "query_count": 3,
+        "listing_count_raw": 0,
+        "listing_count_bin_raw": 0,
+        "listing_count_non_bin_raw": 0,
+        "listing_count_missing_price_raw": 0,
+        "listing_count_validated_pre_dedupe": 0,
+        "listing_count_rejected": 0,
+        "listing_count_deduped": 0,
+        "status": "failed",
+        "queries_executed": [
+          {
+            "query": "Amen Thompson Panini Prizm NBA",
+            "player_name": "Amen Thompson",
+            "player_id": "amen_thompson",
+            "fetch_mode": "browse_fixed_price",
+            "fetch_filter": "buyingOptions:{FIXED_PRICE}",
+            "ok": false,
+            "error": "eBay rate limit (429) on query 'Amen Thompson Panini Prizm NBA'. Wait a few minutes before scanning again.",
+            "hits": 0,
+            "raw_hits": 0,
+            "bin_hits": 0,
+            "non_bin_hits": 0,
+            "missing_price_hits": 0,
+            "validated_hits": 0,
+            "rejected_hits": 0,
+            "rejection_reasons": {},
+            "error_type": "EbayRateLimitError"
+          },
+          {
+            "query": "Anthony Edwards Panini Prizm NBA",
+            "player_name": "Anthony Edwards",
+            "player_id": "anthony_edwards",
+            "fetch_mode": "browse_fixed_price",
+            "fetch_filter": "buyingOptions:{FIXED_PRICE}",
+            "ok": false,
+            "error": "eBay rate limit (429) on query 'Anthony Edwards Panini Prizm NBA'. Wait a few minutes before scanning again.",
+            "hits": 0,
+            "raw_hits": 0,
+            "bin_hits": 0,
+            "non_bin_hits": 0,
+            "missing_price_hits": 0,
+            "validated_hits": 0,
+            "rejected_hits": 0,
+            "rejection_reasons": {},
+            "error_type": "EbayRateLimitError"
+          },
+          {
+            "query": "Anthony Edwards Panini Prizm NBA",
+            "player_name": "Anthony Edwards",
+            "player_id": "uni_anthony_edwards",
+            "fetch_mode": "browse_fixed_price",
+            "fetch_filter": "buyingOptions:{FIXED_PRICE}",
+            "ok": false,
+            "error": "eBay rate limit (429) on query 'Anthony Edwards Panini Prizm NBA'. Wait a few minutes before scanning again.",
+            "hits": 0,
+            "raw_hits": 0,
+            "bin_hits": 0,
+            "non_bin_hits": 0,
+            "missing_price_hits": 0,
+            "validated_hits": 0,
+            "rejected_hits": 0,
+            "rejection_reasons": {},
+            "error_type": "EbayRateLimitError"
+          }
+        ],
+        "results": [],
+        "errors": [
+          "Amen Thompson Panini Prizm NBA: eBay rate limit (429) on query 'Amen Thompson Panini Prizm NBA'. Wait a few minutes before scanning again.",
+          "Anthony Edwards Panini Prizm NBA: eBay rate limit (429) on query 'Anthony Edwards Panini Prizm NBA'. Wait a few minutes before scanning again.",
+          "Anthony Edwards Panini Prizm NBA: eBay rate limit (429) on query 'Anthony Edwards Panini Prizm NBA'. Wait a few minutes before scanning again."
+        ],
+        "rejection_reasons_aggregate": {},
+        "rejected_samples": [],
+        "result_summary": {
+          "queries_ok": 0,
+          "queries_failed": 3,
+          "phrase_used": "panini prizm nba",
+          "raw_listings": 0,
+          "bin_raw": 0,
+          "non_bin_raw": 0,
+          "missing_price_raw": 0,
+          "validated_pre_dedupe": 0,
+          "rejected": 0,
+          "deduped": 0
+        }
+      },
+      {
+        "run_id": "cts_baf29f826bb54c",
+        "target_id": "select_nba",
+        "target_label": "Panini Select NBA",
+        "started_at": "2026-03-31T06:06:20Z",
+        "finished_at": "2026-03-31T06:06:35Z",
+        "query_count": 3,
+        "listing_count_raw": 0,
+        "listing_count_bin_raw": 0,
+        "listing_count_non_bin_raw": 0,
+        "listing_count_missing_price_raw": 0,
+        "listing_count_validated_pre_dedupe": 0,
+        "listing_count_rejected": 0,
+        "listing_count_deduped": 0,
+        "status": "failed",
+        "queries_executed": [
+          {
+            "query": "Amen Thompson Panini Select NBA",
+            "player_name": "Amen Thompson",
+            "player_id": "amen_thompson",
+            "fetch_mode": "browse_fixed_price",
+            "fetch_filter": "buyingOptions:{FIXED_PRICE}",
+            "ok": false,
+            "error": "eBay rate limit (429) on query 'Amen Thompson Panini Select NBA'. Wait a few minutes before scanning again.",
+            "hits": 0,
+            "raw_hits": 0,
+            "bin_hits": 0,
+            "non_bin_hits": 0,
+            "missing_price_hits": 0,
+            "validated_hits": 0,
+            "rejected_hits": 0,
+            "rejection_reasons": {},
+            "error_type": "EbayRateLimitError"
+          },
+          {
+            "query": "Anthony Edwards Panini Select NBA",
+            "player_name": "Anthony Edwards",
+            "player_id": "anthony_edwards",
+            "fetch_mode": "browse_fixed_price",
+            "fetch_filter": "buyingOptions:{FIXED_PRICE}",
+            "ok": false,
+            "error": "eBay rate limit (429) on query 'Anthony Edwards Panini Select NBA'. Wait a few minutes before scanning again.",
+            "hits": 0,
+            "raw_hits": 0,
+            "bin_hits": 0,
+            "non_bin_hits": 0,
+            "missing_price_hits": 0,
+            "validated_hits": 0,
+            "rejected_hits": 0,
+            "rejection_reasons": {},
+            "error_type": "EbayRateLimitError"
+          },
+          {
+            "query": "Anthony Edwards Panini Select NBA",
+            "player_name": "Anthony Edwards",
+            "player_id": "uni_anthony_edwards",
+            "fetch_mode": "browse_fixed_price",
+            "fetch_filter": "buyingOptions:{FIXED_PRICE}",
+            "ok": false,
+            "error": "eBay rate limit (429) on query 'Anthony Edwards Panini Select NBA'. Wait a few minutes before scanning again.",
+            "hits": 0,
+            "raw_hits": 0,
+            "bin_hits": 0,
+            "non_bin_hits": 0,
+            "missing_price_hits": 0,
+            "validated_hits": 0,
+            "rejected_hits": 0,
+            "rejection_reasons": {},
+            "error_type": "EbayRateLimitError"
+          }
+        ],
+        "results": [],
+        "errors": [
+          "Amen Thompson Panini Select NBA: eBay rate limit (429) on query 'Amen Thompson Panini Select NBA'. Wait a few minutes before scanning again.",
+          "Anthony Edwards Panini Select NBA: eBay rate limit (429) on query 'Anthony Edwards Panini Select NBA'. Wait a few minutes before scanning again.",
+          "Anthony Edwards Panini Select NBA: eBay rate limit (429) on query 'Anthony Edwards Panini Select NBA'. Wait a few minutes before scanning again."
+        ],
+        "rejection_reasons_aggregate": {},
+        "rejected_samples": [],
+        "result_summary": {
+          "queries_ok": 0,
+          "queries_failed": 3,
+          "phrase_used": "panini select nba",
+          "raw_listings": 0,
+          "bin_raw": 0,
+          "non_bin_raw": 0,
+          "missing_price_raw": 0,
+          "validated_pre_dedupe": 0,
+          "rejected": 0,
+          "deduped": 0
+        }
+      },
+      {
+        "run_id": "cts_9d643056895d44",
+        "target_id": "mosaic_nba",
+        "target_label": "Panini Mosaic NBA",
+        "started_at": "2026-03-31T06:06:35Z",
+        "finished_at": "2026-03-31T06:06:46Z",
+        "query_count": 3,
+        "listing_count_raw": 0,
+        "listing_count_bin_raw": 0,
+        "listing_count_non_bin_raw": 0,
+        "listing_count_missing_price_raw": 0,
+        "listing_count_validated_pre_dedupe": 0,
+        "listing_count_rejected": 0,
+        "listing_count_deduped": 0,
+        "status": "failed",
+        "queries_executed": [
+          {
+            "query": "Amen Thompson Panini Mosaic NBA",
+            "player_name": "Amen Thompson",
+            "player_id": "amen_thompson",
+            "fetch_mode": "browse_fixed_price",
+            "fetch_filter": "buyingOptions:{FIXED_PRICE}",
+            "ok": false,
+            "error": "eBay rate limit (429) on query 'Amen Thompson Panini Mosaic NBA'. Wait a few minutes before scanning again.",
+            "hits": 0,
+            "raw_hits": 0,
+            "bin_hits": 0,
+            "non_bin_hits": 0,
+            "missing_price_hits": 0,
+            "validated_hits": 0,
+            "rejected_hits": 0,
+            "rejection_reasons": {},
+            "error_type": "EbayRateLimitError"
+          },
+          {
+            "query": "Anthony Edwards Panini Mosaic NBA",
+            "player_name": "Anthony Edwards",
+            "player_id": "anthony_edwards",
+            "fetch_mode": "browse_fixed_price",
+            "fetch_filter": "buyingOptions:{FIXED_PRICE}",
+            "ok": false,
+            "error": "eBay rate limit (429) on query 'Anthony Edwards Panini Mosaic NBA'. Wait a few minutes before scanning again.",
+            "hits": 0,
+            "raw_hits": 0,
+            "bin_hits": 0,
+            "non_bin_hits": 0,
+            "missing_price_hits": 0,
+            "validated_hits": 0,
+            "rejected_hits": 0,
+            "rejection_reasons": {},
+            "error_type": "EbayRateLimitError"
+          },
+          {
+            "query": "Anthony Edwards Panini Mosaic NBA",
+            "player_name": "Anthony Edwards",
+            "player_id": "uni_anthony_edwards",
+            "fetch_mode": "browse_fixed_price",
+            "fetch_filter": "buyingOptions:{FIXED_PRICE}",
+            "ok": false,
+            "error": "eBay rate limit (429) on query 'Anthony Edwards Panini Mosaic NBA'. Wait a few minutes before scanning again.",
+            "hits": 0,
+            "raw_hits": 0,
+            "bin_hits": 0,
+            "non_bin_hits": 0,
+            "missing_price_hits": 0,
+            "validated_hits": 0,
+            "rejected_hits": 0,
+            "rejection_reasons": {},
+            "error_type": "EbayRateLimitError"
+          }
+        ],
+        "results": [],
+        "errors": [
+          "Amen Thompson Panini Mosaic NBA: eBay rate limit (429) on query 'Amen Thompson Panini Mosaic NBA'. Wait a few minutes before scanning again.",
+          "Anthony Edwards Panini Mosaic NBA: eBay rate limit (429) on query 'Anthony Edwards Panini Mosaic NBA'. Wait a few minutes before scanning again.",
+          "Anthony Edwards Panini Mosaic NBA: eBay rate limit (429) on query 'Anthony Edwards Panini Mosaic NBA'. Wait a few minutes before scanning again."
+        ],
+        "rejection_reasons_aggregate": {},
+        "rejected_samples": [],
+        "result_summary": {
+          "queries_ok": 0,
+          "queries_failed": 3,
+          "phrase_used": "panini mosaic nba",
+          "raw_listings": 0,
+          "bin_raw": 0,
+          "non_bin_raw": 0,
+          "missing_price_raw": 0,
+          "validated_pre_dedupe": 0,
+          "rejected": 0,
+          "deduped": 0
+        }
+      },
+      {
+        "run_id": "cts_bad75cd8b1a241",
+        "target_id": "optic_nba",
+        "target_label": "Donruss Optic NBA",
+        "started_at": "2026-03-31T06:06:46Z",
+        "finished_at": "2026-03-31T06:06:58Z",
+        "query_count": 3,
+        "listing_count_raw": 0,
+        "listing_count_bin_raw": 0,
+        "listing_count_non_bin_raw": 0,
+        "listing_count_missing_price_raw": 0,
+        "listing_count_validated_pre_dedupe": 0,
+        "listing_count_rejected": 0,
+        "listing_count_deduped": 0,
+        "status": "failed",
+        "queries_executed": [
+          {
+            "query": "Amen Thompson Panini Donruss Optic NBA",
+            "player_name": "Amen Thompson",
+            "player_id": "amen_thompson",
+            "fetch_mode": "browse_fixed_price",
+            "fetch_filter": "buyingOptions:{FIXED_PRICE}",
+            "ok": false,
+            "error": "eBay rate limit (429) on query 'Amen Thompson Panini Donruss Optic NBA'. Wait a few minutes before scanning again.",
+            "hits": 0,
+            "raw_hits": 0,
+            "bin_hits": 0,
+            "non_bin_hits": 0,
+            "missing_price_hits": 0,
+            "validated_hits": 0,
+            "rejected_hits": 0,
+            "rejection_reasons": {},
+            "error_type": "EbayRateLimitError"
+          },
+          {
+            "query": "Anthony Edwards Panini Donruss Optic NBA",
+            "player_name": "Anthony Edwards",
+            "player_id": "anthony_edwards",
+            "fetch_mode": "browse_fixed_price",
+            "fetch_filter": "buyingOptions:{FIXED_PRICE}",
+            "ok": false,
+            "error": "eBay rate limit (429) on query 'Anthony Edwards Panini Donruss Optic NBA'. Wait a few minutes before scanning again.",
+            "hits": 0,
+            "raw_hits": 0,
+            "bin_hits": 0,
+            "non_bin_hits": 0,
+            "missing_price_hits": 0,
+            "validated_hits": 0,
+            "rejected_hits": 0,
+            "rejection_reasons": {},
+            "error_type": "EbayRateLimitError"
+          },
+          {
+            "query": "Anthony Edwards Panini Donruss Optic NBA",
+            "player_name": "Anthony Edwards",
+            "player_id": "uni_anthony_edwards",
+            "fetch_mode": "browse_fixed_price",
+            "fetch_filter": "buyingOptions:{FIXED_PRICE}",
+            "ok": false,
+            "error": "eBay rate limit (429) on query 'Anthony Edwards Panini Donruss Optic NBA'. Wait a few minutes before scanning again.",
+            "hits": 0,
+            "raw_hits": 0,
+            "bin_hits": 0,
+            "non_bin_hits": 0,
+            "missing_price_hits": 0,
+            "validated_hits": 0,
+            "rejected_hits": 0,
+            "rejection_reasons": {},
+            "error_type": "EbayRateLimitError"
+          }
+        ],
+        "results": [],
+        "errors": [
+          "Amen Thompson Panini Donruss Optic NBA: eBay rate limit (429) on query 'Amen Thompson Panini Donruss Optic NBA'. Wait a few minutes before scanning again.",
+          "Anthony Edwards Panini Donruss Optic NBA: eBay rate limit (429) on query 'Anthony Edwards Panini Donruss Optic NBA'. Wait a few minutes before scanning again.",
+          "Anthony Edwards Panini Donruss Optic NBA: eBay rate limit (429) on query 'Anthony Edwards Panini Donruss Optic NBA'. Wait a few minutes before scanning again."
+        ],
+        "rejection_reasons_aggregate": {},
+        "rejected_samples": [],
+        "result_summary": {
+          "queries_ok": 0,
+          "queries_failed": 3,
+          "phrase_used": "panini donruss optic nba",
+          "raw_listings": 0,
+          "bin_raw": 0,
+          "non_bin_raw": 0,
+          "missing_price_raw": 0,
+          "validated_pre_dedupe": 0,
+          "rejected": 0,
+          "deduped": 0
+        }
+      },
+      {
+        "run_id": "cts_28f6f15717744b",
+        "target_id": "hoops_nba",
+        "target_label": "Panini Hoops NBA",
+        "started_at": "2026-03-31T06:06:58Z",
+        "finished_at": "2026-03-31T06:07:10Z",
+        "query_count": 3,
+        "listing_count_raw": 0,
+        "listing_count_bin_raw": 0,
+        "listing_count_non_bin_raw": 0,
+        "listing_count_missing_price_raw": 0,
+        "listing_count_validated_pre_dedupe": 0,
+        "listing_count_rejected": 0,
+        "listing_count_deduped": 0,
+        "status": "failed",
+        "queries_executed": [
+          {
+            "query": "Amen Thompson Panini Hoops",
+            "player_name": "Amen Thompson",
+            "player_id": "amen_thompson",
+            "fetch_mode": "browse_fixed_price",
+            "fetch_filter": "buyingOptions:{FIXED_PRICE}",
+            "ok": false,
+            "error": "eBay rate limit (429) on query 'Amen Thompson Panini Hoops'. Wait a few minutes before scanning again.",
+            "hits": 0,
+            "raw_hits": 0,
+            "bin_hits": 0,
+            "non_bin_hits": 0,
+            "missing_price_hits": 0,
+            "validated_hits": 0,
+            "rejected_hits": 0,
+            "rejection_reasons": {},
+            "error_type": "EbayRateLimitError"
+          },
+          {
+            "query": "Anthony Edwards Panini Hoops",
+            "player_name": "Anthony Edwards",
+            "player_id": "anthony_edwards",
+            "fetch_mode": "browse_fixed_price",
+            "fetch_filter": "buyingOptions:{FIXED_PRICE}",
+            "ok": false,
+            "error": "eBay rate limit (429) on query 'Anthony Edwards Panini Hoops'. Wait a few minutes before scanning again.",
+            "hits": 0,
+            "raw_hits": 0,
+            "bin_hits": 0,
+            "non_bin_hits": 0,
+            "missing_price_hits": 0,
+            "validated_hits": 0,
+            "rejected_hits": 0,
+            "rejection_reasons": {},
+            "error_type": "EbayRateLimitError"
+          },
+          {
+            "query": "Anthony Edwards Panini Hoops",
+            "player_name": "Anthony Edwards",
+            "player_id": "uni_anthony_edwards",
+            "fetch_mode": "browse_fixed_price",
+            "fetch_filter": "buyingOptions:{FIXED_PRICE}",
+            "ok": false,
+            "error": "eBay rate limit (429) on query 'Anthony Edwards Panini Hoops'. Wait a few minutes before scanning again.",
+            "hits": 0,
+            "raw_hits": 0,
+            "bin_hits": 0,
+            "non_bin_hits": 0,
+            "missing_price_hits": 0,
+            "validated_hits": 0,
+            "rejected_hits": 0,
+            "rejection_reasons": {},
+            "error_type": "EbayRateLimitError"
+          }
+        ],
+        "results": [],
+        "errors": [
+          "Amen Thompson Panini Hoops: eBay rate limit (429) on query 'Amen Thompson Panini Hoops'. Wait a few minutes before scanning again.",
+          "Anthony Edwards Panini Hoops: eBay rate limit (429) on query 'Anthony Edwards Panini Hoops'. Wait a few minutes before scanning again.",
+          "Anthony Edwards Panini Hoops: eBay rate limit (429) on query 'Anthony Edwards Panini Hoops'. Wait a few minutes before scanning again."
+        ],
+        "rejection_reasons_aggregate": {},
+        "rejected_samples": [],
+        "result_summary": {
+          "queries_ok": 0,
+          "queries_failed": 3,
+          "phrase_used": "panini hoops",
+          "raw_listings": 0,
+          "bin_raw": 0,
+          "non_bin_raw": 0,
+          "missing_price_raw": 0,
+          "validated_pre_dedupe": 0,
+          "rejected": 0,
+          "deduped": 0
+        }
+      },
+      {
+        "run_id": "cts_afa5e412168549",
+        "target_id": "chronicles_nba",
+        "target_label": "Panini Chronicles NBA",
+        "started_at": "2026-03-31T06:07:10Z",
+        "finished_at": "2026-03-31T06:07:21Z",
+        "query_count": 3,
+        "listing_count_raw": 0,
+        "listing_count_bin_raw": 0,
+        "listing_count_non_bin_raw": 0,
+        "listing_count_missing_price_raw": 0,
+        "listing_count_validated_pre_dedupe": 0,
+        "listing_count_rejected": 0,
+        "listing_count_deduped": 0,
+        "status": "failed",
+        "queries_executed": [
+          {
+            "query": "Amen Thompson Panini Chronicles",
+            "player_name": "Amen Thompson",
+            "player_id": "amen_thompson",
+            "fetch_mode": "browse_fixed_price",
+            "fetch_filter": "buyingOptions:{FIXED_PRICE}",
+            "ok": false,
+            "error": "eBay rate limit (429) on query 'Amen Thompson Panini Chronicles'. Wait a few minutes before scanning again.",
+            "hits": 0,
+            "raw_hits": 0,
+            "bin_hits": 0,
+            "non_bin_hits": 0,
+            "missing_price_hits": 0,
+            "validated_hits": 0,
+            "rejected_hits": 0,
+            "rejection_reasons": {},
+            "error_type": "EbayRateLimitError"
+          },
+          {
+            "query": "Anthony Edwards Panini Chronicles",
+            "player_name": "Anthony Edwards",
+            "player_id": "anthony_edwards",
+            "fetch_mode": "browse_fixed_price",
+            "fetch_filter": "buyingOptions:{FIXED_PRICE}",
+            "ok": false,
+            "error": "eBay rate limit (429) on query 'Anthony Edwards Panini Chronicles'. Wait a few minutes before scanning again.",
+            "hits": 0,
+            "raw_hits": 0,
+            "bin_hits": 0,
+            "non_bin_hits": 0,
+            "missing_price_hits": 0,
+            "validated_hits": 0,
+            "rejected_hits": 0,
+            "rejection_reasons": {},
+            "error_type": "EbayRateLimitError"
+          },
+          {
+            "query": "Anthony Edwards Panini Chronicles",
+            "player_name": "Anthony Edwards",
+            "player_id": "uni_anthony_edwards",
+            "fetch_mode": "browse_fixed_price",
+            "fetch_filter": "buyingOptions:{FIXED_PRICE}",
+            "ok": false,
+            "error": "eBay rate limit (429) on query 'Anthony Edwards Panini Chronicles'. Wait a few minutes before scanning again.",
+            "hits": 0,
+            "raw_hits": 0,
+            "bin_hits": 0,
+            "non_bin_hits": 0,
+            "missing_price_hits": 0,
+            "validated_hits": 0,
+            "rejected_hits": 0,
+            "rejection_reasons": {},
+            "error_type": "EbayRateLimitError"
+          }
+        ],
+        "results": [],
+        "errors": [
+          "Amen Thompson Panini Chronicles: eBay rate limit (429) on query 'Amen Thompson Panini Chronicles'. Wait a few minutes before scanning again.",
+          "Anthony Edwards Panini Chronicles: eBay rate limit (429) on query 'Anthony Edwards Panini Chronicles'. Wait a few minutes before scanning again.",
+          "Anthony Edwards Panini Chronicles: eBay rate limit (429) on query 'Anthony Edwards Panini Chronicles'. Wait a few minutes before scanning again."
+        ],
+        "rejection_reasons_aggregate": {},
+        "rejected_samples": [],
+        "result_summary": {
+          "queries_ok": 0,
+          "queries_failed": 3,
+          "phrase_used": "panini chronicles",
+          "raw_listings": 0,
+          "bin_raw": 0,
+          "non_bin_raw": 0,
+          "missing_price_raw": 0,
+          "validated_pre_dedupe": 0,
+          "rejected": 0,
+          "deduped": 0
+        }
+      },
+      {
+        "run_id": "cts_41a14a33590147",
+        "target_id": "prizm_nfl",
+        "target_label": "Panini Prizm NFL",
+        "started_at": "2026-03-31T06:07:21Z",
+        "finished_at": "2026-03-31T06:07:31Z",
+        "query_count": 3,
+        "listing_count_raw": 0,
+        "listing_count_bin_raw": 0,
+        "listing_count_non_bin_raw": 0,
+        "listing_count_missing_price_raw": 0,
+        "listing_count_validated_pre_dedupe": 0,
+        "listing_count_rejected": 0,
+        "listing_count_deduped": 0,
+        "status": "failed",
+        "queries_executed": [
+          {
+            "query": "Bijan Robinson Panini Prizm NFL",
+            "player_name": "Bijan Robinson",
+            "player_id": "bijan_robinson",
+            "fetch_mode": "browse_fixed_price",
+            "fetch_filter": "buyingOptions:{FIXED_PRICE}",
+            "ok": false,
+            "error": "eBay rate limit (429) on query 'Bijan Robinson Panini Prizm NFL'. Wait a few minutes before scanning again.",
+            "hits": 0,
+            "raw_hits": 0,
+            "bin_hits": 0,
+            "non_bin_hits": 0,
+            "missing_price_hits": 0,
+            "validated_hits": 0,
+            "rejected_hits": 0,
+            "rejection_reasons": {},
+            "error_type": "EbayRateLimitError"
+          },
+          {
+            "query": "Breece Hall Panini Prizm NFL",
+            "player_name": "Breece Hall",
+            "player_id": "breece_hall",
+            "fetch_mode": "browse_fixed_price",
+            "fetch_filter": "buyingOptions:{FIXED_PRICE}",
+            "ok": false,
+            "error": "eBay rate limit (429) on query 'Breece Hall Panini Prizm NFL'. Wait a few minutes before scanning again.",
+            "hits": 0,
+            "raw_hits": 0,
+            "bin_hits": 0,
+            "non_bin_hits": 0,
+            "missing_price_hits": 0,
+            "validated_hits": 0,
+            "rejected_hits": 0,
+            "rejection_reasons": {},
+            "error_type": "EbayRateLimitError"
+          },
+          {
+            "query": "Bryce Young Panini Prizm NFL",
+            "player_name": "Bryce Young",
+            "player_id": "bryce_young",
+            "fetch_mode": "browse_fixed_price",
+            "fetch_filter": "buyingOptions:{FIXED_PRICE}",
+            "ok": false,
+            "error": "eBay rate limit (429) on query 'Bryce Young Panini Prizm NFL'. Wait a few minutes before scanning again.",
+            "hits": 0,
+            "raw_hits": 0,
+            "bin_hits": 0,
+            "non_bin_hits": 0,
+            "missing_price_hits": 0,
+            "validated_hits": 0,
+            "rejected_hits": 0,
+            "rejection_reasons": {},
+            "error_type": "EbayRateLimitError"
+          }
+        ],
+        "results": [],
+        "errors": [
+          "Bijan Robinson Panini Prizm NFL: eBay rate limit (429) on query 'Bijan Robinson Panini Prizm NFL'. Wait a few minutes before scanning again.",
+          "Breece Hall Panini Prizm NFL: eBay rate limit (429) on query 'Breece Hall Panini Prizm NFL'. Wait a few minutes before scanning again.",
+          "Bryce Young Panini Prizm NFL: eBay rate limit (429) on query 'Bryce Young Panini Prizm NFL'. Wait a few minutes before scanning again."
+        ],
+        "rejection_reasons_aggregate": {},
+        "rejected_samples": [],
+        "result_summary": {
+          "queries_ok": 0,
+          "queries_failed": 3,
+          "phrase_used": "panini prizm nfl",
+          "raw_listings": 0,
+          "bin_raw": 0,
+          "non_bin_raw": 0,
+          "missing_price_raw": 0,
+          "validated_pre_dedupe": 0,
+          "rejected": 0,
+          "deduped": 0
+        }
+      },
+      {
+        "run_id": "cts_10b9847b8c0047",
+        "target_id": "select_nfl",
+        "target_label": "Panini Select NFL",
+        "started_at": "2026-03-31T06:07:31Z",
+        "finished_at": "2026-03-31T06:07:42Z",
+        "query_count": 3,
+        "listing_count_raw": 0,
+        "listing_count_bin_raw": 0,
+        "listing_count_non_bin_raw": 0,
+        "listing_count_missing_price_raw": 0,
+        "listing_count_validated_pre_dedupe": 0,
+        "listing_count_rejected": 0,
+        "listing_count_deduped": 0,
+        "status": "failed",
+        "queries_executed": [
+          {
+            "query": "Bijan Robinson Panini Select NFL",
+            "player_name": "Bijan Robinson",
+            "player_id": "bijan_robinson",
+            "fetch_mode": "browse_fixed_price",
+            "fetch_filter": "buyingOptions:{FIXED_PRICE}",
+            "ok": false,
+            "error": "eBay rate limit (429) on query 'Bijan Robinson Panini Select NFL'. Wait a few minutes before scanning again.",
+            "hits": 0,
+            "raw_hits": 0,
+            "bin_hits": 0,
+            "non_bin_hits": 0,
+            "missing_price_hits": 0,
+            "validated_hits": 0,
+            "rejected_hits": 0,
+            "rejection_reasons": {},
+            "error_type": "EbayRateLimitError"
+          },
+          {
+            "query": "Breece Hall Panini Select NFL",
+            "player_name": "Breece Hall",
+            "player_id": "breece_hall",
+            "fetch_mode": "browse_fixed_price",
+            "fetch_filter": "buyingOptions:{FIXED_PRICE}",
+            "ok": false,
+            "error": "eBay rate limit (429) on query 'Breece Hall Panini Select NFL'. Wait a few minutes before scanning again.",
+            "hits": 0,
+            "raw_hits": 0,
+            "bin_hits": 0,
+            "non_bin_hits": 0,
+            "missing_price_hits": 0,
+            "validated_hits": 0,
+            "rejected_hits": 0,
+            "rejection_reasons": {},
+            "error_type": "EbayRateLimitError"
+          },
+          {
+            "query": "Bryce Young Panini Select NFL",
+            "player_name": "Bryce Young",
+            "player_id": "bryce_young",
+            "fetch_mode": "browse_fixed_price",
+            "fetch_filter": "buyingOptions:{FIXED_PRICE}",
+            "ok": false,
+            "error": "eBay rate limit (429) on query 'Bryce Young Panini Select NFL'. Wait a few minutes before scanning again.",
+            "hits": 0,
+            "raw_hits": 0,
+            "bin_hits": 0,
+            "non_bin_hits": 0,
+            "missing_price_hits": 0,
+            "validated_hits": 0,
+            "rejected_hits": 0,
+            "rejection_reasons": {},
+            "error_type": "EbayRateLimitError"
+          }
+        ],
+        "results": [],
+        "errors": [
+          "Bijan Robinson Panini Select NFL: eBay rate limit (429) on query 'Bijan Robinson Panini Select NFL'. Wait a few minutes before scanning again.",
+          "Breece Hall Panini Select NFL: eBay rate limit (429) on query 'Breece Hall Panini Select NFL'. Wait a few minutes before scanning again.",
+          "Bryce Young Panini Select NFL: eBay rate limit (429) on query 'Bryce Young Panini Select NFL'. Wait a few minutes before scanning again."
+        ],
+        "rejection_reasons_aggregate": {},
+        "rejected_samples": [],
+        "result_summary": {
+          "queries_ok": 0,
+          "queries_failed": 3,
+          "phrase_used": "panini select nfl",
+          "raw_listings": 0,
+          "bin_raw": 0,
+          "non_bin_raw": 0,
+          "missing_price_raw": 0,
+          "validated_pre_dedupe": 0,
+          "rejected": 0,
+          "deduped": 0
+        }
+      },
+      {
+        "run_id": "cts_283162110b1f46",
+        "target_id": "mosaic_nfl",
+        "target_label": "Panini Mosaic NFL",
+        "started_at": "2026-03-31T06:07:42Z",
+        "finished_at": "2026-03-31T06:07:52Z",
+        "query_count": 3,
+        "listing_count_raw": 0,
+        "listing_count_bin_raw": 0,
+        "listing_count_non_bin_raw": 0,
+        "listing_count_missing_price_raw": 0,
+        "listing_count_validated_pre_dedupe": 0,
+        "listing_count_rejected": 0,
+        "listing_count_deduped": 0,
+        "status": "failed",
+        "queries_executed": [
+          {
+            "query": "Bijan Robinson Panini Mosaic NFL",
+            "player_name": "Bijan Robinson",
+            "player_id": "bijan_robinson",
+            "fetch_mode": "browse_fixed_price",
+            "fetch_filter": "buyingOptions:{FIXED_PRICE}",
+            "ok": false,
+            "error": "eBay rate limit (429) on query 'Bijan Robinson Panini Mosaic NFL'. Wait a few minutes before scanning again.",
+            "hits": 0,
+            "raw_hits": 0,
+            "bin_hits": 0,
+            "non_bin_hits": 0,
+            "missing_price_hits": 0,
+            "validated_hits": 0,
+            "rejected_hits": 0,
+            "rejection_reasons": {},
+            "error_type": "EbayRateLimitError"
+          },
+          {
+            "query": "Breece Hall Panini Mosaic NFL",
+            "player_name": "Breece Hall",
+            "player_id": "breece_hall",
+            "fetch_mode": "browse_fixed_price",
+            "fetch_filter": "buyingOptions:{FIXED_PRICE}",
+            "ok": false,
+            "error": "eBay rate limit (429) on query 'Breece Hall Panini Mosaic NFL'. Wait a few minutes before scanning again.",
+            "hits": 0,
+            "raw_hits": 0,
+            "bin_hits": 0,
+            "non_bin_hits": 0,
+            "missing_price_hits": 0,
+            "validated_hits": 0,
+            "rejected_hits": 0,
+            "rejection_reasons": {},
+            "error_type": "EbayRateLimitError"
+          },
+          {
+            "query": "Bryce Young Panini Mosaic NFL",
+            "player_name": "Bryce Young",
+            "player_id": "bryce_young",
+            "fetch_mode": "browse_fixed_price",
+            "fetch_filter": "buyingOptions:{FIXED_PRICE}",
+            "ok": false,
+            "error": "eBay rate limit (429) on query 'Bryce Young Panini Mosaic NFL'. Wait a few minutes before scanning again.",
+            "hits": 0,
+            "raw_hits": 0,
+            "bin_hits": 0,
+            "non_bin_hits": 0,
+            "missing_price_hits": 0,
+            "validated_hits": 0,
+            "rejected_hits": 0,
+            "rejection_reasons": {},
+            "error_type": "EbayRateLimitError"
+          }
+        ],
+        "results": [],
+        "errors": [
+          "Bijan Robinson Panini Mosaic NFL: eBay rate limit (429) on query 'Bijan Robinson Panini Mosaic NFL'. Wait a few minutes before scanning again.",
+          "Breece Hall Panini Mosaic NFL: eBay rate limit (429) on query 'Breece Hall Panini Mosaic NFL'. Wait a few minutes before scanning again.",
+          "Bryce Young Panini Mosaic NFL: eBay rate limit (429) on query 'Bryce Young Panini Mosaic NFL'. Wait a few minutes before scanning again."
+        ],
+        "rejection_reasons_aggregate": {},
+        "rejected_samples": [],
+        "result_summary": {
+          "queries_ok": 0,
+          "queries_failed": 3,
+          "phrase_used": "panini mosaic nfl",
+          "raw_listings": 0,
+          "bin_raw": 0,
+          "non_bin_raw": 0,
+          "missing_price_raw": 0,
+          "validated_pre_dedupe": 0,
+          "rejected": 0,
+          "deduped": 0
+        }
+      },
+      {
+        "run_id": "cts_ccb286329e6047",
+        "target_id": "optic_nfl",
+        "target_label": "Donruss Optic NFL",
+        "started_at": "2026-03-31T06:07:52Z",
+        "finished_at": "2026-03-31T06:08:01Z",
+        "query_count": 3,
+        "listing_count_raw": 0,
+        "listing_count_bin_raw": 0,
+        "listing_count_non_bin_raw": 0,
+        "listing_count_missing_price_raw": 0,
+        "listing_count_validated_pre_dedupe": 0,
+        "listing_count_rejected": 0,
+        "listing_count_deduped": 0,
+        "status": "failed",
+        "queries_executed": [
+          {
+            "query": "Bijan Robinson Panini Donruss Optic NFL",
+            "player_name": "Bijan Robinson",
+            "player_id": "bijan_robinson",
+            "fetch_mode": "browse_fixed_price",
+            "fetch_filter": "buyingOptions:{FIXED_PRICE}",
+            "ok": false,
+            "error": "eBay rate limit (429) on query 'Bijan Robinson Panini Donruss Optic NFL'. Wait a few minutes before scanning again.",
+            "hits": 0,
+            "raw_hits": 0,
+            "bin_hits": 0,
+            "non_bin_hits": 0,
+            "missing_price_hits": 0,
+            "validated_hits": 0,
+            "rejected_hits": 0,
+            "rejection_reasons": {},
+            "error_type": "EbayRateLimitError"
+          },
+          {
+            "query": "Breece Hall Panini Donruss Optic NFL",
+            "player_name": "Breece Hall",
+            "player_id": "breece_hall",
+            "fetch_mode": "browse_fixed_price",
+            "fetch_filter": "buyingOptions:{FIXED_PRICE}",
+            "ok": false,
+            "error": "eBay rate limit (429) on query 'Breece Hall Panini Donruss Optic NFL'. Wait a few minutes before scanning again.",
+            "hits": 0,
+            "raw_hits": 0,
+            "bin_hits": 0,
+            "non_bin_hits": 0,
+            "missing_price_hits": 0,
+            "validated_hits": 0,
+            "rejected_hits": 0,
+            "rejection_reasons": {},
+            "error_type": "EbayRateLimitError"
+          },
+          {
+            "query": "Bryce Young Panini Donruss Optic NFL",
+            "player_name": "Bryce Young",
+            "player_id": "bryce_young",
+            "fetch_mode": "browse_fixed_price",
+            "fetch_filter": "buyingOptions:{FIXED_PRICE}",
+            "ok": false,
+            "error": "eBay rate limit (429) on query 'Bryce Young Panini Donruss Optic NFL'. Wait a few minutes before scanning again.",
+            "hits": 0,
+            "raw_hits": 0,
+            "bin_hits": 0,
+            "non_bin_hits": 0,
+            "missing_price_hits": 0,
+            "validated_hits": 0,
+            "rejected_hits": 0,
+            "rejection_reasons": {},
+            "error_type": "EbayRateLimitError"
+          }
+        ],
+        "results": [],
+        "errors": [
+          "Bijan Robinson Panini Donruss Optic NFL: eBay rate limit (429) on query 'Bijan Robinson Panini Donruss Optic NFL'. Wait a few minutes before scanning again.",
+          "Breece Hall Panini Donruss Optic NFL: eBay rate limit (429) on query 'Breece Hall Panini Donruss Optic NFL'. Wait a few minutes before scanning again.",
+          "Bryce Young Panini Donruss Optic NFL: eBay rate limit (429) on query 'Bryce Young Panini Donruss Optic NFL'. Wait a few minutes before scanning again."
+        ],
+        "rejection_reasons_aggregate": {},
+        "rejected_samples": [],
+        "result_summary": {
+          "queries_ok": 0,
+          "queries_failed": 3,
+          "phrase_used": "panini donruss optic nfl",
+          "raw_listings": 0,
+          "bin_raw": 0,
+          "non_bin_raw": 0,
+          "missing_price_raw": 0,
+          "validated_pre_dedupe": 0,
+          "rejected": 0,
+          "deduped": 0
+        }
+      },
+      {
+        "run_id": "cts_360d8418319748",
+        "target_id": "contenders_nfl",
+        "target_label": "Panini Contenders NFL",
+        "started_at": "2026-03-31T06:08:01Z",
+        "finished_at": "2026-03-31T06:08:12Z",
+        "query_count": 3,
+        "listing_count_raw": 0,
+        "listing_count_bin_raw": 0,
+        "listing_count_non_bin_raw": 0,
+        "listing_count_missing_price_raw": 0,
+        "listing_count_validated_pre_dedupe": 0,
+        "listing_count_rejected": 0,
+        "listing_count_deduped": 0,
+        "status": "failed",
+        "queries_executed": [
+          {
+            "query": "Bijan Robinson Panini Contenders",
+            "player_name": "Bijan Robinson",
+            "player_id": "bijan_robinson",
+            "fetch_mode": "browse_fixed_price",
+            "fetch_filter": "buyingOptions:{FIXED_PRICE}",
+            "ok": false,
+            "error": "eBay rate limit (429) on query 'Bijan Robinson Panini Contenders'. Wait a few minutes before scanning again.",
+            "hits": 0,
+            "raw_hits": 0,
+            "bin_hits": 0,
+            "non_bin_hits": 0,
+            "missing_price_hits": 0,
+            "validated_hits": 0,
+            "rejected_hits": 0,
+            "rejection_reasons": {},
+            "error_type": "EbayRateLimitError"
+          },
+          {
+            "query": "Breece Hall Panini Contenders",
+            "player_name": "Breece Hall",
+            "player_id": "breece_hall",
+            "fetch_mode": "browse_fixed_price",
+            "fetch_filter": "buyingOptions:{FIXED_PRICE}",
+            "ok": false,
+            "error": "eBay rate limit (429) on query 'Breece Hall Panini Contenders'. Wait a few minutes before scanning again.",
+            "hits": 0,
+            "raw_hits": 0,
+            "bin_hits": 0,
+            "non_bin_hits": 0,
+            "missing_price_hits": 0,
+            "validated_hits": 0,
+            "rejected_hits": 0,
+            "rejection_reasons": {},
+            "error_type": "EbayRateLimitError"
+          },
+          {
+            "query": "Bryce Young Panini Contenders",
+            "player_name": "Bryce Young",
+            "player_id": "bryce_young",
+            "fetch_mode": "browse_fixed_price",
+            "fetch_filter": "buyingOptions:{FIXED_PRICE}",
+            "ok": false,
+            "error": "eBay rate limit (429) on query 'Bryce Young Panini Contenders'. Wait a few minutes before scanning again.",
+            "hits": 0,
+            "raw_hits": 0,
+            "bin_hits": 0,
+            "non_bin_hits": 0,
+            "missing_price_hits": 0,
+            "validated_hits": 0,
+            "rejected_hits": 0,
+            "rejection_reasons": {},
+            "error_type": "EbayRateLimitError"
+          }
+        ],
+        "results": [],
+        "errors": [
+          "Bijan Robinson Panini Contenders: eBay rate limit (429) on query 'Bijan Robinson Panini Contenders'. Wait a few minutes before scanning again.",
+          "Breece Hall Panini Contenders: eBay rate limit (429) on query 'Breece Hall Panini Contenders'. Wait a few minutes before scanning again.",
+          "Bryce Young Panini Contenders: eBay rate limit (429) on query 'Bryce Young Panini Contenders'. Wait a few minutes before scanning again."
+        ],
+        "rejection_reasons_aggregate": {},
+        "rejected_samples": [],
+        "result_summary": {
+          "queries_ok": 0,
+          "queries_failed": 3,
+          "phrase_used": "panini contenders",
+          "raw_listings": 0,
+          "bin_raw": 0,
+          "non_bin_raw": 0,
+          "missing_price_raw": 0,
+          "validated_pre_dedupe": 0,
+          "rejected": 0,
+          "deduped": 0
+        }
+      }
+    ],
+    "target_latest_run_by_target": {
+      "prizm_nfl": "cts_41a14a33590147",
+      "select_nfl": "cts_10b9847b8c0047",
+      "mosaic_nfl": "cts_283162110b1f46",
+      "optic_nfl": "cts_ccb286329e6047",
+      "contenders_nfl": "cts_360d8418319748",
+      "chronicles_nfl": "cts_e16a10754dce47",
+      "absolute_nfl": "cts_48a878b79a6143",
+      "score_nfl": "cts_4580e70636994a",
+      "illusions_nfl": "cts_ba442068f0f34a",
+      "luminance_nfl": "cts_2109a83229f44e",
+      "topps_chrome_mlb": "cts_1cc7626bd2a04c",
+      "topps_series1_mlb": "cts_4a231ed4ff304b",
+      "topps_series2_mlb": "cts_020a1827175b4f",
+      "topps_update_mlb": "cts_0e7d0020c9ee47",
+      "bowman_chrome_mlb": "cts_64166412bdd742",
+      "bowman_draft_mlb": "cts_29fa9c1be72b45",
+      "bowman_platinum_mlb": "cts_574aafadd73f4d",
+      "topps_heritage_mlb": "cts_d786bb329dc841",
+      "topps_stadium_club_mlb": "cts_55135700aa7241",
+      "topps_finest_mlb": "cts_dc4eef5babc24e",
+      "prizm_mlb": "cts_51c1896c5f7142",
+      "allen_ginter_mlb": "cts_c0764b672afd40",
+      "topps_gold_label_mlb": "cts_fc67a4f8cd184e",
+      "topps_clearly_auth_mlb": "cts_310137fd2e0246",
+      "prizm_nba": "cts_d5a283a5f97d46",
+      "select_nba": "cts_baf29f826bb54c",
+      "mosaic_nba": "cts_9d643056895d44",
+      "optic_nba": "cts_bad75cd8b1a241",
+      "hoops_nba": "cts_28f6f15717744b",
+      "chronicles_nba": "cts_afa5e412168549",
+      "revolution_nba": "cts_5f09d9505df346",
+      "court_kings_nba": "cts_b768fd186b7442",
+      "national_treasures_nba": "cts_ea53da9e430448",
+      "immaculate_nba": "cts_0cc012bb68034e",
+      "contenders_nba": "cts_8503050efc9441",
+      "flux_nba": "cts_388101d5c84e40"
+    }
+  }
+}

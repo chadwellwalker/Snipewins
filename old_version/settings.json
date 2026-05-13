@@ -1,0 +1,6 @@
+{
+    "fee_percent": 14.0,
+    "shipping_cost": 5.0,
+    "desired_profit": 30.0,
+    "default_snipe_seconds": 4.0
+}

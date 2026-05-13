@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -c \"import ast; ast.parse\\(open\\(''streamlit_app.py'', encoding=''utf-8''\\).read\\(\\)\\); print\\(''Syntax OK''\\)\")",
+      "Bash(python -c \":*)",
+      "Bash(python -c \"import player_hub; print\\(''player_hub OK''\\)\")",
+      "Bash(taskkill /f /im python.exe)",
+      "Bash(streamlit run:*)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:8501/healthz)",
+      "Bash(python -m streamlit run streamlit_app.py --server.port 8501)",
+      "Bash(python -c \"import player_hub; print\\(''OK''\\)\")",
+      "Bash(python -m streamlit run streamlit_app.py --server.port 8502)",
+      "Bash(python:*)"
+    ]
+  }
+}

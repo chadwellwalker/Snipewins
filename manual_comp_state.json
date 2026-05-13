@@ -1,0 +1,84 @@
+{
+  "version": 1,
+  "by_canonical": {
+    "2023|bowman|na|refractor|rc0|a0|m0|psa9|chrome_glow_lunar_prospects": {
+      "comp_decisions": {
+        "id:v1|306838852277|0": "approve"
+      },
+      "use_manual_mv": false,
+      "manual_value": null,
+      "manual_low": null,
+      "manual_high": null
+    },
+    "2023|bowman|na|refractor|rc1|a0|m0|psa10|anthony_chrome_roman_st": {
+      "comp_decisions": {
+        "id:v1|327066154254|0": "approve"
+      },
+      "use_manual_mv": false,
+      "manual_value": null,
+      "manual_low": null,
+      "manual_high": null
+    },
+    "2024|select|45|select_zebra|rc0|a0|m0|psa10|david_montgomery_shock_zebra": {
+      "comp_decisions": {
+        "id:v1|117085986638|0": "approve",
+        "id:v1|236694502511|0": "reject",
+        "id:v1|177427079988|0": "reject"
+      },
+      "use_manual_mv": false,
+      "manual_value": null,
+      "manual_low": null,
+      "manual_high": null
+    }
+  },
+  "learned": {
+    "reject_tokens": {
+      "2024": 4,
+      "panini": 4,
+      "select": 4,
+      "club": 2,
+      "level": 2,
+      "josh": 2,
+      "allen": 2,
+      "zebra": 4,
+      "shock": 4,
+      "prizm": 4,
+      "ssp": 2,
+      "case": 2,
+      "hit": 1,
+      "xavier": 2,
+      "worthy": 2,
+      "chiefs": 2
+    },
+    "approve_tokens": {
+      "2023": 2,
+      "bowman": 3,
+      "chrome": 2,
+      "prospects": 1,
+      "lunar": 1,
+      "glow": 1,
+      "refractor": 2,
+      "bcp71": 1,
+      "roman": 2,
+      "anthony": 2,
+      "1st": 1,
+      "mojo": 1,
+      "2024": 1,
+      "panini": 1,
+      "select": 1,
+      "zebra": 2,
+      "shock": 2,
+      "david": 1,
+      "montgomery": 1
+    },
+    "reject_sellers": {
+      "{'username': 'perfect-10s', 'feedbackpercentage': '100.0', 'feedbackscore': 1049}": 2,
+      "{'username': 'gbig-29', 'feedbackpercentage': '100.0', 'feedbackscore': 45}": 2
+    },
+    "approve_sellers": {
+      "{'username': 'psa', 'feedbackpercentage': '99.9', 'feedbackscore': 452028}": 1,
+      "{'username': 'clippcitycarboard', 'feedbackpercentage': '99.5', 'feedbackscore': 589}": 1,
+      "{'username': 'psa', 'feedbackpercentage': '99.9', 'feedbackscore': 452084}": 1
+    }
+  }
+}

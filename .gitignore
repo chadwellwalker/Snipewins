@@ -1,0 +1,80 @@
+# ── Secrets ─────────────────────────────────────────────────────────────────
+# NEVER commit .env or any secret. Render reads env vars from its dashboard,
+# not from a file in the repo. Same for keys, tokens, and credentials.
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+*.cer
+credentials.json
+secrets.json
+
+# ── Local state and transient data ─────────────────────────────────────────
+# These regenerate on every run. Don't ship them; Render starts fresh and
+# the supervisor rebuilds them as it scans.
+*.log
+*.log.OLD
+*.log.OLD_*
+*.log.prev
+supervisor.log.*
+daily_pool.log
+daily_bin_pool.log
+daily_pool.json
+daily_pool.json.tmp
+bin_pool.json
+bin_pool.json.tmp
+mv_cache.json
+mv_cache.json.tmp
+accounts.json
+accounts.json.tmp
+accounts.json.corrupt.*
+last_scan.log
+*.tmp
+
+# ── Python ─────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+*.egg
+build/
+dist/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# ── OS noise ───────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+.AppleDouble
+.LSOverride
+
+# ── Editor / IDE ───────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.pydevproject
+
+# ── Backups created during refactors ───────────────────────────────────────
+# These are emergency-recovery copies we keep on disk locally but don't
+# need to ship to the deploy environment. (streamlit_app.PRE_CLEANUP_backup
+# etc. — useful locally, dead weight for deploy.)
+*.PRE_CLEANUP_backup.*.py
+*_recovered_*.py
+_patch_*.py
+_recovered_*.py
+
+# ── Logs subfolder & data ──────────────────────────────────────────────────
+data/
+logs/
+scan_verify.log
+live_scan_*.log

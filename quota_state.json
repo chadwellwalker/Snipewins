@@ -1,0 +1,20 @@
+{
+  "users": {
+    "test_self_check": {
+      "tier": "pro",
+      "weeks": {
+        "2026-W18": {
+          "reveals": [
+            "deal-1",
+            "deal-2",
+            "deal-3",
+            "deal-4",
+            "deal-5"
+          ],
+          "scans": 3
+        }
+      }
+    }
+  },
+  "version": 1
+}

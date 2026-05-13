@@ -1,0 +1,32 @@
+# SnipeWins Python dependencies for deployment to Render (or any container
+# host). Versions are pinned to known-stable minimums; we don't pin upper
+# bounds because Streamlit/pandas releases are typically backward-compatible
+# enough for our usage.
+#
+# To regenerate this file from your current local environment (recommended
+# before any major deploy):
+#     pip freeze > requirements.txt
+# Then manually trim any packages that aren't actually imported anywhere —
+# pip freeze includes everything in your venv whether you use it or not.
+
+# ── Web framework ──────────────────────────────────────────────────────────
+streamlit>=1.31
+
+# ── HTTP ───────────────────────────────────────────────────────────────────
+requests>=2.31
+
+# ── Data wrangling ─────────────────────────────────────────────────────────
+pandas>=2.0
+numpy>=1.24
+
+# ── Date parsing (used in pool merging + eBay date strings) ────────────────
+python-dateutil>=2.8
+
+# ── Note: the following are stdlib in modern Python and DON'T need to be
+# in requirements.txt:
+#   - json, os, sys, time, datetime, re, hashlib, hmac, secrets, urllib,
+#     pathlib, typing, unicodedata, subprocess, threading, argparse
+#
+# Resend integration uses stdlib urllib (no SDK).
+# Stripe integration is link-based at the moment (no SDK).
+# If we later add the stripe or resend Python SDKs, add them here.

@@ -1,0 +1,29 @@
+{
+  "snipes": [
+    {
+      "added_at": 1778473733.736484,
+      "current_bid": 709.99,
+      "ebay_url": "https://www.ebay.com/itm/287306368237?_skw=Bobby+Witt+Jr.+auto+Topps+Chrome+Black+-lot+-bulk+-break+-case+-pack+-mystery+-blind+-reprint+-base+-sealed+-wax+-blaster&hash=item42e4cb44ed:g:MOcAAOSwxpxoP6Km",
+      "ends_at": 1778550055.0,
+      "item_id": "v1|287306368237|0",
+      "market_value": 766.79,
+      "sms_sent": false,
+      "target_bid": 575.09,
+      "thumbnail": "https://i.ebayimg.com/images/g/MOcAAOSwxpxoP6Km/s-l225.jpg",
+      "title": "2022 Topps Chrome Black BOBBY WITT JR RC SUPER FUTURES AUTO KC Royals PSA 9 MINT"
+    },
+    {
+      "added_at": 1778647858.6950903,
+      "current_bid": 21.5,
+      "ebay_url": "https://www.ebay.com/itm/267661923979?_skw=Ashton+Jeanty+%2F25+Prizm+-lot+-bulk+-break+-case+-pack+-mystery+-blind+-reprint+-base+-sealed+-wax+-blaster&hash=item3e51e4d68b:g:a8MAAeSwuzJp-6X4",
+      "ends_at": 1778720881.0,
+      "item_id": "v1|267661923979|0",
+      "market_value": 24.38,
+      "sms_sent": false,
+      "target_bid": 18.29,
+      "thumbnail": "https://i.ebayimg.com/images/g/a8MAAeSwuzJp-6X4/s-l225.jpg",
+      "title": "2025 Donruss Optic Ashton Jeanty Hidden Potential Purple Stars Prizm RC /25 #5"
+    }
+  ],
+  "version": 1
+}
