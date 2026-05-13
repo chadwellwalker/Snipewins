@@ -78,3 +78,10 @@ data/
 logs/
 scan_verify.log
 live_scan_*.log
+quota_state.json
+mv_cache.json
+daily_pool.json
+bin_pool.json
+accounts.json
+snipes.json
+app_state.json
