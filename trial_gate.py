@@ -138,15 +138,29 @@ def enforce_gate(st) -> None:
     # ── ROUTE 1: magic link click (?token=xyz) — used for password reset
     #            and as a fallback for users who forgot their password ───
     if "token" in qp and qp["token"]:
-        _handle_token_click(st, trial_accounts, qp["token"])
+        _handle_token_click(
+            st, trial_accounts, qp["token"],
+            is_reset=bool(qp.get("reset")),
+        )
         return  # _handle_token_click sets session and reruns to clean URL
 
-    # ── ROUTE 2: signup redirect from landing (?signup=email@x.com) ──
-    # The landing form collects email only. We need a password to create
-    # the account, so we show a "set your password" form pre-filled with
-    # the email that arrived in the query param.
+    # ── ROUTE 2: signup redirect from landing (?signup=email@x.com).
+    # EMAIL-VERIFY-2026-05-14: the landing form gives us an email. We do
+    # NOT start a trial yet — we send a verification magic link and show
+    # the check-inbox page. The 10-minute clock only starts when the user
+    # clicks the link (handled in _handle_token_click). This is what stops
+    # the "type fake1@x.com, fake2@x.com, ..." trial-farming abuse — you
+    # can't get a trial without controlling a real inbox.
     if "signup" in qp and qp["signup"]:
-        _render_set_password_page(st, prefill_email=str(qp["signup"]))
+        _handle_landing_signup(st, trial_accounts, str(qp["signup"]))
+        st.stop()
+
+    # ── ROUTE 2.6: verification email sent, awaiting the click. Rendered
+    # from a session flag so reruns don't re-fire the send. On a hard
+    # refresh the flag is gone and the user falls through to the login
+    # page — fine, they just check their inbox and click the link.
+    if st.session_state.get("sw_verification_sent_to"):
+        _render_check_inbox_page(st, str(st.session_state["sw_verification_sent_to"]))
         st.stop()
 
     # ── ROUTE 2.5: forgot-password — send a magic link the user can click
@@ -187,11 +201,72 @@ def enforce_gate(st) -> None:
 
 # ── Route handlers ─────────────────────────────────────────────────────────
 
-def _handle_token_click(st, trial_accounts, token: str) -> None:
-    """User clicked a magic link (either forgot-password reset OR initial
-    welcome email). Validate the token, then route to "set a password" so
-    they can either set a new password (reset case) or pick their first one
-    (welcome case). Once set, the trial starts and they enter the dashboard."""
+def _send_verification_and_flag(st, trial_accounts, email: str,
+                                password: Optional[str] = None) -> None:
+    """EMAIL-VERIFY-2026-05-14: rotate a fresh magic token, send the
+    verification email, and set the check-inbox session flag. Shared by
+    all three verification-send paths: the landing-form signup, the
+    in-app signup form, and the 'logged in but never verified' re-send.
+
+    `password` is passed through to signup_email — supply it for the
+    in-app signup (sets the password), leave it None for the landing
+    form (password is set later, after the click) and for re-sends
+    (signup_email preserves an existing password when password is None).
+
+    The trial is intentionally NOT started here — validate_magic_token
+    starts it when the user actually clicks the link."""
+    token = trial_accounts.signup_email(email, password=password)
+    if token:
+        try:
+            import email_sender
+            email_sender.send_magic_link(email, f"{APP_BASE_URL}/?token={token}")
+        except Exception as _send_err:
+            print(f"[VERIFY_SEND_ERR] {type(_send_err).__name__}: {str(_send_err)[:160]}")
+    st.session_state["sw_verification_sent_to"] = email
+
+
+def _handle_landing_signup(st, trial_accounts, raw_email: str) -> None:
+    """EMAIL-VERIFY-2026-05-14: handle the ?signup=email redirect from the
+    landing form. Creates a password-less account, fires a verification
+    magic link, shows the check-inbox page. The trial does NOT start here
+    — it starts when the user clicks the link (validate_magic_token).
+
+    Guarded against rerun re-sends via the sw_verification_sent_to session
+    flag, mirroring the forgot-password flow's one-shot pattern."""
+    em = (raw_email or "").strip().lower()
+    if not em or "@" not in em or "." not in em.split("@")[-1]:
+        st.session_state["sw_trial_error_msg"] = (
+            "That email address looks off — double-check it and try again."
+        )
+        _render_login_or_signup_page(st)
+        return
+
+    # Already sent this session — just re-render check-inbox, don't re-fire.
+    if st.session_state.get("sw_verification_sent_to") == em:
+        _render_check_inbox_page(st, em)
+        return
+
+    _send_verification_and_flag(st, trial_accounts, em, password=None)
+    # Clear ?signup= so reruns land on ROUTE 2.6 instead of re-triggering
+    # ROUTE 2 (which would re-send the email).
+    _clear_query_params(st)
+    _render_check_inbox_page(st, em)
+
+
+def _handle_token_click(st, trial_accounts, token: str, is_reset: bool = False) -> None:
+    """User clicked a magic link. EMAIL-VERIFY-2026-05-14: validate_magic_token
+    both verifies email ownership AND starts the 10-minute trial clock (if
+    not already started). Three cases:
+
+      - is_reset=True (forgot-password link, carries &reset=1) → always
+        route to the set-new-password form, even if they have a password.
+        This is the whole point of a reset.
+      - Has a password, not a reset (in-app signup verification) → log
+        them straight in. They proved the email, the trial is running,
+        no reason to re-ask for a password they already set.
+      - No password yet (landing-form first signup) → route to the
+        set-a-password form so they pick one before entering.
+    """
     email = trial_accounts.validate_magic_token(token)
     if not email:
         _clear_query_params(st)
@@ -202,8 +277,24 @@ def _handle_token_click(st, trial_accounts, token: str) -> None:
         )
         _render_login_or_signup_page(st)
         st.stop()
-    # Park the email in a one-shot session slot so the next render knows
-    # who's setting the password without trusting query params.
+
+    # Verification succeeded — clear the check-inbox flag so the user
+    # isn't trapped on that page after a successful click.
+    st.session_state.pop("sw_verification_sent_to", None)
+
+    if (not is_reset) and trial_accounts.has_password(email):
+        # In-app-signup verification: they already set a password. Log
+        # them in directly — the trial is now running (validate_magic_token
+        # started it), so ROUTE 3 renders the dashboard.
+        st.session_state[SS_EMAIL] = email
+        _clear_query_params(st)
+        _persist_session_in_url(st, trial_accounts, email)
+        st.rerun()
+        return
+
+    # Either a forgot-password reset, or a landing-form first signup with
+    # no password yet. Both route to the set-a-password form — ROUTE 2.7
+    # picks this up on the next render.
     st.session_state["sw_pending_password_set_email"] = email
     _clear_query_params(st)
     st.rerun()
@@ -331,7 +422,12 @@ def _render_forgot_password_page(st) -> None:
         # always abandon the unused account.
         token = trial_accounts.signup_email(em, password=None)
         if token:
-            magic_link_url = f"{APP_BASE_URL}/?token={token}"
+            # EMAIL-VERIFY-2026-05-14: reset links carry &reset=1 so
+            # _handle_token_click knows to route to the set-new-password
+            # form rather than logging the user straight in. Without the
+            # marker, a forgot-password click on an account that already
+            # has a password would just log in and skip the reset.
+            magic_link_url = f"{APP_BASE_URL}/?token={token}&reset=1"
             email_sender.send_magic_link(em, magic_link_url)
         # Always show success — don't leak whether the email was in our store.
         st.session_state["sw_forgot_sent_to"]    = True
@@ -528,22 +624,34 @@ def _render_set_password_page(st, prefill_email: str) -> None:
 
 def _handle_email_password_submit(st, trial_accounts, email: str, password: str) -> None:
     """Single handler used by BOTH the landing-redirect signup AND the
-    in-app login/signup form. Logic:
-        - If the email already has a password set:
-            * Matches → log in (resume existing trial or paywall)
-            * Doesn't match → error, suggest forgot-password
-        - If the email is new OR has no password yet:
-            * Create the account with this password, start the trial,
-              log them in immediately.
+    in-app login/signup form.
 
-    This way users never have to think "am I signing up or logging in?"
-    — they just type email + password and the right thing happens."""
+    EMAIL-VERIFY-2026-05-14: signup no longer grants an instant trial.
+    Logic:
+        - Email already has a password set:
+            * Matches AND verified → log in (resume trial or paywall)
+            * Matches BUT never verified → re-send the verification link,
+              show check-inbox (don't dead-end them on the login page)
+            * Doesn't match → error, suggest forgot-password
+        - Email is new OR has no password yet:
+            * Create the account with this password, send a verification
+              email, show check-inbox. Trial starts on link click.
+    """
     existing_user = trial_accounts.get_user(email)
     has_pw = trial_accounts.has_password(email)
 
     if existing_user and has_pw:
         # Login path
         if trial_accounts.validate_password(email, password):
+            # Edge case: they signed up but never clicked the verification
+            # link, so the trial never started. Logging them in here would
+            # dead-end at ROUTE 3 (pending status falls through to the
+            # login page). Instead, re-send the link and show check-inbox.
+            if trial_accounts.get_trial_status(email) == trial_accounts.STATUS_PENDING_EMAIL_CLICK:
+                _send_verification_and_flag(st, trial_accounts, email)
+                _clear_query_params(st)
+                st.rerun()
+                return
             st.session_state[SS_EMAIL] = email
             _clear_query_params(st)
             _persist_session_in_url(st, trial_accounts, email)
@@ -555,19 +663,12 @@ def _handle_email_password_submit(st, trial_accounts, email: str, password: str)
             )
         return
 
-    # Signup path: no account yet OR account exists without a password
-    # (e.g. they used a magic link once before but never set a password).
-    # Create/upgrade the account with this password.
-    token = trial_accounts.signup_email(email, password=password)
-    if not token:
-        st.error("We couldn't create your account. Try again in a moment.")
-        return
-    # Start the trial immediately — no email verification step. We grant
-    # the trial credit on the strength of the email + password combination.
-    trial_accounts.start_trial_now(email)
-    st.session_state[SS_EMAIL] = email
+    # Signup path: no account yet OR account exists without a password.
+    # EMAIL-VERIFY-2026-05-14: create the account with this password, fire
+    # a verification email, and rerun — ROUTE 2.6 then renders check-inbox.
+    # The 10-minute trial starts only when they click the link.
+    _send_verification_and_flag(st, trial_accounts, email, password=password)
     _clear_query_params(st)
-    _persist_session_in_url(st, trial_accounts, email)
     st.rerun()
 
 
