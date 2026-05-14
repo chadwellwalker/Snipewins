@@ -767,12 +767,16 @@ PAGE_REGISTRY: Dict[str, Dict[str, Any]] = {
     #     "subtitle": "Product catalog, family lanes, and target templates.",
     #     "enabled": True,
     # },
-    "settings": {
-        "label": "Settings",
-        "icon": "SG",
-        "subtitle": "Fees, bidding rules, and shell-level configuration.",
-        "enabled": True,
-    },
+    # SETTINGS-NUKE-2026-05-13: removed the user-facing Settings tab entirely.
+    # All knobs (fees, shipping, profit, snipe seconds, target_bid_ratio)
+    # are now locked at sensible defaults read from profiles.json. Real
+    # users don't need to tune anything to get value — defaults work. If
+    # post-launch feedback says otherwise, we can re-introduce a focused
+    # single-slider Settings page in v2. The 'elif _active_page_id ==
+    # "settings"' block below is kept dead-code-safe (it only renders if
+    # somehow active_page is "settings", which can't happen anymore) so
+    # the existing settings_tools and System Health code don't need to
+    # be ripped out in this same change.
 }
 
 
