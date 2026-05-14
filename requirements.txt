@@ -31,3 +31,9 @@ python-dateutil>=2.8
 # Stripe integration is link-based at the moment (no SDK).
 # If we later add the stripe or resend Python SDKs, add them here.
 python-dotenv
+
+# ── Google sign-in (OIDC) ──────────────────────────────────────────────────
+# Authlib powers Streamlit's native auth (st.login / st.user). Streamlit
+# declares this as an optional dependency, but Render won't install
+# optionals unless we pin it explicitly. GOOGLE-OAUTH-2026-05-13.
+Authlib>=1.3

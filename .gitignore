@@ -9,6 +9,9 @@
 *.cer
 credentials.json
 secrets.json
+# Streamlit OIDC secrets — generated at startup from Render env vars by
+# run_app.py / _bootstrap_streamlit_secrets(). Never commit.
+.streamlit/secrets.toml
 
 # ── Local state and transient data ─────────────────────────────────────────
 # These regenerate on every run. Don't ship them; Render starts fresh and

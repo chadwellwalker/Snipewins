@@ -41,6 +41,51 @@ HERE = Path(__file__).parent
 LOG_PATH = HERE / "last_scan.log"
 
 
+def _bootstrap_streamlit_secrets() -> None:
+    """OAUTH-BOOTSTRAP-2026-05-13: write .streamlit/secrets.toml from env
+    vars before Streamlit boots. This is how Streamlit's native OIDC
+    auth (st.login / st.user) reads its config — and we cannot commit
+    the real secrets to git, so they live in Render env vars and we
+    materialize them to disk at startup.
+
+    Required env vars (if any missing, Google sign-in is silently skipped
+    and the existing email+password flow continues to work):
+      - GOOGLE_OAUTH_CLIENT_ID
+      - GOOGLE_OAUTH_CLIENT_SECRET
+      - STREAMLIT_COOKIE_SECRET (any random ≥32-char string)
+
+    Optional:
+      - STREAMLIT_REDIRECT_URI (defaults to https://app.snipewins.com/oauth2callback)
+    """
+    client_id     = os.environ.get("GOOGLE_OAUTH_CLIENT_ID")
+    client_secret = os.environ.get("GOOGLE_OAUTH_CLIENT_SECRET")
+    cookie_secret = os.environ.get("STREAMLIT_COOKIE_SECRET")
+    redirect_uri  = os.environ.get(
+        "STREAMLIT_REDIRECT_URI",
+        "https://app.snipewins.com/oauth2callback",
+    )
+    if not (client_id and client_secret and cookie_secret):
+        print("[OAUTH] Google sign-in env vars not set, skipping secrets.toml")
+        return
+    secrets_dir  = HERE / ".streamlit"
+    secrets_dir.mkdir(parents=True, exist_ok=True)
+    secrets_file = secrets_dir / "secrets.toml"
+    # Stay alphabetically organized — Streamlit reads the file as TOML and
+    # doesn't care about ordering, but it's easier to debug.
+    content = (
+        '[auth]\n'
+        f'redirect_uri  = "{redirect_uri}"\n'
+        f'cookie_secret = "{cookie_secret}"\n'
+        '\n'
+        '[auth.google]\n'
+        f'client_id            = "{client_id}"\n'
+        f'client_secret        = "{client_secret}"\n'
+        'server_metadata_url  = "https://accounts.google.com/.well-known/openid-configuration"\n'
+    )
+    secrets_file.write_text(content, encoding="utf-8")
+    print(f"[OAUTH] wrote {secrets_file} for Google sign-in (redirect_uri={redirect_uri})")
+
+
 def _resolve_streamlit_command() -> List[str]:
     """Locate streamlit. Prefer `python -m streamlit run` for portability.
 
@@ -66,6 +111,9 @@ def _resolve_streamlit_command() -> List[str]:
 
 
 def main(argv: List[str]) -> int:
+    # Materialize Streamlit's OIDC secrets.toml from env vars before
+    # spawning Streamlit. Idempotent (overwrites previous file each boot).
+    _bootstrap_streamlit_secrets()
     cmd = _resolve_streamlit_command() + argv
     # Truncate / open the log fresh for this run.
     try:

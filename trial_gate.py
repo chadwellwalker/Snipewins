@@ -63,6 +63,35 @@ def enforce_gate(st) -> None:
 
     qp = _read_query_params(st)
 
+    # ── ROUTE -1 (top priority): OIDC / Google sign-in.  GOOGLE-OAUTH-2026-05-13
+    # If Streamlit's native auth says the user is logged in (st.user.is_logged_in
+    # becomes True after a successful Google round-trip), trust that email,
+    # auto-provision an account if needed, and start the trial. This makes
+    # "Sign in with Google" feel like a one-click flow even for first-timers.
+    # Wrapped in try/except because st.user only exists when secrets.toml is
+    # configured — without it, Streamlit raises AttributeError.
+    try:
+        _u = getattr(st, "user", None)
+        if _u is not None and getattr(_u, "is_logged_in", False):
+            google_email = (getattr(_u, "email", "") or "").strip().lower()
+            if google_email and "@" in google_email:
+                # If our store has no record of this email, create one.
+                # Password is None — they sign in via Google, no password
+                # needed. start_trial_now is idempotent so existing trials
+                # don't reset.
+                if not trial_accounts.get_user(google_email):
+                    trial_accounts.signup_email(google_email, password=None)
+                    trial_accounts.start_trial_now(google_email)
+                # Set session if not already (also pins ?s= for refresh).
+                if st.session_state.get(SS_EMAIL) != google_email:
+                    st.session_state[SS_EMAIL] = google_email
+                    _persist_session_in_url(st, trial_accounts, google_email)
+                    st.rerun()
+    except Exception as _oidc_err:
+        # Failure mode: secrets.toml missing or malformed. Don't crash the
+        # gate — silently fall back to email+password flow.
+        print(f"[OIDC_GATE_ERR] {type(_oidc_err).__name__}: {str(_oidc_err)[:140]}")
+
     # ── ROUTE 0: URL session-token restore. Streamlit's session_state dies
     # on every browser refresh (websocket reconnect). If we don't restore
     # auth from a durable handle in the URL, every refresh logs the user
@@ -336,6 +365,25 @@ def _render_login_or_signup_page(st) -> None:
     )
     if err_msg:
         st.error(err_msg)
+
+    # ── Google sign-in button. GOOGLE-OAUTH-2026-05-13 ─────────────────
+    # Only show if Streamlit's native OIDC is configured (st.user exists)
+    # AND we've got a [auth.google] section in secrets.toml (st.login won't
+    # raise AttributeError). We can't perfectly detect the latter without
+    # trying, so we just try and catch in the handler. The button calls
+    # st.login("google") which redirects to Google, then back to /oauth2callback,
+    # then to /. enforce_gate's ROUTE -1 handles the post-return state.
+    if _oidc_is_available(st):
+        _render_google_signin_button(st, mode_label="Continue with Google")
+        st.markdown(
+            "<div style='display:flex;align-items:center;gap:10px;"
+            "margin:12px 0 8px 0;color:#6b7280;font-size:12px;'>"
+            "<div style='flex:1;height:1px;background:rgba(148,163,184,0.15);'></div>"
+            "<span>or use email</span>"
+            "<div style='flex:1;height:1px;background:rgba(148,163,184,0.15);'></div>"
+            "</div>",
+            unsafe_allow_html=True,
+        )
 
     form_key = "sw_signup_form" if is_signup else "sw_login_form"
     with st.form(form_key, clear_on_submit=False):
@@ -770,6 +818,76 @@ def _set_query_params(st, params: dict) -> None:
             st.experimental_set_query_params(**params)
         except Exception:
             pass
+
+
+def _oidc_is_available(st) -> bool:
+    """Return True if Streamlit's native OIDC auth is wired up (i.e. we
+    can safely call st.login('google') without AttributeError). Checks for
+    the presence of st.user and a Google client in secrets — both required
+    for the flow to work end-to-end. GOOGLE-OAUTH-2026-05-13."""
+    try:
+        if not hasattr(st, "user"):
+            return False
+        # st.secrets access is dict-like and lazy; reading [auth][google]
+        # should not raise if it exists.
+        return bool(
+            "auth" in st.secrets
+            and "google" in st.secrets["auth"]
+            and st.secrets["auth"]["google"].get("client_id")
+        )
+    except Exception:
+        return False
+
+
+def _render_google_signin_button(st, mode_label: str = "Sign in with Google") -> None:
+    """Render the brand-correct "Sign in with Google" button. Calls
+    st.login('google') on click — Streamlit handles the OAuth redirect
+    to Google and back to /oauth2callback. GOOGLE-OAUTH-2026-05-13."""
+    # Native Streamlit button styling won't match Google's brand guidelines
+    # exactly, but it's close enough for launch. The four-color G logo
+    # is inline SVG so we don't load an external asset.
+    google_g_svg = (
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" '
+        'style="width:20px;height:20px;flex-shrink:0;">'
+        '<path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3c-1.6 4.7-6.1 8-11.3 8'
+        '-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 5.1 29.3 3 24 3'
+        '11.4 3 1 13.4 1 26s10.4 23 23 23 23-10.4 23-23c0-1.5-.2-3-.4-4.5z"/>'
+        '<path fill="#FF3D00" d="M3.2 14.7l6.6 4.8C11.6 15.1 17.4 12 24 12c3.1 0 5.8 1.2 7.9 3.1'
+        'l5.7-5.7C34 5.1 29.3 3 24 3 16.3 3 9.7 7.4 6.3 13.7l-3.1 1z"/>'
+        '<path fill="#4CAF50" d="M24 45c5.2 0 10-2 13.6-5.3l-6.3-5.3c-2 1.4-4.6 2.3-7.3 2.3'
+        '-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.6 41.4 16.3 45 24 45z"/>'
+        '<path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.2 4.2-4 5.5l6.3 5.3'
+        'C40.9 36.9 45 32 45 26c0-1.5-.2-3-.4-4.5z"/>'
+        '</svg>'
+    )
+    # Wrap st.button to look like a real Google button. We can't fully
+    # restyle a Streamlit button to include inline SVG (button content is
+    # text-only), so we use st.markdown for the visual and overlay a
+    # transparent st.button for the click handler. Simpler approach: just
+    # render a styled Streamlit button — slightly less polished but works.
+    _, mid, _ = st.columns([0.05, 1, 0.05])
+    with mid:
+        st.markdown(
+            f"<div style='display:flex;align-items:center;justify-content:center;"
+            f"gap:10px;padding:10px 16px;background:#ffffff;border:1px solid #dadce0;"
+            f"border-radius:10px;font-family:-apple-system,Roboto,Inter,sans-serif;"
+            f"font-weight:500;color:#3c4043;font-size:14px;margin-bottom:6px;'>"
+            f"{google_g_svg}<span>{mode_label}</span></div>",
+            unsafe_allow_html=True,
+        )
+        if st.button(
+            "Continue with Google",
+            key="sw_oidc_google_login_btn",
+            use_container_width=True,
+            type="secondary",
+        ):
+            try:
+                st.login("google")
+            except Exception as _login_err:
+                print(f"[OIDC_LOGIN_ERR] {type(_login_err).__name__}: {str(_login_err)[:140]}")
+                st.error(
+                    "Google sign-in is temporarily unavailable. Use email + password below."
+                )
 
 
 def _persist_session_in_url(st, trial_accounts, email: str) -> None:
