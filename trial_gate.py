@@ -63,6 +63,19 @@ def enforce_gate(st) -> None:
 
     qp = _read_query_params(st)
 
+    # ── LOGIN-LINK-2026-05-14: the landing page's "Log in" nav link points
+    # at ?login=1 so returning members land directly on the sign-in form
+    # instead of the default signup form. Set the gate mode, then strip the
+    # param so the in-page signup/login toggle button still works on later
+    # reruns (if ?login=1 stuck around, every rerun would re-force login
+    # mode and the toggle would be dead).
+    if "login" in qp and qp["login"]:
+        st.session_state["sw_gate_mode"] = "login"
+        try:
+            del st.query_params["login"]
+        except Exception:
+            pass
+
     # ── ROUTE -2 (top priority): the Google anchor button was clicked.
     # We intercept the ?google_login=1 query param here and fire
     # st.login("google"), which kicks Streamlit's OIDC redirect. Doing the
