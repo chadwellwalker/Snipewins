@@ -63,6 +63,17 @@ def enforce_gate(st) -> None:
 
     qp = _read_query_params(st)
 
+    # ── ROUTE 0: URL session-token restore. Streamlit's session_state dies
+    # on every browser refresh (websocket reconnect). If we don't restore
+    # auth from a durable handle in the URL, every refresh logs the user
+    # out — and worse, when the trial timer hits 0 and the iframe reloads
+    # the page, the user ends up on the signup screen instead of the
+    # paywall. SESSION-TOKEN-2026-05-13.
+    if "s" in qp and qp["s"] and not st.session_state.get(SS_EMAIL):
+        restored = trial_accounts.find_email_by_session_token(str(qp["s"]))
+        if restored:
+            st.session_state[SS_EMAIL] = restored
+
     # ── ROUTE 1: magic link click (?token=xyz) — used for password reset
     #            and as a fallback for users who forgot their password ───
     if "token" in qp and qp["token"]:
@@ -190,6 +201,7 @@ def _render_set_new_password_after_magic(st) -> None:
         trial_accounts.start_trial_now(email)
         st.session_state[SS_EMAIL] = email
         st.session_state.pop("sw_pending_password_set_email", None)
+        _persist_session_in_url(st, trial_accounts, email)
         st.rerun()
 
 
@@ -454,6 +466,7 @@ def _handle_email_password_submit(st, trial_accounts, email: str, password: str)
         if trial_accounts.validate_password(email, password):
             st.session_state[SS_EMAIL] = email
             _clear_query_params(st)
+            _persist_session_in_url(st, trial_accounts, email)
             st.rerun()
         else:
             st.error(
@@ -474,6 +487,7 @@ def _handle_email_password_submit(st, trial_accounts, email: str, password: str)
     trial_accounts.start_trial_now(email)
     st.session_state[SS_EMAIL] = email
     _clear_query_params(st)
+    _persist_session_in_url(st, trial_accounts, email)
     st.rerun()
 
 
@@ -715,6 +729,23 @@ def _set_query_params(st, params: dict) -> None:
             st.experimental_set_query_params(**params)
         except Exception:
             pass
+
+
+def _persist_session_in_url(st, trial_accounts, email: str) -> None:
+    """Pin a session token to the URL via `?s=<token>` so the user stays
+    logged in across browser refreshes. Streamlit's session_state dies on
+    every websocket reconnect; this is the durable handle the gate uses
+    to restore login (see ROUTE 0 in enforce_gate). Rotates the token on
+    each successful auth so a stale shared URL goes dead after the next
+    login. Silent no-op on any failure — we'd rather show the dashboard
+    than block the user from progressing. SESSION-TOKEN-2026-05-13."""
+    try:
+        token = trial_accounts.create_session_token(email)
+        if not token:
+            return
+        st.query_params["s"] = token
+    except Exception as _exc:
+        print(f"[SESSION_TOKEN_SET_ERR] {type(_exc).__name__}: {str(_exc)[:140]}")
 
 
 # ── CSS — single source of truth for gate visual ──────────────────────────

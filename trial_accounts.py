@@ -38,7 +38,13 @@ from typing import Any, Dict, Optional
 
 
 HERE = Path(__file__).parent
-ACCOUNTS_FILE = HERE / "accounts.json"
+# PERSISTENT-STORE-2026-05-13: accounts.json path is configurable via
+# SNIPEWINS_ACCOUNTS_PATH env var so we can point it at a Render
+# persistent disk mount (e.g. /data/accounts.json) without code changes.
+# Without persistent storage, every Render restart wipes user accounts —
+# meaning the same email gets a fresh 10-minute trial after every deploy
+# or OOM. Render Standard supports persistent disks at $0.25/GB/mo.
+ACCOUNTS_FILE = Path(os.environ.get("SNIPEWINS_ACCOUNTS_PATH") or str(HERE / "accounts.json"))
 
 
 # ── Tunables ────────────────────────────────────────────────────────────────
@@ -47,6 +53,11 @@ TRIAL_SECONDS = 600                # 10 minutes — per landing page promise
 MAGIC_LINK_TTL_SECONDS = 86400     # 24h to click the email before token rots
 MAGIC_TOKEN_BYTES = 24             # 24 bytes → 32 url-safe chars; plenty
                                    # of entropy without ugly long URLs
+SESSION_TOKEN_BYTES = 32           # URL-pinned "remember me" token — used
+                                   # by the gate to restore login on
+                                   # browser refresh (Streamlit's
+                                   # session_state dies on websocket
+                                   # reconnect)
 
 # Status constants — single source of truth for what state a user is in
 STATUS_NOT_SIGNED_UP        = "not_signed_up"
@@ -258,6 +269,43 @@ def start_trial_now(email: str) -> bool:
     user["magic_token_used"] = True
     _save(data)
     return True
+
+
+def create_session_token(email: str) -> Optional[str]:
+    """Generate a URL-pinned session token so the user stays logged in
+    across browser refreshes. Streamlit's session_state dies on every
+    websocket reconnect (which is what a refresh causes), so we need a
+    durable handle the URL itself can carry. Stored on the user record;
+    the gate looks it up via `?s=<token>` on every request before falling
+    back to session_state.
+
+    Rotated on each successful auth so an old leaked URL stops working
+    once the user logs in fresh. Returns None if the email isn't registered.
+    SESSION-TOKEN-2026-05-13."""
+    em = _normalize_email(email)
+    data = _load()
+    user = data.get("users", {}).get(em)
+    if not user:
+        return None
+    token = secrets.token_urlsafe(SESSION_TOKEN_BYTES)
+    user["session_token"]            = token
+    user["session_token_created_ts"] = time.time()
+    _save(data)
+    return token
+
+
+def find_email_by_session_token(token: str) -> Optional[str]:
+    """Reverse-lookup an email from a session token. Returns None if the
+    token doesn't match any user. Constant-ish time because the user store
+    is dict-based; if we ever scale to enough users that O(n) scans matter
+    we'll add an index, but at launch volume (hundreds) this is fine."""
+    if not token:
+        return None
+    data = _load()
+    for em, user in (data.get("users") or {}).items():
+        if user.get("session_token") == token:
+            return em
+    return None
 
 
 def has_password(email: str) -> bool:
