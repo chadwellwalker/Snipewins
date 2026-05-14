@@ -357,10 +357,9 @@ def _render_login_or_signup_page(st) -> None:
 
     headline = "Start your trial" if is_signup else "Welcome back"
     subline = (
-        "Enter your email and pick a password. Returning members can use "
-        "the sign-in link below."
+        "10 minutes of full access. No card required."
         if is_signup else
-        "Enter the email and password you used when you signed up."
+        "Sign in to your SnipeWins account."
     )
     button_text = (
         "Start my 10-minute trial  →"
@@ -373,13 +372,16 @@ def _render_login_or_signup_page(st) -> None:
         "Your password"
     )
 
+    # AUTH-LAYOUT-V2-2026-05-13: rebuilt as a flat vertical column with
+    # no visible card. The previous floating-card-with-button-below-it
+    # looked stacked. Now the header sits flush above the auth controls
+    # so the whole thing reads as ONE auth surface.
     st.markdown(
-        f"<div class='sw-gate-shell'>"
-        f"<div class='sw-gate-card'>"
-        f"<div class='sw-gate-kicker'>SnipeWins</div>"
-        f"<h1 class='sw-gate-h1'>{headline}</h1>"
-        f"<p class='sw-gate-sub'>{subline}</p>"
-        f"</div></div>",
+        f"<div class='sw-auth-header'>"
+        f"<div class='sw-auth-kicker'>SnipeWins</div>"
+        f"<h1 class='sw-auth-h1'>{headline}</h1>"
+        f"<p class='sw-auth-sub'>{subline}</p>"
+        f"</div>",
         unsafe_allow_html=True,
     )
     if err_msg:
@@ -387,19 +389,14 @@ def _render_login_or_signup_page(st) -> None:
 
     # ── Google sign-in button. GOOGLE-OAUTH-2026-05-13 ─────────────────
     # Only show if Streamlit's native OIDC is configured (st.user exists)
-    # AND we've got a [auth.google] section in secrets.toml (st.login won't
-    # raise AttributeError). We can't perfectly detect the latter without
-    # trying, so we just try and catch in the handler. The button calls
-    # st.login("google") which redirects to Google, then back to /oauth2callback,
-    # then to /. enforce_gate's ROUTE -1 handles the post-return state.
+    # AND we've got a [auth.google] section in secrets.toml. The button
+    # is a styled <a href="?google_login=1"> — enforce_gate intercepts
+    # the param and fires st.login("google").
     if _oidc_is_available(st):
         _render_google_signin_button(st, mode_label="Continue with Google")
         st.markdown(
-            "<div style='display:flex;align-items:center;gap:10px;"
-            "margin:12px 0 8px 0;color:#6b7280;font-size:12px;'>"
-            "<div style='flex:1;height:1px;background:rgba(148,163,184,0.15);'></div>"
-            "<span>or use email</span>"
-            "<div style='flex:1;height:1px;background:rgba(148,163,184,0.15);'></div>"
+            "<div class='sw-auth-divider'>"
+            "<span></span><em>or use email</em><span></span>"
             "</div>",
             unsafe_allow_html=True,
         )
@@ -435,28 +432,31 @@ def _render_login_or_signup_page(st) -> None:
         _handle_email_password_submit(st, trial_accounts, em, pw)
 
     # Cross-link between the two modes + the forgot-password escape hatch.
-    # Streamlit's recommended way to flip session state on click is via a
-    # button (links don't trigger reruns reliably). Two tiny inline buttons
-    # to keep the layout tight.
-    _col_a, _col_b = st.columns(2)
-    with _col_a:
-        if is_signup:
-            if st.button("Already have an account? Sign in", key="sw_gate_to_login", use_container_width=True):
-                st.session_state["sw_gate_mode"] = "login"
-                st.rerun()
-        else:
-            if st.button("Don't have an account? Sign up", key="sw_gate_to_signup", use_container_width=True):
-                st.session_state["sw_gate_mode"] = "signup"
-                st.rerun()
-    with _col_b:
-        # Forgot-password link only matters on the login screen, but it's
-        # cheap to keep visible on both so the user always has the escape.
-        st.markdown(
-            "<a href='?forgot=1' style='display:block;text-align:center;"
-            "padding:10px;color:#60a5fa;font-size:13px;text-decoration:none;'>"
-            "Forgot your password?</a>",
-            unsafe_allow_html=True,
-        )
+    # Wrapped in spacer columns so the row visually aligns with the 460px
+    # form + Google button width instead of sprawling across the viewport.
+    # AUTH-LAYOUT-V2-2026-05-13.
+    _spacer_l, _mid, _spacer_r = st.columns([1, 3, 1])
+    with _mid:
+        _col_a, _col_b = st.columns(2)
+        with _col_a:
+            if is_signup:
+                if st.button("Already have an account? Sign in", key="sw_gate_to_login", use_container_width=True):
+                    st.session_state["sw_gate_mode"] = "login"
+                    st.rerun()
+            else:
+                if st.button("Don't have an account? Sign up", key="sw_gate_to_signup", use_container_width=True):
+                    st.session_state["sw_gate_mode"] = "signup"
+                    st.rerun()
+        with _col_b:
+            # Forgot-password link only matters on the login screen, but
+            # it's cheap to keep visible on both so the user always has
+            # the escape.
+            st.markdown(
+                "<a href='?forgot=1' style='display:block;text-align:center;"
+                "padding:10px;color:#60a5fa;font-size:13px;text-decoration:none;'>"
+                "Forgot your password?</a>",
+                unsafe_allow_html=True,
+            )
 
 
 def _render_set_password_page(st, prefill_email: str) -> None:
@@ -914,6 +914,75 @@ def _inject_gate_css(st) -> None:
     st.markdown(
         """
 <style>
+/* AUTH-LAYOUT-V2-2026-05-13: flat-column auth screen — no floating card,
+   no stacked-looking boxes. Centered, max-width 460px, everything reads
+   as one continuous auth surface. */
+.sw-auth-header {
+    max-width: 460px;
+    margin: 24px auto 22px auto;
+    padding: 0 16px;
+    font-family: -apple-system, 'SF Pro Display', Inter, sans-serif;
+    text-align: center;
+}
+.sw-auth-kicker {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.20em;
+    color: #4ade80;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+}
+.sw-auth-h1 {
+    margin: 0 0 10px 0;
+    font-size: 32px;
+    font-weight: 700;
+    line-height: 1.15;
+    color: #fafafa;
+    letter-spacing: -0.02em;
+}
+.sw-auth-sub {
+    margin: 0;
+    font-size: 15px;
+    line-height: 1.5;
+    color: #9ca3af;
+}
+.sw-auth-divider {
+    max-width: 460px;
+    margin: 14px auto 8px auto;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: #6b7280;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.10em;
+}
+.sw-auth-divider span {
+    flex: 1;
+    height: 1px;
+    background: rgba(148,163,184,0.14);
+}
+.sw-auth-divider em {
+    font-style: normal;
+    font-weight: 600;
+    color: #6b7280;
+}
+/* Constrain the Streamlit form widget itself to the same width so the
+   inputs don't sprawl across the full viewport on wide screens. */
+[data-testid="stForm"] {
+    max-width: 460px !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+/* The two-column toggle/forgot row beneath the form. */
+.sw-auth-footer-row {
+    max-width: 460px;
+    margin: 4px auto 0 auto;
+}
+
 .sw-gate-shell {
     display: flex;
     align-items: center;
@@ -1329,7 +1398,7 @@ button[kind="secondary"]:hover {
     justify-content: center;
     gap: 12px;
     width: 100%;
-    max-width: 540px;
+    max-width: 460px;
     margin: 4px auto 0 auto;
     padding: 12px 18px;
     background: #ffffff;
