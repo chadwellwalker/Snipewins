@@ -550,7 +550,7 @@ def _render_paywall(st, email: str) -> None:
         f"<div class='sw-gate-kicker' style='color:#facc15;'>Trial ended</div>"
         f"<h1 class='sw-gate-h1'>Your 10 minutes is up.</h1>"
         f"<p class='sw-gate-sub'>Pick how you want to keep going. "
-        f"Two or three typical wins clear the founder rate.</p>"
+        f"The first two wins pay for the year.</p>"
         f""
         f"<div class='sw-paywall-row'>"
         f""
