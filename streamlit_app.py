@@ -16,9 +16,17 @@ from typing import Any, Dict, List, Optional
 import streamlit as st
 
 # ── Must be the very first Streamlit call ─────────────────────────────────────
+# FAVICON-2026-05-13: load the SnipeWins crosshair-and-bolt logo as the
+# browser tab favicon instead of the generic lightning emoji. Streamlit's
+# page_icon accepts a file path (relative to the app dir) or a PIL image.
+# The SVG sits next to streamlit_app.py and ships in the repo. Falls
+# back to the emoji if the file isn't found (e.g. fresh checkout).
+from pathlib import Path as _FaviconPath
+_FAVICON_FILE = _FaviconPath(__file__).parent / "favicon.svg"
+_FAVICON_ICON = str(_FAVICON_FILE) if _FAVICON_FILE.exists() else "⚡"
 st.set_page_config(
-    page_title="SNIPEWINS",
-    page_icon="⚡",
+    page_title="SnipeWins",
+    page_icon=_FAVICON_ICON,
     layout="wide",
     initial_sidebar_state="collapsed",
 )

@@ -341,21 +341,30 @@ def render_my_snipes(streamlit) -> None:
 
     snipes = snipes_store.list_snipes()
     if not snipes:
-        # EMPTY-STATE-2026-05-12: show the call-to-action AND a preview of
-        # what populated snipes look like. New trial users converting at 2x
-        # the rate when they see the dashboard's visual fidelity instead of
-        # just empty-state copy.
+        # EMPTY-STATE-2026-05-13: match the visual treatment from pool_view
+        # and bin_view empty states for consistency. Header explains what
+        # the page is for; sample cards below preview the populated state.
+        # New trial users converted at ~2x rate when they see real-looking
+        # cards in the empty state vs. text-only copy.
         st.markdown(
-            "<div style='margin:18px 0 12px 0;padding:24px 26px;"
-            "background:linear-gradient(135deg,#161616 0%,#0a0a0a 100%);"
-            "border-radius:14px;font-family:-apple-system,\\'SF Pro Display\\',Inter,sans-serif;"
-            "color:#fafafa;text-align:center;'>"
-            "<div style='font-size:18px;font-weight:600;color:#fafafa;margin-bottom:6px;'>"
-            "No snipes yet</div>"
-            "<div style='font-size:13px;color:#b0b0b0;line-height:1.5;'>"
+            "<div style='margin:18px 0 12px 0;padding:36px 28px;"
+            "background:linear-gradient(135deg,#141414 0%,#0a0a0a 100%);"
+            "border:1px solid rgba(148,163,184,0.10);"
+            "border-radius:16px;font-family:-apple-system,\\'SF Pro Display\\',Inter,sans-serif;"
+            "color:#fafafa;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,0.25);'>"
+            "<div style='font-size:11px;font-weight:700;letter-spacing:0.18em;"
+            "color:#4ade80;text-transform:uppercase;margin-bottom:14px;'>"
+            "<span style='display:inline-block;width:7px;height:7px;border-radius:50%;"
+            "background:#4ade80;margin-right:8px;vertical-align:middle;'></span>"
+            "Your Snipes</div>"
+            "<div style='font-size:20px;font-weight:700;color:#fafafa;margin-bottom:8px;"
+            "letter-spacing:-0.01em;'>"
+            "Build your kill list</div>"
+            "<div style='font-size:14px;color:#b0b0b0;line-height:1.55;max-width:480px;"
+            "margin:0 auto;'>"
             "Click <strong style='color:#facc15;'>⭐ Add to Snipes</strong> on any "
-            "card in the Ending Soon tab to start tracking it here. Here's what "
-            "this view looks like once you've added a few:"
+            "card in the Ending Soon or Steals feed to track it here. You'll see "
+            "the spread, your target bid, and a live countdown. Here's a preview:"
             "</div>"
             "</div>",
             unsafe_allow_html=True,

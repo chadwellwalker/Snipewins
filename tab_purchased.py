@@ -147,14 +147,33 @@ def render_purchased_tab() -> None:
     )
 
     if df.empty:
+        # EMPTY-STATE-2026-05-13: match the visual treatment from
+        # pool_view / bin_view / snipes_view empty states for visual
+        # consistency across all tabs. Auto-Buyer reference removed —
+        # it's hidden from the user UI per the May 6 cleanup. Users
+        # mark wins manually from the My Snipes tab.
         st.markdown(
             """
-<div style="background:#0d0d0d;border:1px dashed #1a1a1a;border-radius:8px;
-     padding:40px 24px;text-align:center;font-family:Inter,sans-serif;margin:8px 0 24px 0;">
-  <div style="font-size:13px;font-weight:600;color:#6b7280;margin-bottom:8px;">No purchases yet</div>
-  <div style="font-size:11px;color:#374151;line-height:1.6;">
-    Start the Auto-Buyer or use the Ending Soon sniper to buy cards.<br>
-    Successful purchases will appear here automatically.
+<div style="margin:18px 0 24px 0;padding:36px 28px;
+     background:linear-gradient(135deg,#141414 0%,#0a0a0a 100%);
+     border:1px solid rgba(148,163,184,0.10);border-radius:16px;
+     font-family:-apple-system,'SF Pro Display',Inter,sans-serif;
+     color:#fafafa;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,0.25);">
+  <div style="font-size:11px;font-weight:700;letter-spacing:0.18em;
+              color:#4ade80;text-transform:uppercase;margin-bottom:14px;">
+    <span style="display:inline-block;width:7px;height:7px;border-radius:50%;
+                 background:#4ade80;margin-right:8px;vertical-align:middle;"></span>
+    Purchased
+  </div>
+  <div style="font-size:20px;font-weight:700;color:#fafafa;margin-bottom:8px;
+              letter-spacing:-0.01em;">
+    No wins logged yet
+  </div>
+  <div style="font-size:14px;color:#b0b0b0;line-height:1.55;max-width:460px;
+              margin:0 auto;">
+    When you win an eBay auction or buy a Steal, head to <strong style="color:#fafafa;">My Snipes</strong>,
+    click the card, and mark it Won. Your ROI history and best deals
+    will populate here automatically.
   </div>
 </div>
 """,
