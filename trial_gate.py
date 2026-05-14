@@ -516,47 +516,88 @@ def _render_check_inbox_page(st, email: str) -> None:
 def _render_paywall(st, email: str) -> None:
     """The 10-minute clock has run out. Show the upgrade options.
 
+    PAYWALL-V2-2026-05-13: rebuilt for conversion. Adds BEST VALUE pill,
+    feature checklists, savings math, and risk reversal. The CTAs are
+    real buttons (no underline) with stronger hover/active states.
+
     Two CTAs, two separate Stripe Payment Links:
         - $99/year founder rate (headline conversion goal, normally $228)
         - $29/month with 7-day free trial (gentler ramp for the hesitant)
-
-    Each button reads from its own env var so they can be swapped from
-    test → live independently. If a URL isn't set the button no-ops.
     """
     _inject_gate_css(st)
     checkout_annual = STRIPE_CHECKOUT_URL or "#"
     checkout_trial  = STRIPE_TRIAL_CHECKOUT_URL or "#"
+    # Features common to both tiers — pulled into a list so the Founder
+    # card and Monthly card show identical value (only price/commitment
+    # differs). Keeps the user from feeling like they're sacrificing
+    # something when they pick monthly.
+    _features = [
+        "Every auction ending in the next 24h",
+        "Target bid recommendations on every card",
+        "Steals tab (BIN priced under market)",
+        "Full comp transparency",
+    ]
+    _features_html_annual = "".join(
+        f"<li>{f}</li>" for f in _features + ["Founder rate locked in for life"]
+    )
+    _features_html_monthly = "".join(
+        f"<li>{f}</li>" for f in _features + ["Cancel anytime in the first 7 days, $0"]
+    )
+
     st.markdown(
         f"<div class='sw-gate-shell'>"
-        f"<div class='sw-gate-card'>"
+        f"<div class='sw-gate-card sw-paywall-card-wide'>"
         f"<div class='sw-gate-kicker' style='color:#facc15;'>Trial ended</div>"
         f"<h1 class='sw-gate-h1'>Your 10 minutes is up.</h1>"
-        f"<p class='sw-gate-sub'>Hope you saw a card worth bidding on. "
-        f"Pick how you want to keep going:</p>"
+        f"<p class='sw-gate-sub'>Pick how you want to keep going. "
+        f"Two or three typical wins clear the founder rate.</p>"
         f""
         f"<div class='sw-paywall-row'>"
+        f""
+        # ─── Founder card (recommended) ───────────────────────────────
         f"<div class='sw-paywall-option sw-paywall-recommend'>"
-        f"<div class='sw-paywall-tag'>Founder rate</div>"
+        f"<div class='sw-paywall-best-pill'>BEST VALUE</div>"
+        f"<div class='sw-paywall-tag'>Founder rate · Annual</div>"
         f"<div class='sw-paywall-price'>$99<span>/year</span></div>"
-        f"<div class='sw-paywall-detail'>"
-        f"<span style='text-decoration:line-through;color:#666;'>Normally $228/yr.</span> "
-        f"Locked in for life as a founder. Two or three typical wins clear it.</div>"
+        f"<div class='sw-paywall-strike-row'>"
+        f"<span class='sw-paywall-strike'>$228/yr</span>"
+        f"<span class='sw-paywall-save'>Save $129</span>"
+        f"</div>"
+        f"<ul class='sw-paywall-features'>{_features_html_annual}</ul>"
         f"<a href='{checkout_annual}' target='_top' class='sw-paywall-cta sw-paywall-cta-primary'>"
-        f"Lock in $99/year  →</a>"
+        f"Lock in $99/year</a>"
+        f"<div class='sw-paywall-fineprint'>"
+        f"One-time charge. Renews at the same $99 rate every year for as long as you stay subscribed."
+        f"</div>"
         f"</div>"
         f""
+        # ─── Monthly card (alt path for the hesitant) ──────────────────
         f"<div class='sw-paywall-option'>"
         f"<div class='sw-paywall-tag'>Monthly</div>"
         f"<div class='sw-paywall-price'>$29<span>/month</span></div>"
-        f"<div class='sw-paywall-detail'>Free for 7 days, card required. "
-        f"Cancel anytime in the first week, no charge.</div>"
+        f"<div class='sw-paywall-strike-row'>"
+        f"<span class='sw-paywall-monthly-trial'>7 days free</span>"
+        f"</div>"
+        f"<ul class='sw-paywall-features'>{_features_html_monthly}</ul>"
         f"<a href='{checkout_trial}' target='_top' class='sw-paywall-cta sw-paywall-cta-secondary'>"
-        f"Start 7-day trial  →</a>"
+        f"Start 7-day free trial</a>"
+        f"<div class='sw-paywall-fineprint'>"
+        f"Card required. $0 charged for 7 days. Cancel anytime."
+        f"</div>"
         f"</div>"
         f"</div>"
         f""
-        f"<div class='sw-gate-footnote' style='margin-top:24px;'>"
-        f"Trial associated with <strong>{email}</strong>. Already upgraded? "
+        # ─── Risk-reversal row beneath both cards ──────────────────────
+        f"<div class='sw-paywall-reassurance'>"
+        f"<span>Secure checkout via Stripe</span>"
+        f"<span>·</span>"
+        f"<span>Cancel anytime</span>"
+        f"<span>·</span>"
+        f"<span>One subscription, all features</span>"
+        f"</div>"
+        f""
+        f"<div class='sw-gate-footnote' style='margin-top:18px;'>"
+        f"Trial linked to <strong>{email}</strong>. Already upgraded? "
         f"<a href='?refresh=1' style='color:#60a5fa;'>Refresh your access</a>."
         f"</div>"
         f"</div></div>",
@@ -804,15 +845,22 @@ def _inject_gate_css(st) -> None:
     color: #888;
     text-align: center;
 }
+/* PAYWALL-V2-2026-05-13: card layout, button styling, value-stack list. */
+.sw-paywall-card-wide {
+    max-width: 720px !important;
+}
 .sw-paywall-row {
-    display: flex;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
     gap: 14px;
-    flex-wrap: wrap;
-    margin-top: 18px;
+    margin-top: 22px;
+}
+@media (max-width: 640px) {
+    .sw-paywall-row { grid-template-columns: 1fr; }
 }
 .sw-paywall-option {
-    flex: 1 1 220px;
-    padding: 22px 20px;
+    position: relative;
+    padding: 26px 22px 22px;
     background: #1c1c1c;
     border: 1px solid rgba(148,163,184,0.10);
     border-radius: 14px;
@@ -820,53 +868,161 @@ def _inject_gate_css(st) -> None:
     flex-direction: column;
 }
 .sw-paywall-recommend {
-    border: 1px solid rgba(74,222,128,0.40);
-    background: linear-gradient(180deg, rgba(74,222,128,0.06) 0%, #1c1c1c 100%);
+    border: 1px solid rgba(74,222,128,0.45);
+    background: linear-gradient(180deg, rgba(74,222,128,0.08) 0%, #161616 60%);
+    box-shadow: 0 0 24px rgba(74,222,128,0.10);
+}
+.sw-paywall-best-pill {
+    position: absolute;
+    top: -10px;
+    right: 18px;
+    background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);
+    color: #0a0a0a;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.10em;
+    padding: 4px 10px;
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(74,222,128,0.30);
 }
 .sw-paywall-tag {
     font-size: 10px;
     letter-spacing: 0.16em;
     text-transform: uppercase;
     color: #888;
-    margin-bottom: 8px;
+    margin-bottom: 10px;
+    font-weight: 700;
 }
 .sw-paywall-recommend .sw-paywall-tag { color: #4ade80; }
 .sw-paywall-price {
-    font-size: 32px;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 38px;
     font-weight: 700;
     color: #fafafa;
-    margin-bottom: 6px;
-    line-height: 1.1;
+    margin-bottom: 4px;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
 }
 .sw-paywall-price span {
+    font-family: -apple-system, 'SF Pro Display', Inter, sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    color: #888;
+    margin-left: 2px;
+}
+.sw-paywall-strike-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+    min-height: 20px;
+}
+.sw-paywall-strike {
+    color: #555;
+    text-decoration: line-through;
     font-size: 14px;
     font-weight: 500;
-    color: #b0b0b0;
 }
-.sw-paywall-detail {
-    font-size: 13px;
-    color: #b0b0b0;
-    line-height: 1.45;
-    margin-bottom: 16px;
+.sw-paywall-save {
+    background: rgba(74,222,128,0.14);
+    color: #4ade80;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    padding: 3px 8px;
+    border-radius: 5px;
+    text-transform: uppercase;
+}
+.sw-paywall-monthly-trial {
+    background: rgba(96,165,250,0.14);
+    color: #60a5fa;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    padding: 3px 8px;
+    border-radius: 5px;
+    text-transform: uppercase;
+}
+.sw-paywall-features {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 20px 0;
     flex: 1;
 }
+.sw-paywall-features li {
+    padding: 7px 0 7px 22px;
+    position: relative;
+    font-size: 13.5px;
+    color: #d4d4d8;
+    line-height: 1.4;
+}
+.sw-paywall-features li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 9px;
+    width: 14px;
+    height: 14px;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path fill='%234ade80' d='M13.485 3.515a1 1 0 0 1 0 1.414l-7.071 7.071a1 1 0 0 1-1.414 0L1.515 8.515a1 1 0 1 1 1.414-1.414L5.707 9.88l6.364-6.364a1 1 0 0 1 1.414 0z'/></svg>");
+    background-size: contain;
+    background-repeat: no-repeat;
+}
 .sw-paywall-cta {
-    display: inline-block;
-    padding: 12px 18px;
+    display: block;
+    padding: 14px 18px;
     border-radius: 10px;
     font-weight: 700;
-    font-size: 14px;
+    font-size: 15px;
     text-align: center;
-    text-decoration: none;
+    text-decoration: none !important;
+    transition: transform 0.12s ease, background-color 0.12s ease, box-shadow 0.12s ease;
+    cursor: pointer;
+    border: none;
+    letter-spacing: -0.01em;
 }
 .sw-paywall-cta-primary {
-    background: #4ade80;
-    color: #0a0a0a;
+    background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);
+    color: #0a0a0a !important;
+    box-shadow: 0 4px 16px rgba(74,222,128,0.22);
+}
+.sw-paywall-cta-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 24px rgba(74,222,128,0.32);
+    filter: brightness(1.05);
 }
 .sw-paywall-cta-secondary {
     background: transparent;
-    color: #fafafa;
+    color: #fafafa !important;
     border: 1px solid rgba(148,163,184,0.30);
+}
+.sw-paywall-cta-secondary:hover {
+    transform: translateY(-1px);
+    border-color: rgba(148,163,184,0.55);
+    background: rgba(148,163,184,0.04);
+}
+.sw-paywall-fineprint {
+    margin-top: 12px;
+    font-size: 11.5px;
+    color: #6b7280;
+    text-align: center;
+    line-height: 1.4;
+}
+.sw-paywall-reassurance {
+    margin-top: 22px;
+    padding: 14px 16px;
+    background: rgba(148,163,184,0.04);
+    border: 1px solid rgba(148,163,184,0.08);
+    border-radius: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    font-size: 12px;
+    color: #9ca3af;
+}
+.sw-paywall-reassurance > span:nth-child(even) {
+    color: #4b5563;
 }
 .sw-trial-badge {
     display: inline-flex;
