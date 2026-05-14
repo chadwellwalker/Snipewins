@@ -51,6 +51,21 @@ DEFAULT_LOOP_INTERVAL_SECS = 1800  # 30 minutes — twice as fresh as auctions
 MAX_ITEMS_PER_SPEC         = 50    # eBay returns up to 200; 50 is the sweet
                                    # spot between coverage and API budget.
 
+# QUOTA-SIZING-2026-05-14: the BIN scanner used to run ALL specs from
+# player_hub (600+), uncapped, every 30 minutes. Against a 5,000/day
+# eBay Browse quota that's ~28,800 calls/day from BIN alone — it blew
+# the entire daily budget in ~2 hours, then spent the rest of the day
+# churning 429s (flat 30s pause per spec × 600 specs = ~5 hours of dead
+# work). Two fixes:
+#   1. MAX_SPECS_PER_CYCLE — cap the scan to the hottest N specs. Specs
+#      are tier-sorted (whatnot_tier 1=instant sellers) before the slice
+#      so the cap means "the N most-wanted combos," not "an arbitrary N."
+#   2. RATE_LIMIT_ABORT_THRESHOLD — once we hit N consecutive rate-limited
+#      specs, the daily quota is clearly exhausted; abort the whole cycle
+#      instead of grinding the remaining specs at 30s each.
+MAX_SPECS_PER_CYCLE        = 80    # tier-sorted; covers T1 + top T2
+RATE_LIMIT_ABORT_THRESHOLD = 6     # consecutive 429'd specs → abort cycle
+
 
 # ── Persistence ─────────────────────────────────────────────────────────────
 
@@ -312,7 +327,36 @@ def fetch_and_update() -> Dict[str, Any]:
             "elapsed_seconds": round(time.time() - started, 1),
         }
 
-    print(f"[daily_bin_pool] built {len(specs)} BIN query specs", flush=True)
+    _specs_built = len(specs)
+
+    # QUOTA-SIZING-2026-05-14: tier-sort then cap. whatnot_tier 1 = instant
+    # sellers (the most-wanted cards in the hobby), 3 = steady long tail.
+    # Sorting ascending before the slice means MAX_SPECS_PER_CYCLE keeps the
+    # hottest combos and drops the long tail — which matches the product
+    # promise ("the most desired cards in the hobby"). The long tail can be
+    # picked up by a rotating-offset scan post-launch if it matters.
+    def _spec_tier(_spec: Dict[str, Any]) -> int:
+        _t = _spec.get("whatnot_tier")
+        if _t in (1, 2, 3):
+            return int(_t)
+        _tt = _spec.get("tracked_target") or {}
+        _pid = str(_tt.get("player_id") or "")
+        if _pid:
+            try:
+                return int(player_hub.get_whatnot_tier_for_player_id(_pid))
+            except Exception:
+                pass
+        return 3
+
+    specs.sort(key=_spec_tier)
+    if len(specs) > MAX_SPECS_PER_CYCLE:
+        specs = specs[:MAX_SPECS_PER_CYCLE]
+
+    print(
+        f"[daily_bin_pool] built {_specs_built} BIN query specs, "
+        f"scanning top {len(specs)} (tier-sorted, cap={MAX_SPECS_PER_CYCLE})",
+        flush=True,
+    )
 
     # Fetch each spec via the engine's existing BIN fetcher. We reuse the
     # engine's auth + throttle + parse logic so the API behavior matches
@@ -320,7 +364,11 @@ def fetch_and_update() -> Dict[str, Any]:
     all_rows: List[Dict[str, Any]] = []
     rate_limited = False
     failed_specs = 0
+    consecutive_rate_limited = 0   # QUOTA-SIZING-2026-05-14: early-abort counter
+    aborted_early = False
+    specs_attempted = 0
     for i, spec in enumerate(specs, start=1):
+        specs_attempted = i
         # BIN-FIX 2026-05-12: build_target_scan_query_specs doesn't stamp
         # `sport` on the spec, but _fetch_bin_for_spec needs it (was raising
         # KeyError on every spec → zero BIN cards in the pool). Hoist it
@@ -343,9 +391,31 @@ def fetch_and_update() -> Dict[str, Any]:
             continue
         if was_rate_limited:
             rate_limited = True
-            print(f"[daily_bin_pool] rate-limited at spec #{i}; pausing 30s")
+            consecutive_rate_limited += 1
+            # QUOTA-SIZING-2026-05-14: once we've hit RATE_LIMIT_ABORT_THRESHOLD
+            # specs in a row, the daily quota is exhausted — there is no point
+            # grinding the remaining specs at 30s each (that's the ~5-hour
+            # churn this fix exists to kill). Abort the cycle; the next
+            # scheduled cycle will retry against a (hopefully) refreshed quota.
+            if consecutive_rate_limited >= RATE_LIMIT_ABORT_THRESHOLD:
+                aborted_early = True
+                print(
+                    f"[daily_bin_pool] ABORT: {consecutive_rate_limited} consecutive "
+                    f"rate-limited specs at #{i}/{len(specs)} — daily quota looks "
+                    f"exhausted. Stopping this cycle instead of churning 429s.",
+                    flush=True,
+                )
+                break
+            print(
+                f"[daily_bin_pool] rate-limited at spec #{i} "
+                f"(consecutive={consecutive_rate_limited}/{RATE_LIMIT_ABORT_THRESHOLD}); "
+                f"pausing 30s"
+            )
             time.sleep(30.0)
             continue
+        # Successful (non-rate-limited) fetch — the quota window is healthy,
+        # so reset the consecutive counter.
+        consecutive_rate_limited = 0
         if items:
             all_rows.extend(items)
         if i % 25 == 0:
@@ -357,7 +427,9 @@ def fetch_and_update() -> Dict[str, Any]:
 
     print(
         f"[daily_bin_pool] fetch complete — {len(all_rows)} raw items from "
-        f"{len(specs)} specs ({failed_specs} failures, rate_limited={rate_limited})",
+        f"{specs_attempted}/{len(specs)} specs attempted "
+        f"({failed_specs} failures, rate_limited={rate_limited}, "
+        f"aborted_early={aborted_early})",
         flush=True,
     )
 
@@ -382,7 +454,11 @@ def fetch_and_update() -> Dict[str, Any]:
     pool["last_fetch_ts"]  = started
     pool["last_fetch_iso"] = datetime.fromtimestamp(started, tz=timezone.utc).isoformat(timespec="seconds")
     pool["last_fetch_meta"] = {
-        "specs_built":            int(len(specs)),
+        "specs_built":            int(_specs_built),
+        "specs_scanned":          int(len(specs)),
+        "specs_attempted":        int(specs_attempted),
+        "spec_cap":               int(MAX_SPECS_PER_CYCLE),
+        "aborted_early":          bool(aborted_early),
         "raw_items_returned":     int(len(all_rows)),
         "failed_specs":           int(failed_specs),
         "rate_limited":           bool(rate_limited),
@@ -402,12 +478,13 @@ def fetch_and_update() -> Dict[str, Any]:
         "updated":         merge_counts["updated"],
         "rejected":        merge_counts["rejected_by_chase_rules"],
         "stale_pruned":    stale_pruned,
+        "aborted_early":   aborted_early,
     }
     print(
         f"[daily_bin_pool] cycle done in {summary['elapsed_seconds']}s "
         f"— added={summary['added']} updated={summary['updated']} "
         f"rejected={summary['rejected']} stale_pruned={summary['stale_pruned']} "
-        f"pool_size={summary['items_after']}",
+        f"pool_size={summary['items_after']} aborted_early={aborted_early}",
         flush=True,
     )
     return summary
