@@ -711,19 +711,34 @@ def render_morning_briefing(streamlit, *, max_cards: int = 150) -> None:
     # aesthetic so the panel doesn't look broken before the first scan.
     # Single-line HTML to avoid Streamlit's indented-code-block parsing bug.
     if not items:
+        # USER-FACING-EMPTY-STATE-2026-05-13: previous copy told the user
+        # to "run python daily_pool.py in a separate terminal" — fine for
+        # local dev, terrible for actual customers. New copy mirrors the
+        # pulse indicator pattern from the landing's "Live" dot and tells
+        # the user what's happening and what to do (refresh).
         _empty_html = (
-            '<div style="margin:4px 0 18px 0;padding:32px 26px;'
+            '<div style="margin:4px 0 18px 0;padding:36px 28px;'
             'background:linear-gradient(135deg,#141414 0%,#0a0a0a 100%);'
+            'border:1px solid rgba(148,163,184,0.10);'
             'border-radius:16px;font-family:-apple-system,\'SF Pro Display\',Inter,sans-serif;'
             'color:#fafafa;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,0.25);">'
-            '<div style="font-size:11px;font-weight:600;letter-spacing:0.18em;'
-            'color:#4ade80;text-transform:uppercase;margin-bottom:12px;">Auction Pool</div>'
-            '<div style="font-size:18px;font-weight:600;color:#fafafa;margin-bottom:6px;">'
-            'Pool not built yet</div>'
-            '<div style="font-size:13px;color:#b0b0b0;line-height:1.5;">'
-            'Run <code style="background:rgba(148,163,184,0.12);padding:2px 6px;'
-            'border-radius:4px;">python daily_pool.py</code> in a separate terminal '
-            'to populate the next 24 hours of auctions.</div>'
+            '<div style="font-size:11px;font-weight:700;letter-spacing:0.18em;'
+            'color:#4ade80;text-transform:uppercase;margin-bottom:14px;">'
+            '<span style="display:inline-block;width:7px;height:7px;border-radius:50%;'
+            'background:#4ade80;margin-right:8px;vertical-align:middle;'
+            'box-shadow:0 0 0 0 rgba(74,222,128,0.6);animation:swPulse 1.6s ease-in-out infinite;"></span>'
+            'Scanning eBay</div>'
+            '<div style="font-size:20px;font-weight:700;color:#fafafa;margin-bottom:8px;'
+            'letter-spacing:-0.01em;">'
+            'Building your auction feed…</div>'
+            '<div style="font-size:14px;color:#b0b0b0;line-height:1.55;max-width:440px;'
+            'margin:0 auto;">'
+            "We're combing every relevant eBay auction ending in the next 24 hours "
+            'and pulling sold comps to grade each one. Your first batch of cards '
+            'arrives within a few minutes. Refresh the page to see new entries as '
+            'they land.</div>'
+            '<style>@keyframes swPulse{0%,100%{opacity:1;transform:scale(1)}'
+            '50%{opacity:0.45;transform:scale(0.82)}}</style>'
             '</div>'
         )
         st.markdown(_empty_html, unsafe_allow_html=True)

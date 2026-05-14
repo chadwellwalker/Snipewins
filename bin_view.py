@@ -432,22 +432,32 @@ def render_bin_radar(streamlit, *, max_cards: int = 30) -> None:
     pool = _load_pool()
     items: Dict[str, Any] = pool.get("items", {}) or {}
 
-    # Empty state
+    # Empty state — match the pool_view "scanning eBay" treatment so both
+    # tabs feel like part of the same product when they're empty.
     if not items:
         st.markdown(
-            "<div style='margin:4px 0 18px 0;padding:32px 26px;"
+            "<div style='margin:4px 0 18px 0;padding:36px 28px;"
             "background:linear-gradient(135deg,#161616 0%,#0a0a0a 100%);"
+            "border:1px solid rgba(148,163,184,0.10);"
             "border-radius:16px;font-family:-apple-system,\\'SF Pro Display\\',Inter,sans-serif;"
-            "color:#fafafa;text-align:center;'>"
-            "<div style='font-size:11px;font-weight:600;letter-spacing:0.18em;"
-            "color:#4ade80;text-transform:uppercase;margin-bottom:12px;'>Steals</div>"
-            "<div style='font-size:18px;font-weight:600;color:#fafafa;margin-bottom:6px;'>"
-            "No steals on the board yet</div>"
-            "<div style='font-size:13px;color:#b0b0b0;line-height:1.5;'>"
-            "The BIN scanner is scanning live listings now. Steals will appear "
-            "here as soon as it finds buy-it-now cards priced under market value. "
-            "First results usually land within 15 minutes of supervisor startup."
+            "color:#fafafa;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,0.25);'>"
+            "<div style='font-size:11px;font-weight:700;letter-spacing:0.18em;"
+            "color:#4ade80;text-transform:uppercase;margin-bottom:14px;'>"
+            "<span style='display:inline-block;width:7px;height:7px;border-radius:50%;"
+            "background:#4ade80;margin-right:8px;vertical-align:middle;"
+            "animation:swPulse 1.6s ease-in-out infinite;'></span>"
+            "Scanning Buy It Now</div>"
+            "<div style='font-size:20px;font-weight:700;color:#fafafa;margin-bottom:8px;"
+            "letter-spacing:-0.01em;'>"
+            "Hunting for steals…</div>"
+            "<div style='font-size:14px;color:#b0b0b0;line-height:1.55;max-width:440px;"
+            "margin:0 auto;'>"
+            "We're scanning live buy-it-now listings for cards priced under their "
+            "market value. Steals usually start landing here within 15 minutes. "
+            "Refresh the page to see new entries as they're found."
             "</div>"
+            "<style>@keyframes swPulse{0%,100%{opacity:1;transform:scale(1)}"
+            "50%{opacity:0.45;transform:scale(0.82)}}</style>"
             "</div>",
             unsafe_allow_html=True,
         )

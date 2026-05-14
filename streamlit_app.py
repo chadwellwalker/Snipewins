@@ -7875,6 +7875,37 @@ def _render_es_result_card(_row: Dict[str, Any], _view: Dict[str, Any], _idx: in
         )
 
 
+# BRAND-LOGO-2026-05-13: render the SnipeWins inline-SVG logo at the
+# very top of every page — gate pages, dashboard, paywall. Previously
+# the Streamlit nav bar was blank above the trial badge (the landing
+# page had a clear logo, the app didn't, so they felt disconnected).
+# Inline SVG matches the landing page wordmark exactly.
+st.markdown(
+    """
+<div style="display:flex;align-items:center;gap:11px;padding:14px 4px 6px 4px;
+            font-family:-apple-system,'SF Pro Display',Inter,sans-serif;">
+  <span style="width:34px;height:34px;display:inline-flex;align-items:center;
+               justify-content:center;flex-shrink:0;">
+    <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg"
+         style="width:100%;height:100%;display:block;">
+      <path d="M 36 9.5  A 23 23 0 0 1 54.5 28"   stroke="#4ade80" stroke-width="3.5" stroke-linecap="round"/>
+      <path d="M 54.5 36 A 23 23 0 0 1 36 54.5"   stroke="#4ade80" stroke-width="3.5" stroke-linecap="round"/>
+      <path d="M 28 54.5 A 23 23 0 0 1 9.5 36"    stroke="#4ade80" stroke-width="3.5" stroke-linecap="round"/>
+      <path d="M 9.5 28  A 23 23 0 0 1 28 9.5"    stroke="#4ade80" stroke-width="3.5" stroke-linecap="round"/>
+      <line x1="32" y1="3"  x2="32" y2="11" stroke="#4ade80" stroke-width="3" stroke-linecap="round"/>
+      <line x1="32" y1="53" x2="32" y2="61" stroke="#4ade80" stroke-width="3" stroke-linecap="round"/>
+      <line x1="3"  y1="32" x2="11" y2="32" stroke="#4ade80" stroke-width="3" stroke-linecap="round"/>
+      <line x1="53" y1="32" x2="61" y2="32" stroke="#4ade80" stroke-width="3" stroke-linecap="round"/>
+      <path d="M 38 13 L 22 32 L 30 32 L 25 51 L 42 30 L 34 30 Z" fill="#4ade80"/>
+    </svg>
+  </span>
+  <span style="font-weight:900;font-size:22px;letter-spacing:-0.022em;
+               line-height:1;color:#fafafa;">Snipe<span style="color:#4ade80;">Wins</span></span>
+</div>
+""",
+    unsafe_allow_html=True,
+)
+
 # TRIAL-GATE-2026-05-12: enforce the magic-link / 10-min trial / paywall
 # flow before any dashboard rendering. Returns normally if user is in
 # trial_active or paid state; calls st.stop() with a gate page (login,

@@ -720,10 +720,11 @@ def _set_query_params(st, params: dict) -> None:
 # ── CSS — single source of truth for gate visual ──────────────────────────
 
 def _inject_gate_css(st) -> None:
-    """Idempotent — markdown injection of the same CSS block is harmless."""
-    if st.session_state.get("_sw_gate_css_injected"):
-        return
-    st.session_state["_sw_gate_css_injected"] = True
+    """Inject on every call. The previous session-state guard skipped
+    re-injection across reruns, which made the CSS disappear after
+    st.rerun() (paywall rendered bare, primary buttons briefly flashed
+    Streamlit's default red). Streamlit's renderer dedupes identical
+    markdown blocks, so re-injecting is safe and cheap. CSS-2026-05-13."""
     st.markdown(
         """
 <style>
