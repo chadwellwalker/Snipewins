@@ -63,6 +63,25 @@ def enforce_gate(st) -> None:
 
     qp = _read_query_params(st)
 
+    # ── ROUTE -2 (top priority): the Google anchor button was clicked.
+    # We intercept the ?google_login=1 query param here and fire
+    # st.login("google"), which kicks Streamlit's OIDC redirect. Doing the
+    # redirect here keeps the click handler out of the form (no nested
+    # button-inside-button issues) and lets us render a brand-correct
+    # styled <a> instead of a Streamlit button. GOOGLE-OAUTH-2026-05-13.
+    if "google_login" in qp and qp["google_login"]:
+        try:
+            _clear_query_params(st)
+            st.login("google")
+            st.stop()
+        except Exception as _login_err:
+            print(f"[OIDC_LOGIN_ERR] {type(_login_err).__name__}: {str(_login_err)[:140]}")
+            st.session_state["sw_trial_error_msg"] = (
+                "Google sign-in is temporarily unavailable. Use email + password below."
+            )
+            _render_login_or_signup_page(st)
+            st.stop()
+
     # ── ROUTE -1 (top priority): OIDC / Google sign-in.  GOOGLE-OAUTH-2026-05-13
     # If Streamlit's native auth says the user is logged in (st.user.is_logged_in
     # becomes True after a successful Google round-trip), trust that email,
@@ -839,16 +858,16 @@ def _oidc_is_available(st) -> bool:
         return False
 
 
-def _render_google_signin_button(st, mode_label: str = "Sign in with Google") -> None:
-    """Render the brand-correct "Sign in with Google" button. Calls
-    st.login('google') on click — Streamlit handles the OAuth redirect
-    to Google and back to /oauth2callback. GOOGLE-OAUTH-2026-05-13."""
-    # Native Streamlit button styling won't match Google's brand guidelines
-    # exactly, but it's close enough for launch. The four-color G logo
-    # is inline SVG so we don't load an external asset.
+def _render_google_signin_button(st, mode_label: str = "Continue with Google") -> None:
+    """Render a single Google-brand sign-in button as a styled <a> anchor.
+    Clicking it navigates to ?google_login=1, which enforce_gate detects
+    and turns into st.login('google'). Doing it via an anchor instead of
+    st.button lets us match Google's brand guidelines (white pill, four-color
+    G logo, sentence case) without fighting Streamlit's button DOM.
+    GOOGLE-OAUTH-2026-05-13."""
     google_g_svg = (
         '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" '
-        'style="width:20px;height:20px;flex-shrink:0;">'
+        'style="width:18px;height:18px;flex-shrink:0;">'
         '<path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3c-1.6 4.7-6.1 8-11.3 8'
         '-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 5.1 29.3 3 24 3'
         '11.4 3 1 13.4 1 26s10.4 23 23 23 23-10.4 23-23c0-1.5-.2-3-.4-4.5z"/>'
@@ -860,34 +879,11 @@ def _render_google_signin_button(st, mode_label: str = "Sign in with Google") ->
         'C40.9 36.9 45 32 45 26c0-1.5-.2-3-.4-4.5z"/>'
         '</svg>'
     )
-    # Wrap st.button to look like a real Google button. We can't fully
-    # restyle a Streamlit button to include inline SVG (button content is
-    # text-only), so we use st.markdown for the visual and overlay a
-    # transparent st.button for the click handler. Simpler approach: just
-    # render a styled Streamlit button — slightly less polished but works.
-    _, mid, _ = st.columns([0.05, 1, 0.05])
-    with mid:
-        st.markdown(
-            f"<div style='display:flex;align-items:center;justify-content:center;"
-            f"gap:10px;padding:10px 16px;background:#ffffff;border:1px solid #dadce0;"
-            f"border-radius:10px;font-family:-apple-system,Roboto,Inter,sans-serif;"
-            f"font-weight:500;color:#3c4043;font-size:14px;margin-bottom:6px;'>"
-            f"{google_g_svg}<span>{mode_label}</span></div>",
-            unsafe_allow_html=True,
-        )
-        if st.button(
-            "Continue with Google",
-            key="sw_oidc_google_login_btn",
-            use_container_width=True,
-            type="secondary",
-        ):
-            try:
-                st.login("google")
-            except Exception as _login_err:
-                print(f"[OIDC_LOGIN_ERR] {type(_login_err).__name__}: {str(_login_err)[:140]}")
-                st.error(
-                    "Google sign-in is temporarily unavailable. Use email + password below."
-                )
+    st.markdown(
+        f"<a href='?google_login=1' target='_self' class='sw-google-btn'>"
+        f"{google_g_svg}<span>{mode_label}</span></a>",
+        unsafe_allow_html=True,
+    )
 
 
 def _persist_session_in_url(st, trial_accounts, email: str) -> None:
@@ -1296,7 +1292,13 @@ input:-webkit-autofill:active,
 
 /* Secondary button (the "Already have an account?" / "Don't have an
    account?" inline toggles below the form). Make them subtle so the
-   primary CTA stays the star, but still readable on dark background. */
+   primary CTA stays the star, but still readable on dark background.
+   GATE-BUTTON-CASE-FIX-2026-05-13: the main streamlit_app.py CSS applies
+   text-transform:uppercase + tight letter-spacing to all secondary buttons
+   (intended for the nav tabs at the top of the dashboard). On the auth
+   gate that turns "Already have an account? Sign in" into shouting.
+   Override case+letter-spacing+font-size here so the gate's secondary
+   buttons stay sentence case. */
 [data-testid="baseButton-secondary"],
 .stButton button[kind="secondary"],
 button[kind="secondary"] {
@@ -1304,13 +1306,55 @@ button[kind="secondary"] {
     color: #b0b0b0 !important;
     border: 1px solid rgba(148,163,184,0.20) !important;
     font-weight: 500 !important;
+    font-size: 13px !important;
+    text-transform: none !important;
+    letter-spacing: 0 !important;
     border-radius: 10px !important;
+    padding: 10px 14px !important;
 }
 [data-testid="baseButton-secondary"]:hover,
 button[kind="secondary"]:hover {
     color: #fafafa !important;
     border-color: rgba(148,163,184,0.40) !important;
     background-color: rgba(148,163,184,0.05) !important;
+}
+
+/* Google sign-in anchor button. GOOGLE-OAUTH-2026-05-13.
+   Mirrors Google's brand guidelines: white pill, four-color G logo on the
+   left, Roboto-like font in dark gray. Single source of truth — no
+   duplicate Streamlit button. */
+.sw-google-btn {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    width: 100%;
+    max-width: 540px;
+    margin: 4px auto 0 auto;
+    padding: 12px 18px;
+    background: #ffffff;
+    border: 1px solid #dadce0;
+    border-radius: 10px;
+    font-family: -apple-system, 'SF Pro Display', Roboto, Inter, sans-serif;
+    font-weight: 500;
+    color: #3c4043 !important;
+    font-size: 14px;
+    line-height: 1;
+    text-decoration: none !important;
+    transition: background-color 0.12s ease, box-shadow 0.12s ease, transform 0.08s ease;
+    cursor: pointer;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.10);
+}
+.sw-google-btn:hover {
+    background: #f6f8fa;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.18);
+    transform: translateY(-1px);
+}
+.sw-google-btn:active {
+    transform: translateY(0);
+}
+.sw-google-btn span {
+    color: #3c4043 !important;
 }
 </style>
 """,
