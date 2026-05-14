@@ -11504,11 +11504,15 @@ elif _active_page_id == "settings":
             except Exception:
                 _quota_status = "unknown"
                 _quota_color  = "#888888"
-            # Snipes count for the user's own context
+            # Snipes count for the user's own context. NOTE: this block
+            # lives in the now-removed Settings tab (dead code — active_page
+            # can never be "settings"), but keep the call signature correct
+            # in case Settings is ever resurrected. MULTI-TENANCY-2026-05-13.
             _snipes_count = 0
             try:
                 import snipes_store as _ss_health
-                _snipes_count = len(_ss_health.list_snipes() or [])
+                _ss_health_email = st.session_state.get("sw_trial_user_email")
+                _snipes_count = len(_ss_health.list_snipes(_ss_health_email) or [])
             except Exception:
                 pass
             _label_css = (

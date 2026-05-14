@@ -417,12 +417,17 @@ def _render_card_actions(streamlit, row: Dict[str, Any], item_id: str) -> None:
         st.caption(f"(snipes_store unavailable: {exc})")
         snipes_store = None
 
+    # MULTI-TENANCY-2026-05-13: snipes are per-user now. The logged-in
+    # email comes from session_state (set by trial_gate). Every
+    # snipes_store call is scoped to this email.
+    _user_email = st.session_state.get("sw_trial_user_email")
+
     # ── Action row: button + expander side-by-side ───────────────────────
     col_button, col_expander = st.columns([1, 2])
 
     with col_button:
         if snipes_store is not None:
-            already_sniped = snipes_store.is_sniped(item_id)
+            already_sniped = snipes_store.is_sniped(_user_email, item_id)
             btn_label = "✓ On snipes list" if already_sniped else "⭐ Add to Snipes"
             btn_disabled = already_sniped
             clicked = st.button(
@@ -432,7 +437,7 @@ def _render_card_actions(streamlit, row: Dict[str, Any], item_id: str) -> None:
                 use_container_width=True,
             )
             if clicked and not already_sniped:
-                snipe = snipes_store.add_snipe(row)
+                snipe = snipes_store.add_snipe(_user_email, row)
                 title_short = str(snipe.get("title") or "")[:60]
                 st.toast(f"Added to snipes: {title_short}", icon="⭐")
                 # Force a re-render so the button shows the new state

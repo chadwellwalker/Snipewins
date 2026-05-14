@@ -266,6 +266,10 @@ def _render_snipe_actions(streamlit, snipe: Dict[str, Any], snipes_store) -> Non
     item_id = str(snipe.get("item_id") or "")
     status  = str(snipe.get("status") or "active").lower()
 
+    # MULTI-TENANCY-2026-05-13: every snipes_store call is scoped to the
+    # logged-in user's email from session_state.
+    _user_email = st.session_state.get("sw_trial_user_email")
+
     if status == "active":
         # Active snipe — show Won / Lost / Remove
         col_won, col_lost, col_remove = st.columns(3)
@@ -282,7 +286,7 @@ def _render_snipe_actions(streamlit, snipe: Dict[str, Any], snipes_store) -> Non
                     help="The final amount you paid (so we can compute savings vs target).",
                 )
                 if st.button("Confirm Won", key=f"confirm_won_{item_id}", use_container_width=True):
-                    snipes_store.mark_snipe_resolved(item_id, "won", final_price=fp)
+                    snipes_store.mark_snipe_resolved(_user_email, item_id, "won", final_price=fp)
                     st.toast(f"Marked as won — paid ${fp:,.0f}", icon="🏆")
                     st.rerun()
         with col_lost:
@@ -297,14 +301,14 @@ def _render_snipe_actions(streamlit, snipe: Dict[str, Any], snipes_store) -> Non
                 )
                 if st.button("Confirm Lost", key=f"confirm_lost_{item_id}", use_container_width=True):
                     snipes_store.mark_snipe_resolved(
-                        item_id, "lost",
+                        _user_email, item_id, "lost",
                         final_price=fp if fp > 0 else None,
                     )
                     st.toast("Marked as lost", icon="📉")
                     st.rerun()
         with col_remove:
             if st.button("🗑 Remove", key=f"remove_{item_id}", use_container_width=True):
-                snipes_store.remove_snipe(item_id)
+                snipes_store.remove_snipe(_user_email, item_id)
                 st.toast("Removed from snipes", icon="🗑")
                 st.rerun()
     else:
@@ -312,12 +316,12 @@ def _render_snipe_actions(streamlit, snipe: Dict[str, Any], snipes_store) -> Non
         col_reactivate, col_remove, _ = st.columns(3)
         with col_reactivate:
             if st.button("↺ Reset to active", key=f"reset_{item_id}", use_container_width=True):
-                snipes_store.mark_snipe_resolved(item_id, "active")
+                snipes_store.mark_snipe_resolved(_user_email, item_id, "active")
                 st.toast("Reset to active", icon="↺")
                 st.rerun()
         with col_remove:
             if st.button("🗑 Remove", key=f"remove_{item_id}", use_container_width=True):
-                snipes_store.remove_snipe(item_id)
+                snipes_store.remove_snipe(_user_email, item_id)
                 st.toast("Removed from snipes", icon="🗑")
                 st.rerun()
 
@@ -335,11 +339,14 @@ def render_my_snipes(streamlit) -> None:
         st.error(f"snipes_store unavailable: {exc}")
         return
 
+    # MULTI-TENANCY-2026-05-13: scope the whole tab to the logged-in user.
+    _user_email = st.session_state.get("sw_trial_user_email")
+
     # ── ROI header ────────────────────────────────────────────────────────
-    roi = snipes_store.compute_roi()
+    roi = snipes_store.compute_roi(_user_email)
     _render_roi_header(st, roi)
 
-    snipes = snipes_store.list_snipes()
+    snipes = snipes_store.list_snipes(_user_email)
     if not snipes:
         # EMPTY-STATE-2026-05-13: match the visual treatment from pool_view
         # and bin_view empty states for consistency. Header explains what

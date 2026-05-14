@@ -209,15 +209,41 @@ def _hex_to_rgb(hex_color: str) -> str:
 
 # ── Strike Zone — BIN semantics ─────────────────────────────────────────────
 
+def _row_accepts_offers(row: Dict[str, Any]) -> bool:
+    """RECOMMENDED-OFFER-2026-05-13: True if this BIN listing accepts
+    eBay Best Offers. The scanner stamps `buying_options` from the Browse
+    API — a list like ["FIXED_PRICE"] or ["FIXED_PRICE","BEST_OFFER"].
+    Degrades safely: if the field is missing (old pool data, or the
+    scanner change hasn't deployed yet) this returns False and the UI
+    behaves exactly as before."""
+    opts = (row or {}).get("buying_options") or (row or {}).get("buyingOptions") or []
+    if isinstance(opts, str):
+        opts = [opts]
+    try:
+        return any(str(o or "").strip().upper() == "BEST_OFFER" for o in opts)
+    except Exception:
+        return False
+
+
 def _strike_zone_state(
     bin_price: float,
     target_bid: Optional[float],
+    accepts_offers: bool = False,
 ) -> Tuple[str, str, str]:
     """For BIN:
         STRIKE   — BIN price <= target (instant buy opportunity)
         CLOSE    — BIN price within 15% of target (negotiable via Best Offer)
-        WAIT     — BIN price > 15% above target
+        OFFER    — BIN price > 15% above target BUT the listing accepts
+                   Best Offers — actionable via a Recommended Offer
+        WAIT     — BIN price > 15% above target, no offers accepted
         PENDING  — no target yet
+
+    RECOMMENDED-OFFER-2026-05-13: the OFFER state is new. Before this, a
+    listing priced above target was just "WAIT" and effectively dead
+    inventory. Now, if the seller accepts offers, we surface it with a
+    Recommended Offer (= the target bid) — the user can still land a
+    good deal by negotiating. Expands felt-abundance, which the project
+    notes flag as a conversion lever.
     """
     if not target_bid or target_bid <= 0:
         return "PENDING", "#888888", "#fafafa"
@@ -228,6 +254,10 @@ def _strike_zone_state(
         return "STRIKE", "#4ade80", "#fff"
     if ratio <= 1.15:
         return "CLOSE", "#facc15", "#0a0a0a"
+    if accepts_offers:
+        # Above target, but negotiable. Blue to read as "actionable" without
+        # competing with STRIKE green or CLOSE amber.
+        return "OFFER", "#3b82f6", "#fff"
     return "WAIT", "#888888", "#fafafa"
 
 
@@ -251,10 +281,14 @@ def _render_card_actions(streamlit, row: Dict[str, Any], item_id: str) -> None:
         st.caption(f"(snipes_store unavailable: {exc})")
         snipes_store = None
 
+    # MULTI-TENANCY-2026-05-13: snipes are per-user — scope every call
+    # to the logged-in email from session_state.
+    _user_email = st.session_state.get("sw_trial_user_email")
+
     col_button, col_expander = st.columns([1, 2])
     with col_button:
         if snipes_store is not None:
-            already = snipes_store.is_sniped(item_id)
+            already = snipes_store.is_sniped(_user_email, item_id)
             btn_label = "✓ On snipes list" if already else "⭐ Add to Snipes"
             clicked = st.button(
                 btn_label,
@@ -263,7 +297,7 @@ def _render_card_actions(streamlit, row: Dict[str, Any], item_id: str) -> None:
                 use_container_width=True,
             )
             if clicked and not already:
-                snipe = snipes_store.add_snipe(row)
+                snipe = snipes_store.add_snipe(_user_email, row)
                 title_short = str(snipe.get("title") or "")[:60]
                 st.toast(f"Added to snipes: {title_short}", icon="⭐")
                 st.rerun()
@@ -468,6 +502,7 @@ def render_bin_radar(streamlit, *, max_cards: int = 30) -> None:
     pending_count = 0
     strike_count = 0
     close_count = 0
+    offer_count = 0   # RECOMMENDED-OFFER-2026-05-13
     for row in items.values():
         if not isinstance(row, dict):
             continue
@@ -478,11 +513,13 @@ def render_bin_radar(streamlit, *, max_cards: int = 30) -> None:
         discount = _discount_to_mv(bin_price, mv) if mv else None
         sort_key = -(discount or -1.0)   # negate so high discount = low sort key = top
         actionable.append((sort_key, row))
-        sz_label, _, _ = _strike_zone_state(bin_price, target)
+        sz_label, _, _ = _strike_zone_state(bin_price, target, _row_accepts_offers(row))
         if sz_label == "STRIKE":
             strike_count += 1
         elif sz_label == "CLOSE":
             close_count += 1
+        elif sz_label == "OFFER":
+            offer_count += 1
         elif sz_label == "PENDING":
             pending_count += 1
     actionable.sort(key=lambda t: t[0])
@@ -528,6 +565,8 @@ def render_bin_radar(streamlit, *, max_cards: int = 30) -> None:
         f'<div style="font-size:22px;font-weight:700;color:#4ade80;">{strike_count}</div></div>'
         f'<div style="flex:1;"><div style="{_label_css}">Close</div>'
         f'<div style="font-size:22px;font-weight:700;color:#facc15;">{close_count}</div></div>'
+        f'<div style="flex:1;"><div style="{_label_css}">Offer</div>'
+        f'<div style="font-size:22px;font-weight:700;color:#3b82f6;">{offer_count}</div></div>'
         f'<div style="flex:1;"><div style="{_label_css}">Pending MV</div>'
         f'<div style="font-size:22px;font-weight:700;color:#fafafa;">{pending_count}</div></div>'
         f'</div>'
@@ -535,10 +574,13 @@ def render_bin_radar(streamlit, *, max_cards: int = 30) -> None:
     )
     st.markdown(_headline_html, unsafe_allow_html=True)
 
-    # Filter chip — Strike / Close / All
+    # Filter chip — Strikes / Actionable / All. RECOMMENDED-OFFER-2026-05-13:
+    # the middle option now covers everything the user can act on right
+    # now — STRIKE (buy it), CLOSE (offer to close the gap), and OFFER
+    # (priced above target but negotiable via Best Offer).
     _filter_label = st.radio(
         "Filter",
-        options=["Strikes only", "Strike + Close", "All"],
+        options=["Strikes only", "Strike · Close · Offer", "All"],
         index=0,
         horizontal=True,
         key="bin_view_filter",
@@ -548,10 +590,10 @@ def render_bin_radar(streamlit, *, max_cards: int = 30) -> None:
     for _sort_key, row in actionable:
         bin_price = _row_current_price(row)
         target = _row_target_bid(row) if _row_has_real_mv(row) else None
-        sz_label, _, _ = _strike_zone_state(bin_price, target)
+        sz_label, _, _ = _strike_zone_state(bin_price, target, _row_accepts_offers(row))
         if _filter_label == "Strikes only" and sz_label != "STRIKE":
             continue
-        if _filter_label == "Strike + Close" and sz_label not in {"STRIKE", "CLOSE"}:
+        if _filter_label == "Strike · Close · Offer" and sz_label not in {"STRIKE", "CLOSE", "OFFER"}:
             continue
         filtered.append(row)
     filtered = filtered[:max_cards]
@@ -578,8 +620,11 @@ def render_bin_radar(streamlit, *, max_cards: int = 30) -> None:
         listed_age = _row_listed_age_secs(row)
         listed_str = _format_listed_age(listed_age)
 
-        # Strike Zone badge
-        sz_label, sz_bg, sz_fg = _strike_zone_state(bin_price, target_value)
+        # Strike Zone badge. RECOMMENDED-OFFER-2026-05-13: pass accepts_offers
+        # so an above-target listing that takes Best Offers shows as OFFER
+        # rather than dead-weight WAIT.
+        _accepts_offers = _row_accepts_offers(row)
+        sz_label, sz_bg, sz_fg = _strike_zone_state(bin_price, target_value, _accepts_offers)
         sz_rgb = _hex_to_rgb(sz_bg)
         sz_html = (
             f'<div style="display:inline-block;padding:4px 10px;'
@@ -611,6 +656,22 @@ def render_bin_radar(streamlit, *, max_cards: int = 30) -> None:
                     f'margin-right:6px;">{_spread_label}</div>'
                 )
 
+        # RECOMMENDED-OFFER-2026-05-13: when a listing is in the OFFER zone
+        # (priced above target but accepts Best Offers), surface the
+        # recommended offer number — which is just the target bid. This
+        # turns "skip it" inventory into "negotiate it" inventory. Rendered
+        # as a blue pill that pairs with the OFFER strike-zone badge.
+        recommend_offer_html = ""
+        if sz_label == "OFFER" and target_value and target_value > 0:
+            recommend_offer_html = (
+                f'<div style="display:inline-block;padding:4px 10px;'
+                f'background:rgba(59,130,246,0.12);'
+                f'border:1px solid rgba(59,130,246,0.35);'
+                f'border-radius:999px;font-size:10px;font-weight:700;'
+                f'color:#3b82f6;letter-spacing:0.08em;'
+                f'margin-right:6px;">RECOMMENDED OFFER ${target_value:,.0f}</div>'
+            )
+
         # Image + link + blocks
         if img_url:
             image_html = (
@@ -631,13 +692,17 @@ def render_bin_radar(streamlit, *, max_cards: int = 30) -> None:
                 f'color:#888888;font-size:24px;">●</div>'
             )
         if ebay_url:
+            # RECOMMENDED-OFFER-2026-05-13: OFFER-zone listings get a
+            # "Make offer" CTA instead of "Buy on eBay" — the action the
+            # user should actually take on a negotiable above-target listing.
+            _link_label = "Make offer on eBay →" if sz_label == "OFFER" else "Buy on eBay →"
             link_html = (
                 f'<a href="{ebay_url}" target="_blank" '
                 f'style="display:inline-flex;align-items:center;gap:4px;'
                 f'padding:8px 14px;background:rgba(59,130,246,0.12);'
                 f'border:1px solid rgba(59,130,246,0.3);border-radius:8px;'
                 f'font-size:12px;font-weight:600;color:#4ade80;'
-                f'text-decoration:none;">Buy on eBay →</a>'
+                f'text-decoration:none;">{_link_label}</a>'
             )
         else:
             link_html = '<span></span>'
@@ -724,10 +789,11 @@ def render_bin_radar(streamlit, *, max_cards: int = 30) -> None:
             f'{image_html}'
             f'<div style="flex:1;min-width:0;display:flex;flex-direction:column;">'
             f'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">'
-            f'<div style="display:flex;align-items:center;gap:10px;">'
+            f'<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">'
             f'{sz_html}'
             f'<span style="font-size:11px;color:#888888;">Listed {listed_str}</span>'
             f'{discount_html}'
+            f'{recommend_offer_html}'
             f'</div>'
             f'</div>'
             f'<div style="font-size:15px;font-weight:600;color:#fafafa;line-height:1.35;margin-bottom:12px;">{title}</div>'
