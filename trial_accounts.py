@@ -59,6 +59,17 @@ SESSION_TOKEN_BYTES = 32           # URL-pinned "remember me" token — used
                                    # session_state dies on websocket
                                    # reconnect)
 
+# ADMIN-OVERRIDE-2026-05-13: emails listed in SNIPEWINS_ADMIN_EMAILS env
+# var get treated as STATUS_PAID regardless of their stored status. Lets
+# the owner (and any team members) use the dashboard without paying
+# themselves, and survives accounts.json wipes. Comma-separated. Empty
+# var = no admins. The user still needs to sign up normally first
+# (email + password) so they have a session token to log in with.
+_ADMIN_EMAILS_RAW = os.environ.get("SNIPEWINS_ADMIN_EMAILS") or ""
+ADMIN_EMAILS = {
+    e.strip().lower() for e in _ADMIN_EMAILS_RAW.split(",") if e.strip()
+}
+
 # Status constants — single source of truth for what state a user is in
 STATUS_NOT_SIGNED_UP        = "not_signed_up"
 STATUS_PENDING_EMAIL_CLICK  = "pending_email_click"
@@ -372,6 +383,11 @@ def get_trial_status(email: str) -> str:
     user = get_user(email)
     if user is None:
         return STATUS_NOT_SIGNED_UP
+    # ADMIN-OVERRIDE-2026-05-13: admin emails are always paid regardless
+    # of stored state. Survives Render disk wipes — even if accounts.json
+    # gets reset, the owner re-signs-up and is immediately PAID.
+    if _normalize_email(email) in ADMIN_EMAILS:
+        return STATUS_PAID
     # Paid customers always win regardless of trial state.
     if (user.get("paid_status") or "").lower() == "paid":
         return STATUS_PAID
