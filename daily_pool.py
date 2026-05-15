@@ -53,6 +53,17 @@ POOL_FILE = HERE / "daily_pool.json"
 LOG_FILE = HERE / "daily_pool.log"
 
 DEFAULT_WINDOW_HOURS = 24.0
+
+
+# SCAN-PAUSE-2026-05-15: operator kill switch. Set SNIPEWINS_SCAN_PAUSED=1
+# in Render env to halt all eBay calls without suspending the service
+# (dashboard stays up; scanners idle). Used to stop quota burn mid-day
+# so the next UTC reset gives a clean window for testing. Same helper
+# lives in daily_bin_pool.py and valuation_worker.py.
+def _is_scan_paused() -> bool:
+    return os.environ.get("SNIPEWINS_SCAN_PAUSED", "").strip().lower() in (
+        "1", "true", "yes", "on",
+    )
 DEFAULT_LOOP_INTERVAL_SECS = 3600  # 1 hour
 
 
@@ -903,13 +914,16 @@ def main(argv: List[str]) -> int:
     # --loop mode
     print(f"[daily_pool] entering loop mode — interval={args.interval}s window={args.window}h")
     while True:
-        try:
-            fetch_and_update(window_hours=args.window)
-        except KeyboardInterrupt:
-            print("[daily_pool] interrupted, exiting")
-            return 130
-        except Exception as exc:
-            print(f"[daily_pool] cycle error: {type(exc).__name__}: {exc}")
+        if _is_scan_paused():
+            print("[daily_pool] PAUSED via SNIPEWINS_SCAN_PAUSED — skipping cycle", flush=True)
+        else:
+            try:
+                fetch_and_update(window_hours=args.window)
+            except KeyboardInterrupt:
+                print("[daily_pool] interrupted, exiting")
+                return 130
+            except Exception as exc:
+                print(f"[daily_pool] cycle error: {type(exc).__name__}: {exc}")
         # Sleep until next cycle
         try:
             time.sleep(args.interval)

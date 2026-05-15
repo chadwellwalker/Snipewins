@@ -57,6 +57,18 @@ DEFAULT_BATCH_SIZE = 20
 DEFAULT_LOOP_INTERVAL_SECS = 60
 DEFAULT_LOOP_BATCH = 5  # smaller batch in loop mode so we cycle faster
 
+
+# SCAN-PAUSE-2026-05-15: operator kill switch. Set SNIPEWINS_SCAN_PAUSED=1
+# in Render env to halt all eBay calls without suspending the service
+# (dashboard stays up; scanners idle). Used to stop quota burn mid-day
+# so the next UTC reset gives a clean window for testing. The worker
+# is the biggest quota spender — capping it here is the most impactful
+# leg of the three-process pause.
+def _is_scan_paused() -> bool:
+    return os.environ.get("SNIPEWINS_SCAN_PAUSED", "").strip().lower() in (
+        "1", "true", "yes", "on",
+    )
+
 PRIORITY_END_BUCKETS = [
     (1800,    "<30m"),
     (3600,    "30m-1h"),
@@ -663,13 +675,16 @@ def main(argv: List[str]) -> int:
     # --loop mode — smaller batches per cycle so we drain the queue smoothly
     print(f"[valuation_worker] loop mode — batch={DEFAULT_LOOP_BATCH}, interval={args.interval}s")
     while True:
-        try:
-            run_batch(batch_size=DEFAULT_LOOP_BATCH)
-        except KeyboardInterrupt:
-            print("[valuation_worker] interrupted")
-            return 130
-        except Exception as exc:
-            print(f"[valuation_worker] cycle error: {type(exc).__name__}: {exc}")
+        if _is_scan_paused():
+            print("[valuation_worker] PAUSED via SNIPEWINS_SCAN_PAUSED — skipping cycle", flush=True)
+        else:
+            try:
+                run_batch(batch_size=DEFAULT_LOOP_BATCH)
+            except KeyboardInterrupt:
+                print("[valuation_worker] interrupted")
+                return 130
+            except Exception as exc:
+                print(f"[valuation_worker] cycle error: {type(exc).__name__}: {exc}")
         try:
             time.sleep(args.interval)
         except KeyboardInterrupt:
