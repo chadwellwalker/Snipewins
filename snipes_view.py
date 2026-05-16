@@ -376,35 +376,48 @@ def render_my_snipes(streamlit) -> None:
             "</div>",
             unsafe_allow_html=True,
         )
+        # SAMPLE-CARDS-2026-05-15: realistic numbers + real card images so the
+        # preview reads as a believable "what your snipes will look like."
+        # Numbers are grounded in actual recent hobby comp ranges (the same
+        # cards used in the landing page's social-proof toast — fact-checked
+        # enough to ship publicly). Three states demonstrated:
+        #   STRIKE: bid ≤ target (instant buy candidate)
+        #   CLOSE:  bid within 15% of target (negotiable)
+        #   WAIT:   bid >15% above target (sit it out)
+        # Images served from snipewins.com (Cloudflare Pages) since the same
+        # files power the landing toast — no separate asset deploy needed.
         _sample_cards = [
             {
-                "title": "2024 Topps Chrome Cooper Flagg RC Auto Refractor /99 PSA 10",
-                "bid": "$58",
-                "mv": "$95",
-                "target": "$71",
-                "spread": "$37 BELOW MV · 39% SPREAD",
+                "title": "2024 Panini Select Patrick Mahomes Green Shock PSA 10",
+                "image": "https://snipewins.com/Patrick%20Mahomes%20Green%20Shock%20PSA%2010%202024%20Panini%20Select.jpg",
+                "bid": "$142",
+                "mv": "$215",
+                "target": "$161",
+                "spread": "$73 BELOW MV · 34% SPREAD",
                 "status": "STRIKE",
                 "status_color": "#4ade80",
                 "ends": "23m",
                 "ends_color": "#ef4444",
             },
             {
-                "title": "2023 Bowman Chrome Paul Skenes Pirates RC Auto BDC14 PSA 10",
-                "bid": "$178",
-                "mv": "$245",
-                "target": "$184",
-                "spread": "$67 BELOW MV · 27% SPREAD",
+                "title": "2023 Panini Select Victor Wembanyama RC PSA 10",
+                "image": "https://snipewins.com/Victor%20Wembanyama%20PSA%2010%20Rookie%202023%20Select.jpg",
+                "bid": "$80",
+                "mv": "$95",
+                "target": "$71",
+                "spread": "$15 BELOW MV · 16% SPREAD",
                 "status": "CLOSE",
                 "status_color": "#facc15",
                 "ends": "1h 12m",
                 "ends_color": "#f97316",
             },
             {
-                "title": "2024 Panini Prizm Caleb Williams Silver Prizm RC",
-                "bid": "$42",
-                "mv": "$58",
-                "target": "$44",
-                "spread": "$16 BELOW MV · 28% SPREAD",
+                "title": "2023 Donruss Clearly Bijan Robinson Rookie Auto",
+                "image": "https://snipewins.com/Bijan%20Robinson%20Donruss%20Clearly%202023%20Rookie%20Auto.png",
+                "bid": "$78",
+                "mv": "$85",
+                "target": "$64",
+                "spread": "$7 BELOW MV · 8% SPREAD",
                 "status": "WAIT",
                 "status_color": "#888888",
                 "ends": "4h 8m",
@@ -417,7 +430,17 @@ def render_my_snipes(streamlit) -> None:
                 f"background:linear-gradient(180deg,#141414 0%,#1c1c1c 100%);"
                 f"border-radius:14px;font-family:-apple-system,\\'SF Pro Display\\',Inter,sans-serif;"
                 f"color:#fafafa;border:1px solid rgba(148,163,184,0.06);"
-                f"box-shadow:0 2px 12px rgba(0,0,0,0.2);opacity:0.65;'>"
+                f"box-shadow:0 2px 12px rgba(0,0,0,0.2);opacity:0.85;"
+                f"display:flex;gap:14px;'>"
+                # ── Card thumbnail ─────────────────────────────────────
+                f"<div style='flex-shrink:0;width:84px;height:84px;"
+                f"border-radius:10px;overflow:hidden;background:#0a0a0a;"
+                f"border:1px solid rgba(148,163,184,0.12);'>"
+                f"<img src='{_c['image']}' alt='' "
+                f"style='width:100%;height:100%;object-fit:cover;display:block;' "
+                f"loading='lazy' /></div>"
+                # ── Right side: badges + title + prices ────────────────
+                f"<div style='flex:1;min-width:0;'>"
                 f"<div style='display:flex;justify-content:space-between;"
                 f"align-items:center;margin-bottom:8px;gap:8px;flex-wrap:wrap;'>"
                 f"<span style='background:{_c['ends_color']};color:#fff;font-weight:700;"
@@ -455,7 +478,7 @@ def render_my_snipes(streamlit) -> None:
                 f"<div style='font-size:20px;font-weight:700;color:#4ade80;'>{_c['target']}</div>"
                 f"</div>"
                 f"</div>"
-                f"</div>",
+                f"</div></div>",
                 unsafe_allow_html=True,
             )
         return
