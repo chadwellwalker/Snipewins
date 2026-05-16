@@ -17,6 +17,7 @@ shows the latest pool state without explicit polling.
 from __future__ import annotations
 
 import json
+import os
 import time
 from datetime import datetime, timezone
 from pathlib import Path
@@ -26,7 +27,10 @@ from typing import Any, Dict, List, Optional, Tuple
 # loop so this module stays importable without snipes_store on the path.
 
 HERE = Path(__file__).parent
-POOL_FILE = HERE / "daily_pool.json"
+# PERSISTENT-POOL-2026-05-15: must match the path used by daily_pool.py
+# (writer) so the dashboard reads what the scanner just wrote. Render
+# env: SNIPEWINS_AUCTION_POOL_PATH=/data/daily_pool.json.
+POOL_FILE = Path(os.environ.get("SNIPEWINS_AUCTION_POOL_PATH") or str(HERE / "daily_pool.json"))
 
 
 # ── Pool reading (no writes — read-only consumer) ───────────────────────────

@@ -49,7 +49,13 @@ from typing import Any, Dict, List, Optional, Tuple
 
 
 HERE = Path(__file__).parent
-POOL_FILE = HERE / "daily_pool.json"
+# PERSISTENT-POOL-2026-05-15: every code push was wiping the auction pool
+# because the file lived on the container's ephemeral filesystem. Same
+# env-var pattern as accounts/snipes/mv_cache: point at /data/daily_pool.json
+# via SNIPEWINS_AUCTION_POOL_PATH in Render. WITHOUT this env var, every
+# redeploy starts the pool from 0 and the scanner has to rebuild — wasted
+# eBay quota and an empty Ending Soon page after every push.
+POOL_FILE = Path(os.environ.get("SNIPEWINS_AUCTION_POOL_PATH") or str(HERE / "daily_pool.json"))
 LOG_FILE = HERE / "daily_pool.log"
 
 DEFAULT_WINDOW_HOURS = 24.0

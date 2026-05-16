@@ -47,8 +47,13 @@ from typing import Any, Dict, List, Optional, Tuple
 
 
 HERE = Path(__file__).parent
-POOL_FILE     = HERE / "daily_pool.json"   # auctions
-BIN_POOL_FILE = HERE / "bin_pool.json"     # BIN listings — added May 2026
+# PERSISTENT-POOL-2026-05-15: env-var paths must match daily_pool.py /
+# daily_bin_pool.py / pool_view.py / bin_view.py so the worker reads
+# what the scanners just wrote and the dashboard reads what the worker
+# just stamped. Render env: SNIPEWINS_AUCTION_POOL_PATH=/data/daily_pool.json
+# and SNIPEWINS_BIN_POOL_PATH=/data/bin_pool.json.
+POOL_FILE     = Path(os.environ.get("SNIPEWINS_AUCTION_POOL_PATH") or str(HERE / "daily_pool.json"))   # auctions
+BIN_POOL_FILE = Path(os.environ.get("SNIPEWINS_BIN_POOL_PATH")     or str(HERE / "bin_pool.json"))     # BIN listings
                                             # Worker iterates both pools each
                                             # cycle so MV computation flows
                                             # the same way for either feed.

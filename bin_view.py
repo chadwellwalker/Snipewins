@@ -15,13 +15,16 @@ UX differences from Ending Soon:
 from __future__ import annotations
 
 import json
+import os
 import time
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 
 HERE = Path(__file__).parent
-POOL_FILE = HERE / "bin_pool.json"
+# PERSISTENT-POOL-2026-05-15: must match the path used by daily_bin_pool.py
+# (writer). Render env: SNIPEWINS_BIN_POOL_PATH=/data/bin_pool.json.
+POOL_FILE = Path(os.environ.get("SNIPEWINS_BIN_POOL_PATH") or str(HERE / "bin_pool.json"))
 
 
 # ── Pool reading ────────────────────────────────────────────────────────────
