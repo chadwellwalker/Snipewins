@@ -787,6 +787,18 @@ def fetch_and_update(window_hours: float = DEFAULT_WINDOW_HOURS) -> Dict[str, An
         f"pool_size={summary['items_after']}",
         flush=True,
     )
+
+    # DAILY-BUDGET-2026-05-15: report this cycle's eBay-call count to the
+    # shared daily counter. The auction engine doesn't expose an exact
+    # call count, so we use a conservative flat estimate based on the
+    # known budgeted spec count (~27) plus auth/probe overhead. Tunable
+    # if logs show systematic over/under-counting once we observe real runs.
+    try:
+        import daily_budget
+        daily_budget.record_calls(40)
+    except Exception as _bud_err:
+        print(f"[daily_pool] daily_budget record failure (non-fatal): {_bud_err}")
+
     return summary
 
 
@@ -918,7 +930,17 @@ def main(argv: List[str]) -> int:
             print("[daily_pool] PAUSED via SNIPEWINS_SCAN_PAUSED — skipping cycle", flush=True)
         else:
             try:
-                fetch_and_update(window_hours=args.window)
+                import daily_budget
+                if daily_budget.is_budget_exceeded():
+                    _summ = daily_budget.get_budget_summary()
+                    print(
+                        f"[daily_pool] DAILY BUDGET REACHED "
+                        f"({_summ['calls_today']}/{_summ['daily_budget']} calls today) — "
+                        f"skipping cycle until UTC rollover",
+                        flush=True,
+                    )
+                else:
+                    fetch_and_update(window_hours=args.window)
             except KeyboardInterrupt:
                 print("[daily_pool] interrupted, exiting")
                 return 130

@@ -679,7 +679,27 @@ def main(argv: List[str]) -> int:
             print("[valuation_worker] PAUSED via SNIPEWINS_SCAN_PAUSED — skipping cycle", flush=True)
         else:
             try:
-                run_batch(batch_size=DEFAULT_LOOP_BATCH)
+                import daily_budget
+                if daily_budget.is_budget_exceeded():
+                    _summ = daily_budget.get_budget_summary()
+                    print(
+                        f"[valuation_worker] DAILY BUDGET REACHED "
+                        f"({_summ['calls_today']}/{_summ['daily_budget']} calls today) — "
+                        f"skipping cycle until UTC rollover",
+                        flush=True,
+                    )
+                else:
+                    _result = run_batch(batch_size=DEFAULT_LOOP_BATCH)
+                    # DAILY-BUDGET-2026-05-15: each card processed in a batch
+                    # fires up to ~3 comp searches (after relaxation cap),
+                    # often 1-2 with cache hits. We estimate calls as
+                    # (valued + failed) × 2 — a middle ground between best
+                    # case (1 call/card via cache) and worst case (3 passes).
+                    try:
+                        _cards = int(_result.get("valued", 0)) + int(_result.get("failed", 0))
+                        daily_budget.record_calls(_cards * 2)
+                    except Exception:
+                        pass
             except KeyboardInterrupt:
                 print("[valuation_worker] interrupted")
                 return 130

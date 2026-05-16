@@ -480,6 +480,19 @@ def fetch_and_update() -> Dict[str, Any]:
     }
     save_pool(pool)
 
+    # DAILY-BUDGET-2026-05-15: report this cycle's eBay-call count to the
+    # shared daily counter so the next cycle's pre-flight check knows
+    # whether the day's budget has been exhausted. Each attempted spec is
+    # roughly one Browse API call (the auth token is cached). Conservative
+    # — overcounts slightly because some specs may have early-aborted
+    # before the HTTP request fired, which is fine: we'd rather throttle
+    # too early than too late.
+    try:
+        import daily_budget
+        daily_budget.record_calls(specs_attempted)
+    except Exception as _bud_err:
+        print(f"[daily_bin_pool] daily_budget record failure (non-fatal): {_bud_err}")
+
     summary = {
         "ok":              True,
         "elapsed_seconds": round(time.time() - started, 1),
@@ -575,7 +588,17 @@ def main(argv: List[str]) -> int:
             print("[daily_bin_pool] PAUSED via SNIPEWINS_SCAN_PAUSED — skipping cycle", flush=True)
         else:
             try:
-                fetch_and_update()
+                import daily_budget
+                if daily_budget.is_budget_exceeded():
+                    _summ = daily_budget.get_budget_summary()
+                    print(
+                        f"[daily_bin_pool] DAILY BUDGET REACHED "
+                        f"({_summ['calls_today']}/{_summ['daily_budget']} calls today) — "
+                        f"skipping cycle until UTC rollover",
+                        flush=True,
+                    )
+                else:
+                    fetch_and_update()
             except KeyboardInterrupt:
                 print("[daily_bin_pool] interrupted, exiting")
                 return 130
