@@ -425,10 +425,19 @@ def render_my_snipes(streamlit) -> None:
             },
         ]
         for _c in _sample_cards:
+            # ATTRIBUTE-QUOTE-FIX-2026-05-15: outer card's style attribute
+            # MUST NOT contain unescaped apostrophes — Streamlit's markdown
+            # renders the HTML with the apostrophes literal, and an
+            # embedded `'` inside style='...' terminates the attribute
+            # value early. That dropped `display:flex` from this outer div
+            # and made the image stack above the content instead of beside
+            # it. Fix: drop the apostrophe-wrapped 'SF Pro Display' from
+            # font-family — the rest of the stack still renders cleanly
+            # under -apple-system + Inter.
             st.markdown(
                 f"<div style='margin:10px 0;padding:16px 18px;"
                 f"background:linear-gradient(180deg,#141414 0%,#1c1c1c 100%);"
-                f"border-radius:14px;font-family:-apple-system,\\'SF Pro Display\\',Inter,sans-serif;"
+                f"border-radius:14px;font-family:-apple-system,Inter,sans-serif;"
                 f"color:#fafafa;border:1px solid rgba(148,163,184,0.06);"
                 f"box-shadow:0 2px 12px rgba(0,0,0,0.2);opacity:0.85;"
                 f"display:flex;gap:14px;'>"
