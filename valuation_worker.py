@@ -553,30 +553,41 @@ def _process_pool_batch(
 
 
 def run_batch(batch_size: int = DEFAULT_BATCH_SIZE) -> Dict[str, Any]:
-    """Compute MVs for the top `batch_size` priority unvalued rows. Now
-    processes BOTH the auction pool (daily_pool.json) and the BIN pool
-    (bin_pool.json), splitting the batch between them so neither feed
-    starves the other when both have queue."""
+    """Compute MVs for the top `batch_size` priority unvalued rows.
+
+    AUCTION-PRIORITY-2026-05-15: drain auctions FIRST. Previously this
+    split each batch 60% AUC / 40% BIN, which meant when 2,600 BIN listings
+    landed in the pool the worker spent 40% of every cycle on BINs even
+    when there were unvalued auctions sitting time-pressured. Bad: BINs
+    have no clock; auctions end on a timer and an empty Ending Soon page
+    is the conversion killer. New behavior: the auction pool gets the
+    ENTIRE batch budget every cycle. BIN only gets cycles where the
+    auction queue is empty. The BIN pool will fill in over time once
+    auctions are healthy."""
     started = time.time()
 
-    # Split the batch budget — 60% to auctions (time-pressured), 40% to BIN
-    auction_budget = max(1, int(batch_size * 0.6))
-    bin_budget     = max(1, batch_size - auction_budget)
-
+    # Drain auctions first. If the auction queue is smaller than the batch,
+    # spill the leftover capacity into BIN so we still make BIN progress.
     auction_result = _process_pool_batch(
         pool_label="AUC",
         load_fn=load_pool,
         save_fn=save_pool,
-        batch_size=auction_budget,
+        batch_size=batch_size,
         skip_time_check=False,
     )
-    bin_result = _process_pool_batch(
-        pool_label="BIN",
-        load_fn=load_bin_pool,
-        save_fn=save_bin_pool,
-        batch_size=bin_budget,
-        skip_time_check=True,
-    )
+    auction_used = int(auction_result.get("valued", 0)) + int(auction_result.get("failed", 0))
+    bin_budget = max(0, batch_size - auction_used)
+    if bin_budget > 0:
+        bin_result = _process_pool_batch(
+            pool_label="BIN",
+            load_fn=load_bin_pool,
+            save_fn=save_bin_pool,
+            batch_size=bin_budget,
+            skip_time_check=True,
+        )
+    else:
+        # Auctions consumed the full batch — BIN waits this cycle.
+        bin_result = {"label": "BIN", "queue_size": 0, "valued": 0, "failed": 0, "confident": 0}
 
     # Compose the combined counters so the legacy print path still works
     valued = auction_result["valued"] + bin_result["valued"]

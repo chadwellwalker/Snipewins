@@ -315,6 +315,38 @@ def _render_comp_summary(streamlit, row: Dict[str, Any]) -> None:
             "**No comps found yet.** The valuation engine is still working "
             "on this card or couldn't find enough recent eBay sold listings."
         )
+        # AUDIT-LINK-2026-05-15: render the same one-click audit link the
+        # MV'd cards get. Matches pool_view's no-comps fallback.
+        try:
+            _audit_title = str(row.get("title") or row.get("source_title") or "").strip()
+            if _audit_title and len(_audit_title) >= 8:
+                from urllib.parse import quote_plus as _qp
+                import re as _re
+                _clean = _re.sub(
+                    r"\b(PSA|BGS|SGC|CGC)\s*\d+(?:\.\d+)?\b", "",
+                    _audit_title, flags=_re.IGNORECASE,
+                ).strip()
+                _clean = _re.sub(r"\s+", " ", _clean)[:140]
+                _audit_url = (
+                    f"https://www.ebay.com/sch/i.html?_nkw={_qp(_clean)}"
+                    f"&LH_Sold=1&LH_Complete=1"
+                )
+                st.markdown(
+                    f"<div style='margin-top:14px;padding-top:10px;"
+                    f"border-top:1px solid rgba(148,163,184,0.08);'>"
+                    f"<a href='{_audit_url}' target='_blank' style='"
+                    f"display:inline-flex;align-items:center;gap:6px;"
+                    f"padding:6px 12px;background:rgba(59,130,246,0.10);"
+                    f"border:1px solid rgba(59,130,246,0.25);border-radius:8px;"
+                    f"font-size:12px;font-weight:600;color:#60a5fa;"
+                    f"text-decoration:none;'>Audit this on eBay sold listings →</a>"
+                    f"<span style='font-size:11px;color:#888;margin-left:10px;'>"
+                    f"Check sold prices for this exact card on eBay.</span>"
+                    f"</div>",
+                    unsafe_allow_html=True,
+                )
+        except Exception:
+            pass
         return
     mv_value = float(row.get("true_mv") or row.get("market_value") or 0)
     target = _row_target_bid(row)

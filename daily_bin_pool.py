@@ -78,6 +78,20 @@ def _is_scan_paused() -> bool:
     )
 
 
+# BIN-PAUSE-2026-05-15: BIN-specific kill switch. Lets the operator pause
+# JUST the BIN scanner (auction pool + valuation worker keep running).
+# Use case: Ending Soon (auctions) is the conversion driver and is
+# starved by BIN's appetite for eBay calls. Setting
+# SNIPEWINS_BIN_SCAN_PAUSED=1 stops new BIN fetches so the auction
+# scanner and worker get the full daily quota. Existing BIN listings
+# in the pool stay; the worker keeps MV'ing them via the auction-priority
+# spillover. Toggle off once the auction feed is healthy.
+def _is_bin_scan_paused() -> bool:
+    return os.environ.get("SNIPEWINS_BIN_SCAN_PAUSED", "").strip().lower() in (
+        "1", "true", "yes", "on",
+    )
+
+
 # ── Persistence ─────────────────────────────────────────────────────────────
 
 def load_pool() -> Dict[str, Any]:
@@ -586,6 +600,12 @@ def main(argv: List[str]) -> int:
     while True:
         if _is_scan_paused():
             print("[daily_bin_pool] PAUSED via SNIPEWINS_SCAN_PAUSED — skipping cycle", flush=True)
+        elif _is_bin_scan_paused():
+            print(
+                "[daily_bin_pool] BIN PAUSED via SNIPEWINS_BIN_SCAN_PAUSED — "
+                "auction pool + worker continue running",
+                flush=True,
+            )
         else:
             try:
                 import daily_budget
