@@ -36827,6 +36827,13 @@ def _fetch_bin_for_spec(spec: Dict[str, Any]) -> Tuple[List[Dict[str, Any]], boo
             "sport":         spec.get("sport") or (spec.get("tracked_target") or {}).get("sport") or "",
             "whatnot_tier":  spec.get("whatnot_tier"),
             "listing_type":  "BIN",
+            # RECOMMENDED-OFFER-2026-05-13: capture buyingOptions so the
+            # Steals tab knows whether a listing accepts Best Offer. eBay's
+            # Browse API returns this as a list like ["FIXED_PRICE"] or
+            # ["FIXED_PRICE","BEST_OFFER"]. Previously dropped — now the UI
+            # can surface a Recommended Offer on offer-enabled listings
+            # priced above target instead of just hiding them as WAIT.
+            "buying_options": list(item.get("buyingOptions") or []),
         })
     _progress_tick(spec.get("player_name", ""))
     return out, False, pre_filter_count

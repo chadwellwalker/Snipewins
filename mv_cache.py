@@ -35,7 +35,12 @@ from typing import Any, Dict, Optional
 
 
 HERE = Path(__file__).parent
-CACHE_FILE = HERE / "mv_cache.json"
+# PERSISTENT-CACHE-2026-05-15: the MV cache MUST live on the Render
+# persistent disk in production. Without it, every redeploy wipes the
+# cache and the worker re-computes every card from scratch — directly
+# burning eBay quota. Same env-var pattern as accounts.json / snipes.json
+# / daily_call_budget.json. In Render env: SNIPEWINS_MV_CACHE_PATH=/data/mv_cache.json
+CACHE_FILE = Path(os.environ.get("SNIPEWINS_MV_CACHE_PATH") or str(HERE / "mv_cache.json"))
 
 
 # ── Tunables ────────────────────────────────────────────────────────────────
