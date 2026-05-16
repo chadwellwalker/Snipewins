@@ -477,8 +477,9 @@ def render_my_snipes(streamlit) -> None:
                 f"text-transform:uppercase;margin-bottom:2px;'>Target</div>"
                 f"<div style='font-size:20px;font-weight:700;color:#4ade80;'>{_c['target']}</div>"
                 f"</div>"
-                f"</div>"
-                f"</div></div>",
+                f"</div>"      # closes prices row
+                f"</div>"      # closes right column (the flex:1 sibling of the image)
+                f"</div>",     # closes outer card
                 unsafe_allow_html=True,
             )
         return
