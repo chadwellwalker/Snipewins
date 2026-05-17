@@ -716,22 +716,24 @@ def main(argv: List[str]) -> int:
                         daily_budget.record_calls(_cards * 2)
                     except Exception:
                         pass
+            except KeyboardInterrupt:
+                print("[valuation_worker] interrupted")
+                return 130
+            except Exception as exc:
+                print(f"[valuation_worker] cycle error: {type(exc).__name__}: {exc}")
             # EMAIL-CONVERSION-2026-05-15: piggyback the marketing-email
             # drip on the worker loop. The drip has its own internal hourly
             # cadence guard, so this is safe to call every 60s — most calls
-            # early-return without doing work. Wrapped in try/except so any
-            # email failure can never crash the valuation worker.
+            # early-return without doing work. Wrapped in its own try/except
+            # so any email failure can never crash the valuation worker.
+            # Sits OUTSIDE the run_batch try/except so it still runs even
+            # if the valuation cycle hit an error.
             try:
                 import email_drip
                 email_drip.run_once()
             except Exception as _drip_err:
                 print(f"[valuation_worker] email_drip error (non-fatal): "
                       f"{type(_drip_err).__name__}: {str(_drip_err)[:140]}")
-            except KeyboardInterrupt:
-                print("[valuation_worker] interrupted")
-                return 130
-            except Exception as exc:
-                print(f"[valuation_worker] cycle error: {type(exc).__name__}: {exc}")
         try:
             time.sleep(args.interval)
         except KeyboardInterrupt:
