@@ -646,6 +646,18 @@ def render_bin_radar(streamlit, *, max_cards: int = 30) -> None:
     )
     st.markdown(_headline_html, unsafe_allow_html=True)
 
+    # TITLE-SEARCH-2026-05-17: free-text search box, same UX as pool_view.
+    # Multi-word queries are AND'd against title + source_title, so typing
+    # "judge auto" matches listings with both words in any order.
+    _search_q = st.text_input(
+        "Search BIN listings",
+        value="",
+        placeholder="Search by player, set, parallel… (e.g. 'Wemby Prizm')",
+        key="bin_view_search",
+        label_visibility="collapsed",
+    )
+    _search_norm = (_search_q or "").strip().lower()
+
     # Filter chip — Strikes / Actionable / All. RECOMMENDED-OFFER-2026-05-13:
     # the middle option now covers everything the user can act on right
     # now — STRIKE (buy it), CLOSE (offer to close the gap), and OFFER
@@ -658,6 +670,14 @@ def render_bin_radar(streamlit, *, max_cards: int = 30) -> None:
         key="bin_view_filter",
         label_visibility="collapsed",
     )
+
+    # TITLE-SEARCH-2026-05-17: helper to assemble the searchable haystack
+    # for each row. Combined title + source_title catches both display
+    # title and raw eBay title.
+    def _title_haystack(r: Dict[str, Any]) -> str:
+        return " ".join(str(r.get(k) or "") for k in ("title", "source_title")).lower()
+    _search_terms = [t for t in _search_norm.split() if t]
+
     filtered: List[Dict[str, Any]] = []
     for _sort_key, row in actionable:
         bin_price = _row_current_price(row)
@@ -667,11 +687,22 @@ def render_bin_radar(streamlit, *, max_cards: int = 30) -> None:
             continue
         if _filter_label == "Strike · Close · Offer" and sz_label not in {"STRIKE", "CLOSE", "OFFER"}:
             continue
+        # TITLE-SEARCH-2026-05-17: apply search after the zone filter so a
+        # title hit still has to pass the same zone gate.
+        if _search_terms:
+            _hay = _title_haystack(row)
+            if not all(_t in _hay for _t in _search_terms):
+                continue
         filtered.append(row)
     filtered = filtered[:max_cards]
 
     if not filtered:
-        st.caption(f"No {_filter_label.lower()} right now. Try a wider filter or refresh.")
+        # TITLE-SEARCH-2026-05-17: search-specific empty state if the search
+        # box has content, so the user knows what they're seeing zero of.
+        if _search_norm:
+            st.caption(f"No BIN listings match “{_search_q}”. Clear the search to see all.")
+        else:
+            st.caption(f"No {_filter_label.lower()} right now. Try a wider filter or refresh.")
         return
 
     # ── Per-card render — wallet style ────────────────────────────────────

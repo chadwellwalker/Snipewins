@@ -1005,6 +1005,21 @@ def render_morning_briefing(streamlit, *, max_cards: int = 150) -> None:
         st.caption("No auctions ending in the next 24 hours match your tracked players.")
         return
 
+    # TITLE-SEARCH-2026-05-17: free-text search box. Filters the current
+    # window to listings whose title contains the query (case-insensitive,
+    # whitespace-tolerant). Streamlit reruns on Enter or blur, so the user
+    # types → tabs out / hits Enter → sees results in ~100ms. Matching
+    # against title + source_title catches both the display title and the
+    # raw eBay title in case they diverge after trimming/normalization.
+    _search_q = st.text_input(
+        "Search auctions",
+        value="",
+        placeholder="Search by player, set, parallel… (e.g. 'Wemby Prizm')",
+        key="pool_view_search",
+        label_visibility="collapsed",
+    )
+    _search_norm = (_search_q or "").strip().lower()
+
     # FILTER-FIX 2026-05-12: time-window chips replaced with sport chips. The
     # tab is "Ending Soon" so the 24h window is the implicit contract — surface
     # buckets ( <1h / 1-3h / 3-6h / 6-24h ) already live in the headline panel
@@ -1030,6 +1045,20 @@ def render_morning_briefing(streamlit, *, max_cards: int = 150) -> None:
         _window_filtered = [
             r for s, r in actionable_rows
             if _row_sport(r) == _filter_label
+        ]
+
+    # TITLE-SEARCH-2026-05-17: apply the free-text search after sport filter.
+    # Match against both display title and raw source_title so users can
+    # find cards even when the display has been trimmed/normalized. Multi-word
+    # queries are AND'd — typing "wemby prizm" matches titles containing
+    # both words in any order, which beats strict substring for natural use.
+    if _search_norm:
+        _terms = [t for t in _search_norm.split() if t]
+        def _title_haystack(r: Dict[str, Any]) -> str:
+            return " ".join(str(r.get(k) or "") for k in ("title", "source_title")).lower()
+        _window_filtered = [
+            r for r in _window_filtered
+            if all(_t in _title_haystack(r) for _t in _terms)
         ]
 
     # TARGET-BID-FILTER-2026-05-17: when ?tgt=1 is set, keep only rows where
@@ -1088,7 +1117,12 @@ def render_morning_briefing(streamlit, *, max_cards: int = 150) -> None:
     if not _filtered:
         # TARGET-BID-FILTER-2026-05-17: if the filter is active and there's
         # nothing to show, copy says exactly why and offers a one-click out.
-        if _target_only:
+        if _search_norm:
+            # TITLE-SEARCH-2026-05-17: search-specific empty state — tells
+            # the user no results AND echoes back their query so they know
+            # the filter is doing something.
+            st.caption(f"No auctions match “{_search_q}”. Clear the search to see all listings.")
+        elif _target_only:
             _clear_href = _build_filter_url(tgt=None)
             st.markdown(
                 f'<div style="padding:18px 16px;text-align:center;color:#b0b0b0;'
