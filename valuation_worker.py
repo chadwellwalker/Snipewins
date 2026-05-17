@@ -669,7 +669,33 @@ def print_status() -> int:
 
 # ── CLI ─────────────────────────────────────────────────────────────────────
 
+def _install_log_filter() -> None:
+    """LOG-NOISE-2026-05-17: wrap stdout/stderr with log_filter.FilteringTee
+    so the trace-level tags (SUBSET_PARSE_GUARD, SUBSET_PARSE_RESULT,
+    SERIAL_PARSE, etc.) get dropped from the worker's log output. These
+    fire 7-8 times per row and accounted for ~80% of log volume; without
+    this filter the real signal (cooldowns, batch summaries, errors) is
+    buried. Verbose mode (SNIPEWINS_VERBOSE=1) bypasses the filter.
+
+    Mirrors run_scan_once.py — pass real stdout/stderr as the sole sink
+    so we filter in place without duplicating output to a file. Failure
+    here is non-fatal: if log_filter can't be imported we just keep the
+    noisy logs."""
+    import sys as _sys
+    try:
+        from log_filter import FilteringTee as _Filter
+        _sys.stdout = _Filter(_sys.stdout)
+        _sys.stderr = _Filter(_sys.stderr)
+    except Exception as _exc:
+        # Silent — print uses _sys.stdout which may already be wrapped.
+        try:
+            print(f"[valuation_worker] log filter unavailable: {type(_exc).__name__}: {_exc}")
+        except Exception:
+            pass
+
+
 def main(argv: List[str]) -> int:
+    _install_log_filter()
     parser = argparse.ArgumentParser(description="Background MV worker (Module 2 of 24h pipeline)")
     parser.add_argument("--batch", type=int, default=DEFAULT_BATCH_SIZE,
                         help=f"Rows to value per cycle (default {DEFAULT_BATCH_SIZE})")
