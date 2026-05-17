@@ -760,6 +760,18 @@ def main(argv: List[str]) -> int:
             except Exception as _drip_err:
                 print(f"[valuation_worker] email_drip error (non-fatal): "
                       f"{type(_drip_err).__name__}: {str(_drip_err)[:140]}")
+            # NEAR-END-REFRESH-2026-05-17: refresh current_bid on auctions
+            # approaching end. Tiered cadence inside run_once means most
+            # calls early-return (e.g. tier_1 only refreshes every 10min,
+            # tier_2 every 60s, tier_3 every 15s — though worker's own
+            # 60s loop is the effective floor for tier_3). Own try/except
+            # because price-refresh failures must NOT take down the worker.
+            try:
+                import near_end_refresher
+                near_end_refresher.run_once()
+            except Exception as _ner_err:
+                print(f"[valuation_worker] near_end_refresher error (non-fatal): "
+                      f"{type(_ner_err).__name__}: {str(_ner_err)[:140]}")
         try:
             time.sleep(args.interval)
         except KeyboardInterrupt:
