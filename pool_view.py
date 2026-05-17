@@ -48,32 +48,32 @@ _MOBILE_CARD_CSS = """<style>
   .snipe-card-footer > .snipe-card-link { flex: 1 1 100% !important; margin-top: 4px !important; }
   .snipe-card-footer .snipe-card-link a { display: flex !important; justify-content: center !important; width: 100% !important; box-sizing: border-box !important; }
 }
-/* SEARCH-BUTTON-2026-05-17: brand-green Streamlit primary button with white
-   text. Matches the green-glow search input and the rest of the SnipeWins
-   accent palette. Multiple selectors cover the various data-testid names
-   Streamlit has used across versions. */
+/* SEARCH-BUTTON-2026-05-17: hollow brand-green primary button. Matches the
+   "View on eBay" link styling on the cards exactly — same green hue
+   (#4ade80), same translucent fill, same border opacity — so the two
+   feel like siblings rather than competing accents. */
 .stButton > button[kind="primary"],
 button[data-testid="baseButton-primary"],
 button[data-testid="stBaseButton-primary"] {
-  background: #4ade80 !important;
-  color: #ffffff !important;
-  border: 1px solid #4ade80 !important;
+  background: rgba(74,222,128,0.12) !important;
+  color: #4ade80 !important;
+  border: 1px solid rgba(74,222,128,0.3) !important;
   font-weight: 600 !important;
   letter-spacing: 0.02em !important;
-  box-shadow: 0 0 0 1px rgba(74,222,128,0.25) !important;
+  box-shadow: none !important;
   transition: background 0.15s ease, border-color 0.15s ease, transform 0.05s ease !important;
 }
 .stButton > button[kind="primary"] *,
 button[data-testid="baseButton-primary"] *,
 button[data-testid="stBaseButton-primary"] * {
-  color: #ffffff !important;
+  color: #4ade80 !important;
 }
 .stButton > button[kind="primary"]:hover,
 button[data-testid="baseButton-primary"]:hover,
 button[data-testid="stBaseButton-primary"]:hover {
-  background: #22c55e !important;
-  border-color: #22c55e !important;
-  color: #ffffff !important;
+  background: rgba(74,222,128,0.22) !important;
+  border-color: rgba(74,222,128,0.55) !important;
+  color: #4ade80 !important;
 }
 .stButton > button[kind="primary"]:active,
 button[data-testid="baseButton-primary"]:active,

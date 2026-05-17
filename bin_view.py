@@ -43,31 +43,32 @@ _MOBILE_CARD_CSS = """<style>
   .snipe-card-footer > .snipe-card-link { flex: 1 1 100% !important; margin-top: 4px !important; }
   .snipe-card-footer .snipe-card-link a { display: flex !important; justify-content: center !important; width: 100% !important; box-sizing: border-box !important; }
 }
-/* SEARCH-BUTTON-2026-05-17: brand-green primary button — see pool_view.py
-   for the same block + rationale. Duplicated rather than centralized
-   because both modules render independently and either tab can mount first. */
+/* SEARCH-BUTTON-2026-05-17: hollow brand-green primary button — see
+   pool_view.py for the same block + rationale. Matches the "View on eBay"
+   button style on the cards exactly so the two visual elements feel
+   like siblings rather than competing accents. */
 .stButton > button[kind="primary"],
 button[data-testid="baseButton-primary"],
 button[data-testid="stBaseButton-primary"] {
-  background: #4ade80 !important;
-  color: #ffffff !important;
-  border: 1px solid #4ade80 !important;
+  background: rgba(74,222,128,0.12) !important;
+  color: #4ade80 !important;
+  border: 1px solid rgba(74,222,128,0.3) !important;
   font-weight: 600 !important;
   letter-spacing: 0.02em !important;
-  box-shadow: 0 0 0 1px rgba(74,222,128,0.25) !important;
+  box-shadow: none !important;
   transition: background 0.15s ease, border-color 0.15s ease, transform 0.05s ease !important;
 }
 .stButton > button[kind="primary"] *,
 button[data-testid="baseButton-primary"] *,
 button[data-testid="stBaseButton-primary"] * {
-  color: #ffffff !important;
+  color: #4ade80 !important;
 }
 .stButton > button[kind="primary"]:hover,
 button[data-testid="baseButton-primary"]:hover,
 button[data-testid="stBaseButton-primary"]:hover {
-  background: #22c55e !important;
-  border-color: #22c55e !important;
-  color: #ffffff !important;
+  background: rgba(74,222,128,0.22) !important;
+  border-color: rgba(74,222,128,0.55) !important;
+  color: #4ade80 !important;
 }
 .stButton > button[kind="primary"]:active,
 button[data-testid="baseButton-primary"]:active,
