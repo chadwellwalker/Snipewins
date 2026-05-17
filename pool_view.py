@@ -882,6 +882,37 @@ def render_morning_briefing(streamlit, *, max_cards: int = 150) -> None:
     _imm_color = "#ef4444" if _imm > 0 else "#475569"
     _label_css = "font-size:10px;color:#b0b0b0;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:4px;"
 
+    # TARGET-BID-FILTER-2026-05-17: clicking the "N with target bid" pill in
+    # the headline toggles a filter that shows only cards where the engine
+    # produced a confident, comp-backed MV (i.e. has a real Target). Driven
+    # by ?tgt=1 in the URL so it survives the page reload Streamlit does
+    # on any link click. _build_filter_url preserves other query params
+    # (especially the ?s= session token) so users don't get logged out.
+    _target_only = str(st.query_params.get("tgt") or "").lower() in ("1", "true", "yes", "on")
+
+    def _build_filter_url(**patches: Any) -> str:
+        from urllib.parse import urlencode
+        # st.query_params is a Mapping-like; convert to plain dict. Values
+        # may be str or list[str] depending on Streamlit version — coerce
+        # to single-value strings for urlencode.
+        _cur: Dict[str, str] = {}
+        try:
+            for _k in list(st.query_params.keys()):
+                _v = st.query_params.get(_k)
+                if isinstance(_v, list):
+                    _v = _v[0] if _v else ""
+                if _v is None:
+                    continue
+                _cur[str(_k)] = str(_v)
+        except Exception:
+            pass
+        for _k, _v in patches.items():
+            if _v is None or _v == "":
+                _cur.pop(_k, None)
+            else:
+                _cur[_k] = str(_v)
+        return ("?" + urlencode(_cur)) if _cur else "?"
+
     # CURATION-DEPTH-2026-05-12: reach into player_hub to show the breadth
     # of the scan ("we're watching N players across X products"). This is
     # the visible proof of curation depth — it's what justifies the trial
@@ -912,6 +943,33 @@ def render_morning_briefing(streamlit, *, max_cards: int = 150) -> None:
     except Exception:
         pass
 
+    # TARGET-BID-FILTER-2026-05-17: pill becomes an <a> tag styled like the
+    # original chip. Two visual states:
+    #   inactive: hollow green chip, label "{N} with target bid"
+    #   active:   filled green chip with an × prefix, label "Showing {N} ·
+    #             clear" so the toggle-off path is obvious. Clicking either
+    #             reloads with the toggled ?tgt= param via _build_filter_url.
+    if _target_only:
+        _pill_href = _build_filter_url(tgt=None)
+        _pill_bg = "rgba(74,222,128,0.22)"
+        _pill_border = "rgba(74,222,128,0.55)"
+        _pill_label = f'<span style="margin-right:6px;font-weight:700;">×</span>Showing {_hero_tgt} · clear'
+        _pill_title = "Click to show all auctions"
+    else:
+        _pill_href = _build_filter_url(tgt="1")
+        _pill_bg = "rgba(74,222,128,0.12)"
+        _pill_border = "rgba(74,222,128,0.3)"
+        _pill_label = f"{_hero_tgt} with target bid"
+        _pill_title = "Click to show only auctions with a target bid"
+    _pill_html = (
+        f'<a href="{_pill_href}" target="_self" title="{_pill_title}" '
+        f'style="display:inline-block;padding:6px 12px;background:{_pill_bg};'
+        f'border:1px solid {_pill_border};border-radius:999px;font-size:13px;'
+        f'color:#4ade80;font-weight:600;text-decoration:none;cursor:pointer;'
+        f'transition:background 0.15s ease,border-color 0.15s ease;">'
+        f'{_pill_label}</a>'
+    )
+
     _headline_html = (
         f'<div style="margin:4px 0 18px 0;padding:22px 26px;'
         f'background:linear-gradient(135deg,#141414 0%,#0a0a0a 100%);'
@@ -926,9 +984,7 @@ def render_morning_briefing(streamlit, *, max_cards: int = 150) -> None:
         f'</div>'
         f'<div style="text-align:right;">'
         f'<div style="font-size:11px;color:#888888;margin-bottom:6px;">Updated {age_str} ago</div>'
-        f'<div style="display:inline-block;padding:6px 12px;background:rgba(74,222,128,0.12);'
-        f'border:1px solid rgba(74,222,128,0.3);border-radius:999px;font-size:13px;color:#4ade80;font-weight:600;">'
-        f'{_hero_tgt} with target bid</div>'
+        f'{_pill_html}'
         f'</div>'
         f'</div>'
         f'<div style="display:flex;gap:14px;margin-top:18px;padding-top:16px;border-top:1px solid rgba(148,163,184,0.12);">'
@@ -976,6 +1032,31 @@ def render_morning_briefing(streamlit, *, max_cards: int = 150) -> None:
             if _row_sport(r) == _filter_label
         ]
 
+    # TARGET-BID-FILTER-2026-05-17: when ?tgt=1 is set, keep only rows where
+    # the engine produced a confident, comp-backed MV. This mirrors the
+    # count shown on the headline pill so clicking "18 with target bid"
+    # surfaces exactly those 18. Renders a clear-filter banner directly
+    # above the cards too — discoverable even after scrolling, and offers
+    # a graceful escape if the filter accidentally hides everything.
+    if _target_only:
+        _window_filtered = [r for r in _window_filtered if _row_has_confident_mv(r)]
+        _clear_href = _build_filter_url(tgt=None)
+        _clear_banner = (
+            f'<div style="margin:0 0 12px 0;padding:10px 14px;'
+            f'background:rgba(74,222,128,0.08);'
+            f'border:1px solid rgba(74,222,128,0.25);'
+            f'border-radius:10px;display:flex;justify-content:space-between;'
+            f'align-items:center;gap:12px;font-size:13px;color:#b0b0b0;">'
+            f'<span><span style="color:#4ade80;font-weight:700;">Filtered:</span> '
+            f'showing only auctions with a target bid</span>'
+            f'<a href="{_clear_href}" target="_self" '
+            f'style="color:#4ade80;text-decoration:none;font-weight:600;'
+            f'padding:4px 10px;border:1px solid rgba(74,222,128,0.3);'
+            f'border-radius:999px;font-size:12px;">× Clear filter</a>'
+            f'</div>'
+        )
+        st.markdown(_clear_banner, unsafe_allow_html=True)
+
     # ── Per-player diversity cap ─────────────────────────────────────────
     # ABUNDANCE-2026-05-12: cap RELAXED from 3 → 8 per player. The product
     # value is felt-abundance — users who scroll through 100+ curated cards
@@ -1005,7 +1086,19 @@ def render_morning_briefing(streamlit, *, max_cards: int = 150) -> None:
     _filtered = (_capped_primary + _capped_overflow)[:max_cards]
 
     if not _filtered:
-        if _filter_label == "All":
+        # TARGET-BID-FILTER-2026-05-17: if the filter is active and there's
+        # nothing to show, copy says exactly why and offers a one-click out.
+        if _target_only:
+            _clear_href = _build_filter_url(tgt=None)
+            st.markdown(
+                f'<div style="padding:18px 16px;text-align:center;color:#b0b0b0;'
+                f'font-size:14px;">No auctions with a target bid right now. '
+                f'<a href="{_clear_href}" target="_self" '
+                f'style="color:#4ade80;font-weight:600;text-decoration:none;">'
+                f'Show all auctions →</a></div>',
+                unsafe_allow_html=True,
+            )
+        elif _filter_label == "All":
             st.caption("No auctions ending in the next 24 hours.")
         else:
             st.caption(f"No {_filter_label} auctions ending in the next 24 hours.")
