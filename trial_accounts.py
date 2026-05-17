@@ -319,6 +319,141 @@ def find_email_by_session_token(token: str) -> Optional[str]:
     return None
 
 
+# ── Email-send flag helpers. EMAIL-CONVERSION-2026-05-15 ──────────────────
+# Each conversion email writes a timestamp flag on the user record so we
+# don't double-send. Generic helper plus four named wrappers for clarity
+# at call sites.
+
+def _mark_email_sent(email: str, flag_field: str) -> bool:
+    em = _normalize_email(email)
+    data = _load()
+    user = data.get("users", {}).get(em)
+    if not user:
+        return False
+    user[flag_field] = time.time()
+    _save(data)
+    return True
+
+
+def mark_trial_expired_email_sent(email: str) -> bool:
+    return _mark_email_sent(email, "trial_expired_email_sent_ts")
+
+
+def mark_welcome_email_sent(email: str) -> bool:
+    return _mark_email_sent(email, "welcome_email_sent_ts")
+
+
+def mark_trial_followup_email_sent(email: str) -> bool:
+    return _mark_email_sent(email, "trial_followup_email_sent_ts")
+
+
+def mark_unverified_nudge_sent(email: str) -> bool:
+    return _mark_email_sent(email, "unverified_nudge_sent_ts")
+
+
+def has_email_been_sent(email: str, flag_field: str) -> bool:
+    em = _normalize_email(email)
+    user = (_load().get("users") or {}).get(em)
+    if not user:
+        return False
+    ts = user.get(flag_field)
+    try:
+        return bool(ts and float(ts) > 0)
+    except Exception:
+        return False
+
+
+# ── Drip query helpers — feed email_drip.py with users due for a send ────
+# Each helper iterates accounts.json, applies all the gating conditions
+# (status, marketing_optin, time-since-event, not-already-sent), and
+# returns email addresses ready to receive that specific email.
+
+def users_needing_trial_followup(min_hours_since_expiry: float = 48.0) -> list:
+    """Users whose trial expired ≥ min_hours_since_expiry ago, haven't
+    paid, opted into marketing, and haven't received the followup yet.
+    Returns a list of email strings."""
+    out = []
+    now = time.time()
+    cutoff = now - (float(min_hours_since_expiry) * 3600.0)
+    for em, user in (_load().get("users") or {}).items():
+        if not isinstance(user, dict):
+            continue
+        # Must have a real trial that's expired
+        exp_ts = float(user.get("trial_expires_ts") or 0)
+        if exp_ts <= 0 or exp_ts > cutoff:
+            continue
+        # Must not be paid
+        if (user.get("paid_status") or "").lower() == "paid":
+            continue
+        # Must have opted in (default True for older accounts)
+        if not bool(user.get("marketing_optin", True)):
+            continue
+        # Must not have been sent already
+        if user.get("trial_followup_email_sent_ts"):
+            continue
+        out.append(em)
+    return out
+
+
+def users_needing_unverified_nudge(min_hours_since_signup: float = 24.0) -> list:
+    """Users who signed up ≥ min_hours_since_signup ago, never clicked
+    the verification link, opted into marketing, and haven't received
+    the nudge yet. Returns a list of email strings."""
+    out = []
+    now = time.time()
+    cutoff = now - (float(min_hours_since_signup) * 3600.0)
+    for em, user in (_load().get("users") or {}).items():
+        if not isinstance(user, dict):
+            continue
+        # Must have signed up long enough ago
+        signed_up = float(user.get("signed_up_ts") or 0)
+        if signed_up <= 0 or signed_up > cutoff:
+            continue
+        # Must not have clicked the verification link yet
+        if user.get("magic_token_used"):
+            continue
+        # Must not be paid (paid users skip verification via admin/Stripe path)
+        if (user.get("paid_status") or "").lower() == "paid":
+            continue
+        # Must have opted in
+        if not bool(user.get("marketing_optin", True)):
+            continue
+        # Must not have been nudged already
+        if user.get("unverified_nudge_sent_ts"):
+            continue
+        out.append(em)
+    return out
+
+
+def set_marketing_optin(email: str, optin: bool) -> bool:
+    """Record the user's preference for product/marketing email. Used by
+    the signup forms' "Daily eBay briefing and SnipeWins alerts" checkbox.
+    Returns True on success, False if the email isn't registered.
+    MARKETING-OPTIN-2026-05-15."""
+    em = _normalize_email(email)
+    data = _load()
+    user = data.get("users", {}).get(em)
+    if not user:
+        return False
+    user["marketing_optin"]        = bool(optin)
+    user["marketing_optin_set_ts"] = time.time()
+    _save(data)
+    return True
+
+
+def get_marketing_optin(email: str) -> bool:
+    """Read the user's product/marketing email opt-in. Defaults to True
+    for users who signed up before this field existed — the checkbox is
+    pre-checked at signup, so older accounts were implicitly opted in.
+    Returns False only if the user explicitly unchecked the box or the
+    email isn't registered."""
+    em = _normalize_email(email)
+    user = (_load().get("users") or {}).get(em)
+    if not user:
+        return False
+    return bool(user.get("marketing_optin", True))
+
+
 def has_password(email: str) -> bool:
     """True if the user has ever set a password. Used by the gate to
     decide whether to offer the password login form or only the magic-link

@@ -63,6 +63,16 @@ def enforce_gate(st) -> None:
 
     qp = _read_query_params(st)
 
+    # ── ROUTE -3 (top priority): Stripe checkout return. After a Payment
+    # Link completion, Stripe redirects the user back to
+    # app.snipewins.com/?paid=1&session_id=cs_xxx. We verify the session
+    # with Stripe's API and auto-flip the account to STATUS_PAID. This is
+    # the "auto-flip" that replaces manually running grant-paid.
+    # STRIPE-AUTOFLIP-2026-05-15.
+    if "paid" in qp and qp["paid"] and "session_id" in qp and qp["session_id"]:
+        _handle_stripe_return(st, trial_accounts, str(qp["session_id"]))
+        return
+
     # ── LOGIN-LINK-2026-05-14: the landing page's "Log in" nav link points
     # at ?login=1 so returning members land directly on the sign-in form
     # instead of the default signup form. Set the gate mode, then strip the
@@ -134,6 +144,20 @@ def enforce_gate(st) -> None:
         restored = trial_accounts.find_email_by_session_token(str(qp["s"]))
         if restored:
             st.session_state[SS_EMAIL] = restored
+
+    # ── ROUTE 0.5: Account page (?account=1). Shown from the trial-badge
+    # area for logged-in users. Renders current plan + a "Manage
+    # subscription" button that creates a Stripe Customer Portal session
+    # and redirects. Cancel, upgrade, payment-method change all live
+    # inside the portal. STRIPE-AUTOFLIP-2026-05-15.
+    if "account" in qp and qp["account"]:
+        _account_email = st.session_state.get(SS_EMAIL)
+        if not _account_email:
+            # Not logged in — fall through to the login page below.
+            pass
+        else:
+            _render_account_page(st, trial_accounts, _account_email)
+            st.stop()
 
     # ── ROUTE 1: magic link click (?token=xyz) — used for password reset
     #            and as a fallback for users who forgot their password ───
@@ -231,6 +255,10 @@ def _handle_landing_signup(st, trial_accounts, raw_email: str) -> None:
     magic link, shows the check-inbox page. The trial does NOT start here
     — it starts when the user clicks the link (validate_magic_token).
 
+    MARKETING-OPTIN-2026-05-15: if the landing form passed &optin=1 (or
+    omitted it — checkbox defaults to pre-checked), record the preference
+    on the account. Honored later by the daily briefing send.
+
     Guarded against rerun re-sends via the sw_verification_sent_to session
     flag, mirroring the forgot-password flow's one-shot pattern."""
     em = (raw_email or "").strip().lower()
@@ -247,10 +275,238 @@ def _handle_landing_signup(st, trial_accounts, raw_email: str) -> None:
         return
 
     _send_verification_and_flag(st, trial_accounts, em, password=None)
+    # MARKETING-OPTIN-2026-05-15: read the optin query param. The landing
+    # form sends it as &optin=1 when the checkbox is checked, &optin=0 if
+    # the user unchecked it, missing entirely if the form lacks the field
+    # (legacy). Default to True (the checkbox is pre-checked).
+    try:
+        qp_here = _read_query_params(st)
+        optin_raw = str(qp_here.get("optin") or "1").strip().lower()
+        optin_value = optin_raw not in ("0", "false", "no", "off")
+        trial_accounts.set_marketing_optin(em, optin_value)
+    except Exception as _err:
+        print(f"[MARKETING_OPTIN_ERR] {type(_err).__name__}: {str(_err)[:120]}")
     # Clear ?signup= so reruns land on ROUTE 2.6 instead of re-triggering
     # ROUTE 2 (which would re-send the email).
     _clear_query_params(st)
     _render_check_inbox_page(st, em)
+
+
+def _handle_stripe_return(st, trial_accounts, session_id: str) -> None:
+    """STRIPE-AUTOFLIP-2026-05-15: handle a return from a Stripe Payment
+    Link. The user just paid; verify the session with Stripe's API, then
+    flip their SnipeWins account from trial_expired → paid with the
+    captured customer_id and subscription_id. After this the user lands
+    on the dashboard as a Member.
+
+    Failure mode: if Stripe says the session isn't paid yet (e.g. webhook
+    timing race) or the email doesn't match an account, surface an
+    actionable error and let them retry. We do NOT mark anyone paid based
+    on the query-param alone — we trust ONLY what Stripe's API confirms."""
+    try:
+        import stripe_client
+        if not stripe_client.is_configured():
+            print("[STRIPE_RETURN_ERR] STRIPE_SECRET_KEY not set; can't verify session")
+            st.session_state["sw_trial_error_msg"] = (
+                "Payment received, but we couldn't verify it automatically. "
+                "Email hello@snipewins.com with your address and we'll fix it within the hour."
+            )
+            _clear_query_params(st)
+            _render_login_or_signup_page(st)
+            st.stop()
+        session = stripe_client.get_checkout_session(session_id)
+    except Exception as exc:
+        print(f"[STRIPE_RETURN_ERR] {type(exc).__name__}: {str(exc)[:200]}")
+        st.session_state["sw_trial_error_msg"] = (
+            "We couldn't verify your payment automatically. Refresh in a minute, "
+            "or email hello@snipewins.com — we'll get you set up by hand."
+        )
+        _clear_query_params(st)
+        _render_login_or_signup_page(st)
+        st.stop()
+
+    payment_status = str(session.get("payment_status") or "").lower()
+    if payment_status not in ("paid", "no_payment_required"):
+        # Stripe sometimes returns the user before payment_status flips
+        # to "paid" if their bank is still processing. Tell them to refresh.
+        st.session_state["sw_trial_error_msg"] = (
+            "Your payment is still processing. Refresh this page in a minute — "
+            "once Stripe confirms it, your access flips automatically."
+        )
+        _clear_query_params(st)
+        _render_login_or_signup_page(st)
+        st.stop()
+
+    customer_id     = str(session.get("customer") or "")
+    subscription_id = str(session.get("subscription") or "")
+    customer_email  = (
+        session.get("customer_email")
+        or (session.get("customer_details") or {}).get("email")
+        or ""
+    )
+    customer_email = str(customer_email).strip().lower()
+    if not customer_email:
+        # Should never happen for subscription checkouts — Stripe requires email.
+        print(f"[STRIPE_RETURN_ERR] no customer_email in session {session_id}")
+        _clear_query_params(st)
+        st.session_state["sw_trial_error_msg"] = (
+            "Payment verified, but Stripe didn't return an email for the account. "
+            "Email hello@snipewins.com and we'll set it up by hand."
+        )
+        _render_login_or_signup_page(st)
+        st.stop()
+
+    # Ensure the user record exists. If they paid as a brand-new user
+    # (skipped the trial somehow — possible if someone shared the Stripe
+    # Payment Link directly), signup_email creates an empty account so
+    # mark_as_paid has somewhere to write.
+    if not trial_accounts.get_user(customer_email):
+        trial_accounts.signup_email(customer_email, password=None)
+
+    trial_accounts.mark_as_paid(
+        customer_email,
+        stripe_customer_id=customer_id or "stripe",
+        stripe_subscription_id=subscription_id or None,
+    )
+
+    # EMAIL-CONVERSION-2026-05-15: fire the welcome email the FIRST time
+    # we flip a customer to paid. Guarded by a per-user flag so any future
+    # repeat hit on this route (Stripe retries, manual return, etc.)
+    # doesn't re-send. Best-effort — payment succeeds regardless of email
+    # send status.
+    try:
+        if not trial_accounts.has_email_been_sent(customer_email, "welcome_email_sent_ts"):
+            import email_sender as _es
+            if _es.send_welcome_paid(customer_email):
+                trial_accounts.mark_welcome_email_sent(customer_email)
+    except Exception as _welcome_err:
+        print(f"[WELCOME_EMAIL_ERR] {type(_welcome_err).__name__}: {str(_welcome_err)[:140]}")
+
+    # Log them in with a fresh URL session token so refresh keeps them in.
+    st.session_state[SS_EMAIL] = customer_email
+    _clear_query_params(st)
+    _persist_session_in_url(st, trial_accounts, customer_email)
+    st.rerun()
+
+
+def _render_account_page(st, trial_accounts, email: str) -> None:
+    """STRIPE-AUTOFLIP-2026-05-15: the Account page. Reachable via
+    ?account=1. Shows current plan + a Manage Subscription button that
+    creates a Stripe Customer Portal session and redirects. Cancel,
+    upgrade/downgrade, payment-method update, and invoice history all
+    live inside Stripe's portal — we don't build any of that UI ourselves.
+
+    For trial-active and trial-expired users, the button is replaced with
+    a link back to the paywall (or just info — they have no Stripe
+    customer yet)."""
+    _inject_gate_css(st)
+    user = trial_accounts.get_user(email) or {}
+    status = trial_accounts.get_trial_status(email)
+    customer_id = str(user.get("stripe_customer_id") or "")
+    has_stripe_customer = bool(customer_id) and customer_id not in ("manual", "stripe")
+
+    # Plan label and supporting copy per status
+    if status == trial_accounts.STATUS_PAID and has_stripe_customer:
+        kicker = "Active subscription"
+        headline = "Manage your SnipeWins membership."
+        sub = (
+            "Cancel, switch between Annual and Monthly, update your card, or "
+            "download invoices — all from Stripe's secure billing portal."
+        )
+    elif status == trial_accounts.STATUS_PAID:
+        kicker = "Active member"
+        headline = "You're in."
+        sub = (
+            "Your access is managed manually right now. Email hello@snipewins.com "
+            "with any billing or subscription change."
+        )
+    elif status == trial_accounts.STATUS_TRIAL_ACTIVE:
+        kicker = "10-minute trial active"
+        headline = "Make the most of it."
+        sub = (
+            "Your trial is still ticking. Once it ends you'll see two subscription "
+            "options — Founder Annual or Monthly."
+        )
+    else:
+        kicker = "Trial ended"
+        headline = "Pick a plan to keep going."
+        sub = (
+            "Head back to the paywall to choose Founder Annual ($99/yr) or "
+            "Monthly with a 7-day free trial."
+        )
+
+    st.markdown(
+        f"<div class='sw-auth-header'>"
+        f"<div class='sw-auth-kicker'>{kicker}</div>"
+        f"<h1 class='sw-auth-h1'>{headline}</h1>"
+        f"<p class='sw-auth-sub'>{sub}</p>"
+        f"<p class='sw-auth-sub' style='font-size:13px;color:#6b7280;margin-top:6px;'>"
+        f"Account: <strong>{email}</strong></p>"
+        f"</div>",
+        unsafe_allow_html=True,
+    )
+
+    # Center the action area to match the auth-page width.
+    _spacer_l, _mid, _spacer_r = st.columns([1, 3, 1])
+    with _mid:
+        if status == trial_accounts.STATUS_PAID and has_stripe_customer:
+            try:
+                import stripe_client
+                _stripe_ok = stripe_client.is_configured()
+            except Exception:
+                _stripe_ok = False
+            if not _stripe_ok:
+                st.info(
+                    "Billing portal is temporarily unavailable. "
+                    "Email hello@snipewins.com to make any subscription change."
+                )
+            else:
+                if st.button(
+                    "Manage subscription",
+                    key="sw_account_manage_btn",
+                    type="primary",
+                    use_container_width=True,
+                ):
+                    try:
+                        portal = stripe_client.create_billing_portal_session(
+                            customer_id,
+                            return_url=f"{APP_BASE_URL}/?account=1",
+                        )
+                        portal_url = str(portal.get("url") or "")
+                        if portal_url:
+                            st.markdown(
+                                f"<meta http-equiv='refresh' content='0; url={portal_url}'>"
+                                f"<p style='color:#b0b0b0;font-size:14px;text-align:center;"
+                                f"margin-top:14px;'>Opening Stripe billing portal… "
+                                f"<a href='{portal_url}' style='color:#4ade80;'>"
+                                f"Click here</a> if you aren't redirected.</p>",
+                                unsafe_allow_html=True,
+                            )
+                            st.stop()
+                        else:
+                            st.error("Couldn't open the billing portal. Try again in a moment.")
+                    except Exception as exc:
+                        print(f"[BILLING_PORTAL_ERR] {type(exc).__name__}: {str(exc)[:200]}")
+                        st.error(
+                            "Couldn't open the billing portal right now. "
+                            "Try again in a moment, or email hello@snipewins.com."
+                        )
+        elif status == trial_accounts.STATUS_TRIAL_EXPIRED:
+            # Send them back to where the paywall renders.
+            st.markdown(
+                "<a href='?' style='display:block;text-align:center;padding:12px 18px;"
+                "background:linear-gradient(135deg,#4ade80 0%,#22c55e 100%);color:#0a0a0a;"
+                "font-weight:700;font-size:15px;border-radius:10px;text-decoration:none;'>"
+                "See subscription options →</a>",
+                unsafe_allow_html=True,
+            )
+        # Back-to-dashboard link below the action area.
+        st.markdown(
+            "<div style='margin-top:18px;text-align:center;'>"
+            "<a href='?' style='color:#60a5fa;font-size:13px;text-decoration:none;'>"
+            "← Back to dashboard</a></div>",
+            unsafe_allow_html=True,
+        )
 
 
 def _handle_token_click(st, trial_accounts, token: str, is_reset: bool = False) -> None:
@@ -336,6 +592,21 @@ def _render_set_new_password_after_magic(st) -> None:
             type="password",
             label_visibility="collapsed",
         )
+        # MARKETING-OPTIN-2026-05-15: show the checkbox here too, pre-checked
+        # with the user's existing preference. Covers the landing-form path
+        # (where the user already saw + maybe checked the box on the landing
+        # page) AND the forgot-password reset path (lets them adjust at the
+        # same time as resetting). get_marketing_optin defaults to True for
+        # users who haven't been asked yet.
+        try:
+            _existing_optin = trial_accounts.get_marketing_optin(email)
+        except Exception:
+            _existing_optin = True
+        optin_value = st.checkbox(
+            "Receive daily eBay briefings and SnipeWins alerts with target bids for each auction",
+            value=_existing_optin,
+            key="sw_magic_optin",
+        )
         submitted = st.form_submit_button(
             "Save password and start my trial  →",
             type="primary",
@@ -351,6 +622,12 @@ def _render_set_new_password_after_magic(st) -> None:
             st.error("Couldn't save that password. Try again in a moment.")
             return
         trial_accounts.start_trial_now(email)
+        # MARKETING-OPTIN-2026-05-15: record the final preference from the
+        # checkbox on this form.
+        try:
+            trial_accounts.set_marketing_optin(email, bool(optin_value))
+        except Exception as _err:
+            print(f"[MARKETING_OPTIN_ERR] {type(_err).__name__}: {str(_err)[:120]}")
         st.session_state[SS_EMAIL] = email
         st.session_state.pop("sw_pending_password_set_email", None)
         _persist_session_in_url(st, trial_accounts, email)
@@ -523,6 +800,24 @@ def _render_login_or_signup_page(st) -> None:
             type="password",
             label_visibility="collapsed",
         )
+        # MARKETING-OPTIN-2026-05-15: signup mode only — log-in users
+        # already have a preference on file. Pre-checked because the
+        # opt-in is product-functional (daily briefing + STRIKE alerts),
+        # not pure marketing. Honors the user's existing preference if
+        # they're returning to re-sign-up after a forgot/reset.
+        optin_value = True
+        if is_signup:
+            try:
+                _existing_optin = trial_accounts.get_marketing_optin(
+                    (email_input or "").strip().lower()
+                ) if (email_input or "").strip() else True
+            except Exception:
+                _existing_optin = True
+            optin_value = st.checkbox(
+                "Receive daily eBay briefings and SnipeWins alerts with target bids for each auction",
+                value=_existing_optin,
+                key="sw_signup_optin",
+            )
         submitted = st.form_submit_button(
             button_text,
             type="primary",
@@ -538,7 +833,10 @@ def _render_login_or_signup_page(st) -> None:
         if len(pw) < trial_accounts.MIN_PASSWORD_LEN:
             st.error(f"Password needs at least {trial_accounts.MIN_PASSWORD_LEN} characters.")
             return
-        _handle_email_password_submit(st, trial_accounts, em, pw)
+        _handle_email_password_submit(
+            st, trial_accounts, em, pw,
+            marketing_optin=(optin_value if is_signup else None),
+        )
 
     # Cross-link between the two modes + the forgot-password escape hatch.
     # Wrapped in spacer columns so the row visually aligns with the 460px
@@ -622,11 +920,18 @@ def _render_set_password_page(st, prefill_email: str) -> None:
         _handle_email_password_submit(st, trial_accounts, em, pw)
 
 
-def _handle_email_password_submit(st, trial_accounts, email: str, password: str) -> None:
+def _handle_email_password_submit(
+    st, trial_accounts, email: str, password: str,
+    marketing_optin: Optional[bool] = None,
+) -> None:
     """Single handler used by BOTH the landing-redirect signup AND the
     in-app login/signup form.
 
     EMAIL-VERIFY-2026-05-14: signup no longer grants an instant trial.
+    MARKETING-OPTIN-2026-05-15: marketing_optin is recorded for signups
+    (and refreshes for login if the user is re-confirming intent). None
+    means "don't touch" — used by paths that don't show a checkbox.
+
     Logic:
         - Email already has a password set:
             * Matches AND verified → log in (resume trial or paywall)
@@ -668,6 +973,14 @@ def _handle_email_password_submit(st, trial_accounts, email: str, password: str)
     # a verification email, and rerun — ROUTE 2.6 then renders check-inbox.
     # The 10-minute trial starts only when they click the link.
     _send_verification_and_flag(st, trial_accounts, email, password=password)
+    # MARKETING-OPTIN-2026-05-15: persist the checkbox value if the caller
+    # supplied one. signup_email created the user record above, so the
+    # set_marketing_optin call has a record to write to.
+    if marketing_optin is not None:
+        try:
+            trial_accounts.set_marketing_optin(email, bool(marketing_optin))
+        except Exception as _err:
+            print(f"[MARKETING_OPTIN_ERR] {type(_err).__name__}: {str(_err)[:120]}")
     _clear_query_params(st)
     st.rerun()
 
@@ -706,6 +1019,20 @@ def _render_paywall(st, email: str) -> None:
         - $29/month with 7-day free trial (gentler ramp for the hesitant)
     """
     _inject_gate_css(st)
+
+    # EMAIL-CONVERSION-2026-05-15: fire the trial-expired conversion email
+    # the FIRST time the paywall renders for this user. Guarded by a per-
+    # user flag so refreshes / re-renders don't re-send. Best-effort —
+    # we don't block the paywall render if the email send fails.
+    try:
+        import trial_accounts as _ta
+        if not _ta.has_email_been_sent(email, "trial_expired_email_sent_ts"):
+            import email_sender as _es
+            if _es.send_trial_expired(email):
+                _ta.mark_trial_expired_email_sent(email)
+    except Exception as _exp_email_err:
+        print(f"[TRIAL_EXPIRED_EMAIL_ERR] {type(_exp_email_err).__name__}: {str(_exp_email_err)[:140]}")
+
     checkout_annual = STRIPE_CHECKOUT_URL or "#"
     checkout_trial  = STRIPE_TRIAL_CHECKOUT_URL or "#"
     # Features common to both tiers — pulled into a list so the Founder
@@ -802,10 +1129,16 @@ def _render_trial_badge(st, email: str, remaining_secs: Optional[int], paid: boo
     _inject_gate_css(st)
     if paid:
         # Paid users — no countdown needed, stay with the simple inline markdown.
+        # STRIPE-AUTOFLIP-2026-05-15: append a discrete "Account" link that
+        # routes to ?account=1 → the Manage Subscription page. Same nav-link
+        # treatment as the landing's Log in link; only there if they look for it.
         st.markdown(
             f"<div class='sw-trial-badge sw-trial-badge-paid'>"
             f"<span class='sw-trial-badge-dot' style='background:#4ade80;'></span>"
             f"Member · <strong>{email}</strong>"
+            f"<span style='color:#444;margin:0 6px;'>·</span>"
+            f"<a href='?account=1' style='color:#60a5fa;font-size:11px;"
+            f"text-decoration:none;'>Account</a>"
             f"</div>",
             unsafe_allow_html=True,
         )
