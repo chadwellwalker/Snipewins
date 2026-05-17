@@ -43,6 +43,37 @@ _MOBILE_CARD_CSS = """<style>
   .snipe-card-footer > .snipe-card-link { flex: 1 1 100% !important; margin-top: 4px !important; }
   .snipe-card-footer .snipe-card-link a { display: flex !important; justify-content: center !important; width: 100% !important; box-sizing: border-box !important; }
 }
+/* SEARCH-BUTTON-2026-05-17: brand-green primary button — see pool_view.py
+   for the same block + rationale. Duplicated rather than centralized
+   because both modules render independently and either tab can mount first. */
+.stButton > button[kind="primary"],
+button[data-testid="baseButton-primary"],
+button[data-testid="stBaseButton-primary"] {
+  background: #4ade80 !important;
+  color: #ffffff !important;
+  border: 1px solid #4ade80 !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.02em !important;
+  box-shadow: 0 0 0 1px rgba(74,222,128,0.25) !important;
+  transition: background 0.15s ease, border-color 0.15s ease, transform 0.05s ease !important;
+}
+.stButton > button[kind="primary"] *,
+button[data-testid="baseButton-primary"] *,
+button[data-testid="stBaseButton-primary"] * {
+  color: #ffffff !important;
+}
+.stButton > button[kind="primary"]:hover,
+button[data-testid="baseButton-primary"]:hover,
+button[data-testid="stBaseButton-primary"]:hover {
+  background: #22c55e !important;
+  border-color: #22c55e !important;
+  color: #ffffff !important;
+}
+.stButton > button[kind="primary"]:active,
+button[data-testid="baseButton-primary"]:active,
+button[data-testid="stBaseButton-primary"]:active {
+  transform: translateY(1px) !important;
+}
 </style>"""
 
 
@@ -649,13 +680,23 @@ def render_bin_radar(streamlit, *, max_cards: int = 30) -> None:
     # TITLE-SEARCH-2026-05-17: free-text search box, same UX as pool_view.
     # Multi-word queries are AND'd against title + source_title, so typing
     # "judge auto" matches listings with both words in any order.
-    _search_q = st.text_input(
-        "Search BIN listings",
-        value="",
-        placeholder="Search by player, set, parallel… (e.g. 'Wemby Prizm')",
-        key="bin_view_search",
-        label_visibility="collapsed",
-    )
+    # SEARCH-BUTTON-2026-05-17: input + green "Search" button on the same row.
+    _search_cols = st.columns([6, 1], gap="small")
+    with _search_cols[0]:
+        _search_q = st.text_input(
+            "Search BIN listings",
+            value="",
+            placeholder="Search by player, set, parallel… (e.g. 'Wemby Prizm')",
+            key="bin_view_search",
+            label_visibility="collapsed",
+        )
+    with _search_cols[1]:
+        st.button(
+            "Search",
+            key="bin_view_search_btn",
+            type="primary",
+            use_container_width=True,
+        )
     _search_norm = (_search_q or "").strip().lower()
 
     # Filter chip — Strikes / Actionable / All. RECOMMENDED-OFFER-2026-05-13:

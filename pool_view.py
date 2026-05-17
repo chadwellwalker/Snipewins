@@ -48,6 +48,38 @@ _MOBILE_CARD_CSS = """<style>
   .snipe-card-footer > .snipe-card-link { flex: 1 1 100% !important; margin-top: 4px !important; }
   .snipe-card-footer .snipe-card-link a { display: flex !important; justify-content: center !important; width: 100% !important; box-sizing: border-box !important; }
 }
+/* SEARCH-BUTTON-2026-05-17: brand-green Streamlit primary button with white
+   text. Matches the green-glow search input and the rest of the SnipeWins
+   accent palette. Multiple selectors cover the various data-testid names
+   Streamlit has used across versions. */
+.stButton > button[kind="primary"],
+button[data-testid="baseButton-primary"],
+button[data-testid="stBaseButton-primary"] {
+  background: #4ade80 !important;
+  color: #ffffff !important;
+  border: 1px solid #4ade80 !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.02em !important;
+  box-shadow: 0 0 0 1px rgba(74,222,128,0.25) !important;
+  transition: background 0.15s ease, border-color 0.15s ease, transform 0.05s ease !important;
+}
+.stButton > button[kind="primary"] *,
+button[data-testid="baseButton-primary"] *,
+button[data-testid="stBaseButton-primary"] * {
+  color: #ffffff !important;
+}
+.stButton > button[kind="primary"]:hover,
+button[data-testid="baseButton-primary"]:hover,
+button[data-testid="stBaseButton-primary"]:hover {
+  background: #22c55e !important;
+  border-color: #22c55e !important;
+  color: #ffffff !important;
+}
+.stButton > button[kind="primary"]:active,
+button[data-testid="baseButton-primary"]:active,
+button[data-testid="stBaseButton-primary"]:active {
+  transform: translateY(1px) !important;
+}
 </style>"""
 
 
@@ -1011,13 +1043,28 @@ def render_morning_briefing(streamlit, *, max_cards: int = 150) -> None:
     # types → tabs out / hits Enter → sees results in ~100ms. Matching
     # against title + source_title catches both the display title and the
     # raw eBay title in case they diverge after trimming/normalization.
-    _search_q = st.text_input(
-        "Search auctions",
-        value="",
-        placeholder="Search by player, set, parallel… (e.g. 'Wemby Prizm')",
-        key="pool_view_search",
-        label_visibility="collapsed",
-    )
+    #
+    # SEARCH-BUTTON-2026-05-17: input + brand-green "Search" button laid
+    # out as a 2-column row. The button is functionally redundant (any
+    # rerun re-applies the filter from session_state) but visually
+    # affords "this is a search" and gives users a clickable target
+    # if Enter feels unusual.
+    _search_cols = st.columns([6, 1], gap="small")
+    with _search_cols[0]:
+        _search_q = st.text_input(
+            "Search auctions",
+            value="",
+            placeholder="Search by player, set, parallel… (e.g. 'Wemby Prizm')",
+            key="pool_view_search",
+            label_visibility="collapsed",
+        )
+    with _search_cols[1]:
+        st.button(
+            "Search",
+            key="pool_view_search_btn",
+            type="primary",
+            use_container_width=True,
+        )
     _search_norm = (_search_q or "").strip().lower()
 
     # FILTER-FIX 2026-05-12: time-window chips replaced with sport chips. The
