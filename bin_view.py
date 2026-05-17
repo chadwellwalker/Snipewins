@@ -27,6 +27,41 @@ HERE = Path(__file__).parent
 POOL_FILE = Path(os.environ.get("SNIPEWINS_BIN_POOL_PATH") or str(HERE / "bin_pool.json"))
 
 
+# MOBILE-CSS-2026-05-17: cards were squished on phones because the 4-column
+# footer (BIN / MV / Target / link) doesn't fit at 360-414px viewports. We
+# can't put @media queries inside inline style attributes, so we tag the
+# card pieces with classes and inject a <style> block once per session that
+# overrides the inline styles with !important on small screens. Stacks the
+# footer into a 2x2 grid + full-width link, shrinks the image and padding.
+_MOBILE_CARD_CSS = """<style>
+@media (max-width: 640px) {
+  .snipe-card { padding: 12px 14px !important; gap: 12px !important; }
+  .snipe-card-image { width: 64px !important; height: 64px !important; }
+  .snipe-card-title { font-size: 13.5px !important; line-height: 1.3 !important; margin-bottom: 10px !important; }
+  .snipe-card-footer { flex-wrap: wrap !important; gap: 10px 14px !important; align-items: flex-start !important; }
+  .snipe-card-footer > div { flex: 1 1 40% !important; min-width: 0 !important; }
+  .snipe-card-footer > .snipe-card-link { flex: 1 1 100% !important; margin-top: 4px !important; }
+  .snipe-card-footer .snipe-card-link a { display: flex !important; justify-content: center !important; width: 100% !important; box-sizing: border-box !important; }
+}
+</style>"""
+
+
+def _inject_mobile_card_css(st) -> None:
+    """Emit the responsive style block once per session. Cheap to call
+    repeatedly thanks to the session_state guard."""
+    try:
+        if st.session_state.get("_snipewins_mobile_card_css_v1"):
+            return
+        st.markdown(_MOBILE_CARD_CSS, unsafe_allow_html=True)
+        st.session_state["_snipewins_mobile_card_css_v1"] = True
+    except Exception:
+        # Worst case we emit the style block twice — harmless.
+        try:
+            st.markdown(_MOBILE_CARD_CSS, unsafe_allow_html=True)
+        except Exception:
+            pass
+
+
 # ── Pool reading ────────────────────────────────────────────────────────────
 
 def _load_pool() -> Dict[str, Any]:
@@ -498,6 +533,8 @@ def _render_comp_summary(streamlit, row: Dict[str, Any]) -> None:
 def render_bin_radar(streamlit, *, max_cards: int = 30) -> None:
     """Render the Buying Radar tab — continuous BIN feed."""
     st = streamlit
+    # MOBILE-CSS-2026-05-17: emit responsive overrides before any card render.
+    _inject_mobile_card_css(st)
     pool = _load_pool()
     items: Dict[str, Any] = pool.get("items", {}) or {}
 
@@ -710,7 +747,7 @@ def render_bin_radar(streamlit, *, max_cards: int = 30) -> None:
         # Image + link + blocks
         if img_url:
             image_html = (
-                f'<div style="flex-shrink:0;width:84px;height:84px;'
+                f'<div class="snipe-card-image" style="flex-shrink:0;width:84px;height:84px;'
                 f'border-radius:10px;overflow:hidden;background:#0a0a0a;'
                 f'border:1px solid rgba(148,163,184,0.12);">'
                 f'<img src="{img_url}" alt="" '
@@ -720,7 +757,7 @@ def render_bin_radar(streamlit, *, max_cards: int = 30) -> None:
             )
         else:
             image_html = (
-                f'<div style="flex-shrink:0;width:84px;height:84px;'
+                f'<div class="snipe-card-image" style="flex-shrink:0;width:84px;height:84px;'
                 f'border-radius:10px;background:#0a0a0a;'
                 f'border:1px solid rgba(148,163,184,0.12);'
                 f'display:flex;align-items:center;justify-content:center;'
@@ -814,8 +851,11 @@ def render_bin_radar(streamlit, *, max_cards: int = 30) -> None:
             )
 
         # Build single-line card HTML
+        # MOBILE-CSS-2026-05-17: classes (snipe-card / snipe-card-title /
+        # snipe-card-footer / snipe-card-link) let the @media style block
+        # collapse the footer into a 2x2 grid + full-width link on phones.
         card_html = (
-            f'<div style="margin:10px 0;padding:16px 18px;'
+            f'<div class="snipe-card" style="margin:10px 0;padding:16px 18px;'
             f'background:linear-gradient(180deg,#161616 0%,#1c1c1c 100%);'
             f'border-radius:14px;font-family:-apple-system,\'SF Pro Display\',Inter,sans-serif;'
             f'color:#fafafa;box-shadow:0 2px 12px rgba(0,0,0,0.2);'
@@ -831,12 +871,12 @@ def render_bin_radar(streamlit, *, max_cards: int = 30) -> None:
             f'{recommend_offer_html}'
             f'</div>'
             f'</div>'
-            f'<div style="font-size:15px;font-weight:600;color:#fafafa;line-height:1.35;margin-bottom:12px;">{title}</div>'
-            f'<div style="display:flex;align-items:flex-end;gap:18px;padding-top:12px;border-top:1px solid rgba(148,163,184,0.08);margin-top:auto;">'
+            f'<div class="snipe-card-title" style="font-size:15px;font-weight:600;color:#fafafa;line-height:1.35;margin-bottom:12px;">{title}</div>'
+            f'<div class="snipe-card-footer" style="display:flex;align-items:flex-end;gap:18px;padding-top:12px;border-top:1px solid rgba(148,163,184,0.08);margin-top:auto;">'
             f'<div style="flex:1;">{bin_block}</div>'
             f'<div style="flex:1;">{mv_block}</div>'
             f'<div style="flex:1;">{target_block}</div>'
-            f'<div style="flex-shrink:0;">{link_html}</div>'
+            f'<div class="snipe-card-link" style="flex-shrink:0;">{link_html}</div>'
             f'</div>'
             f'</div>'
             f'</div>'

@@ -681,10 +681,27 @@ def build_card_fingerprint(title: str) -> Dict[str, Any]:
     ).upper() or None
     _grade = _grade_value_from_title(_title) or str(getattr(_legacy_parsed, "grade", "") or "").strip() or None
     _grade_state = "graded" if _grade_company else "raw"
+    # Guard against "non auto" / "non-auto" / "no auto" / "no autograph" being
+    # misclassified as Auto. The bare-word regex below matches "auto" /
+    # "autograph", but eBay listings frequently say "Elly De La Cruz Non Auto
+    # /99" or "Skenes No Autograph Refractor" — those are explicitly NOT
+    # autograph cards and were being tagged as Auto, which poisoned the MV
+    # (autos comp 5-20× higher than the same card non-auto). Also check the
+    # profile/legacy bool sources first — those come from the structured
+    # parser and are trustworthy; only fall through to the regex if neither
+    # said yes AND there's no negation marker in the title.
+    _has_non_auto_marker = bool(re.search(
+        r"\bno[n]?[\s\-]*(?:auto(?:graph)?|signed|ink)\b",
+        _title,
+        flags=re.IGNORECASE,
+    ))
     _is_auto = bool(
         getattr(_profile, "is_auto", False)
         or getattr(_legacy_parsed, "is_auto", False)
-        or re.search(r"\b(auto|autograph|signed|ink)\b", _title, flags=re.IGNORECASE)
+        or (
+            not _has_non_auto_marker
+            and re.search(r"\b(auto|autograph|signed|ink)\b", _title, flags=re.IGNORECASE)
+        )
     )
     _scarcity_class = ""
     if _serial_denominator:
