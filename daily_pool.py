@@ -795,13 +795,18 @@ def fetch_and_update(window_hours: float = DEFAULT_WINDOW_HOURS) -> Dict[str, An
     )
 
     # DAILY-BUDGET-2026-05-15: report this cycle's eBay-call count to the
-    # shared daily counter. The auction engine doesn't expose an exact
-    # call count, so we use a conservative flat estimate based on the
-    # known budgeted spec count (~27) plus auth/probe overhead. Tunable
-    # if logs show systematic over/under-counting once we observe real runs.
+    # shared daily counter. The auction engine uses urllib directly (not
+    # ebay_search.fetch_completed_listings, which now auto-records each
+    # call) so we still flat-estimate engine calls here.
+    #
+    # ACCURATE-CALL-COUNTING-2026-05-17: bumped 40 → 60 because _ES_MAX_COHORT_SIZE
+    # is 50 specs/scan and we were observed running into 429s with the
+    # daily_budget showing only ~2000/4500 used — meaning the on-disk
+    # counter was systematically undercounting actual eBay usage. 60 is
+    # 50 search calls + auth/probe overhead.
     try:
         import daily_budget
-        daily_budget.record_calls(40)
+        daily_budget.record_calls(60)
     except Exception as _bud_err:
         print(f"[daily_pool] daily_budget record failure (non-fatal): {_bud_err}")
 

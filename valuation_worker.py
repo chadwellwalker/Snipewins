@@ -737,11 +737,14 @@ def main(argv: List[str]) -> int:
                     # often 1-2 with cache hits. We estimate calls as
                     # (valued + failed) × 2 — a middle ground between best
                     # case (1 call/card via cache) and worst case (3 passes).
-                    try:
-                        _cards = int(_result.get("valued", 0)) + int(_result.get("failed", 0))
-                        daily_budget.record_calls(_cards * 2)
-                    except Exception:
-                        pass
+                    # ACCURATE-CALL-COUNTING-2026-05-17: ebay_search.py
+                    # now records 1 call per actual HTTP fire (which is
+                    # the source of truth for API usage). The old
+                    # (cards * 2) estimate here is gone because it was
+                    # undercounting by 2-4x — real per-card cost is 3-8
+                    # API calls across the query-pass ladder. Leave this
+                    # block as a no-op marker so the diff is obvious.
+                    pass
             except KeyboardInterrupt:
                 print("[valuation_worker] interrupted")
                 return 130

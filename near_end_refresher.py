@@ -219,6 +219,18 @@ def _fetch_item_price(item_id: str, headers: Dict[str, str]) -> Optional[Dict[st
             f"body={body}",
             flush=True,
         )
+        # COOLDOWN-SIGNAL-2026-05-17: when we 429, feed that signal into
+        # ebay_search's cooldown counter so the worker process (which
+        # shares this module's process) sees the rate-limit hint and
+        # backs off in lockstep. Without this, near-end and worker each
+        # had to discover 429s independently — doubling the burn.
+        if exc.code == 429:
+            try:
+                import ebay_search as _es
+                _es._consecutive_429s = int(getattr(_es, "_consecutive_429s", 0) or 0) + 1
+                _es._last_was_rate_limited = True
+            except Exception:
+                pass
         return None
     except Exception as exc:
         print(
@@ -422,6 +434,24 @@ def run_once(force: bool = False) -> Dict[str, Any]:
     except Exception:
         # If daily_budget can't be imported (e.g. dev environment without
         # the file), fall through using only the near-end cap.
+        pass
+
+    # COOLDOWN-RESPECT-2026-05-17: if ebay_search is currently in its
+    # 429-cooldown window, do NOT fire near-end requests on top of it.
+    # Stacking pressure during a cooldown is what caused the worker to
+    # escalate to 12 consecutive cooldowns at the 1h ceiling. The near-end
+    # tier cadence (15-60s) is way tighter than the worst-case 1h
+    # cooldown, so skipping one cycle is no big deal; resuming once the
+    # cooldown lifts gives us a clean attempt instead of stacking 429s.
+    try:
+        import ebay_search as _es
+        _cd_until = float(getattr(_es, "_rate_limit_cooldown_until_ts", 0.0) or 0.0)
+        if _cd_until > time.time():
+            _remaining = int(_cd_until - time.time())
+            summary["skipped_reason"] = f"ebay_search_cooldown_active ({_remaining}s remaining)"
+            return summary
+    except Exception:
+        # ebay_search not available in some contexts — fall through.
         pass
 
     headers = _ebay_headers()

@@ -319,6 +319,18 @@ def search_market_comps_browse(keyword: str, limit: int = 40) -> List[Dict[str, 
         "limit": lim,
     }
     _q_short = (keyword or "")[:120]
+    # ACCURATE-CALL-COUNTING-2026-05-17: register the call against the
+    # daily budget AT THE POINT OF ACTUAL FIRE, not via heuristic estimate
+    # in callers. The worker was using (cards_valued * 2) which severely
+    # undercounts — real per-card cost is 3-8 calls across query passes.
+    # Counting here is the source of truth: one HTTP request = one budget
+    # tick, regardless of which caller fired it. Failure-quiet so a
+    # budget bookkeeping bug can't take down the scanner.
+    try:
+        import daily_budget as _db
+        _db.record_calls(1)
+    except Exception:
+        pass
     try:
         response = _ebay_requests_session().get(url, headers=headers, params=params, timeout=30)
     except requests.RequestException as exc:
