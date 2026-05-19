@@ -1434,11 +1434,49 @@ def render_morning_briefing(streamlit, *, max_cards: int = 150) -> None:
                 f'<div style="{_pending_css}">{_state_msg}</div>'
                 f'{_state_sub}'
             )
-        if target_value is not None and target_value > 0:
+        # MV-BANDAID-2026-05-18: when the MV is a fuzzy fallback (no
+        # exact-grade comps AND no countable comp basis), the Target
+        # number is built on sand — observed Skenes Refractor PSA 10
+        # showing Target $292 when the real PSA-10 comp set was $200-$235.
+        # Surfacing a confident-looking dollar Target in that state
+        # actively misleads the user. So we suppress just the number
+        # (not the whole STRIKE/CLOSE call) when the engine isn't
+        # confident enough to defend a specific bid level. The user can
+        # still see MV, see the spread, and use the Audit-on-eBay link
+        # in View comps to sanity-check.
+        _target_is_unreliable = False
+        if mv_is_estimate:
+            _target_is_unreliable = True
+        elif mv_value is not None and mv_value > 0:
+            _mq = _row_mv_match_quality(row)
+            _cc = (
+                row.get("_mv_dominant_comp_count")
+                or row.get("_mv_accepted_comp_count")
+                or row.get("_mv_comp_count")
+                or 0
+            )
+            try:
+                _cc = int(_cc)
+            except Exception:
+                _cc = 0
+            # Fuzzy MV with zero countable comps = the bare "≈ SnipeWins
+            # estimate" case (no qualifier under MV) — the worst signal.
+            if _mq != "exact" and _cc == 0:
+                _target_is_unreliable = True
+
+        if target_value is not None and target_value > 0 and not _target_is_unreliable:
             target_block = (
                 f'<div style="{_label_css}">Target</div>'
                 f'<div style="font-size:20px;font-weight:700;color:#4ade80;">'
                 f'${target_value:,.0f}</div>'
+            )
+        elif _target_is_unreliable:
+            # MV exists but is fuzzy — don't put a dollar Target on it.
+            target_block = (
+                f'<div style="{_label_css}">Target</div>'
+                f'<div style="{_pending_css}">needs more comps</div>'
+                f'<div style="font-size:9px;color:#6b7280;margin-top:3px;">'
+                f'audit on eBay →</div>'
             )
         else:
             target_block = (

@@ -742,9 +742,20 @@ def main(argv: List[str]) -> int:
                     # the source of truth for API usage). The old
                     # (cards * 2) estimate here is gone because it was
                     # undercounting by 2-4x — real per-card cost is 3-8
-                    # API calls across the query-pass ladder. Leave this
-                    # block as a no-op marker so the diff is obvious.
-                    pass
+                    # API calls across the query-pass ladder.
+                    #
+                    # BUDGET-PULSE-2026-05-18: emit grep-friendly quota
+                    # snapshot every cycle so drift is visible in logs.
+                    try:
+                        _bs = daily_budget.get_budget_summary()
+                        print(
+                            f"[BUDGET_PULSE] source=worker "
+                            f"calls={_bs['calls_today']}/{_bs['daily_budget']} "
+                            f"pct={_bs['pct_used']}% remaining={_bs['remaining']}",
+                            flush=True,
+                        )
+                    except Exception:
+                        pass
             except KeyboardInterrupt:
                 print("[valuation_worker] interrupted")
                 return 130

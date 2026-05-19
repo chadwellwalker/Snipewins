@@ -810,6 +810,22 @@ def fetch_and_update(window_hours: float = DEFAULT_WINDOW_HOURS) -> Dict[str, An
     except Exception as _bud_err:
         print(f"[daily_pool] daily_budget record failure (non-fatal): {_bud_err}")
 
+    # BUDGET-PULSE-2026-05-18: emit a single-line snapshot of quota usage
+    # after every cycle so we can spot drift early instead of discovering
+    # exhaustion only when 429s start cascading. Format is grep-friendly:
+    # [BUDGET_PULSE] source=daily_pool calls=X/Y pct=Z%
+    try:
+        import daily_budget as _bp
+        _bs = _bp.get_budget_summary()
+        print(
+            f"[BUDGET_PULSE] source=daily_pool "
+            f"calls={_bs['calls_today']}/{_bs['daily_budget']} "
+            f"pct={_bs['pct_used']}% remaining={_bs['remaining']}",
+            flush=True,
+        )
+    except Exception:
+        pass
+
     return summary
 
 

@@ -793,21 +793,31 @@ def _is_valid_product_parallel_combo(product: Any, parallel: Any) -> bool:
 # ── Cohort batching — focused scan universe per Ending Soon cycle ─────────────
 # When sport_filter is None/"All", default to NFL to prevent cross-sport explosion.
 _ES_DEFAULT_SPORT = "NFL"
+# VOLUME-BUMP-2026-05-18: prior config (25/25/50 specs/scan, 5-min rotation)
+# produced only 11 actionable auctions in the pool — not enough surface area
+# for a beta userbase. Bumping core +5 and rotating +20 increases per-scan
+# breadth from 50 → 75 specs. With ACCURATE-CALL-COUNTING-2026-05-17 in place,
+# we can trust daily_budget to gate this safely: 75 specs/scan × 24 scans/day
+# ≈ 1,800 calls/day for auction pool, leaving ~3,200/day headroom for worker
+# comps + BIN scanner + near_end_refresher. Rotation interval 5min → 3min so
+# lower-tier specs cycle through the rotating slot faster — over a day we see
+# ~480 unique specs covered (was ~288) without raising per-cycle calls.
 # Core cohort: always included (highest-priority player × product combos)
-_ES_COHORT_CORE_SIZE = 25
+_ES_COHORT_CORE_SIZE = 30
 # Rotating cohort: a slice of lower-priority targets, rotated across scans
-_ES_COHORT_ROTATING_SIZE = 25
+_ES_COHORT_ROTATING_SIZE = 45
 # Total max specs sent to the lane executor per scan (before budget capping)
-_ES_MAX_COHORT_SIZE = 50
+_ES_MAX_COHORT_SIZE = 75
 # Rotation interval in seconds — how long before the rotating slice advances
-_ES_ROTATION_INTERVAL_SECS = 300  # 5 min
+_ES_ROTATION_INTERVAL_SECS = 180  # 3 min
 
 # ── Cross-sport cohort allocation (when sport_filter=None/"All") ─────────────
-# Per-sport core + rotating slots; total ~53, capped at _ES_MAX_COHORT_SIZE=50
-_ES_CROSS_SPORT_NFL_CORE = 18
-_ES_CROSS_SPORT_NFL_ROT  = 10
-_ES_CROSS_SPORT_MLB_CORE = 10
-_ES_CROSS_SPORT_MLB_ROT  =  5
+# Per-sport core + rotating slots; total adjusted for _ES_MAX_COHORT_SIZE=75.
+# Allocation roughly proportional to target volume (NFL 1139, MLB 560, NBA 91).
+_ES_CROSS_SPORT_NFL_CORE = 24
+_ES_CROSS_SPORT_NFL_ROT  = 18
+_ES_CROSS_SPORT_MLB_CORE = 14
+_ES_CROSS_SPORT_MLB_ROT  =  9
 _ES_CROSS_SPORT_NBA_CORE =  6
 _ES_CROSS_SPORT_NBA_ROT  =  4
 _ES_DIVERSITY_STABLE_CORE_SIZE = 12

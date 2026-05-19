@@ -911,11 +911,45 @@ def render_bin_radar(streamlit, *, max_cards: int = 30) -> None:
                 f'<div style="{_row_label_css}">Market value</div>'
                 f'<div style="{_pending_css}">computing…</div>'
             )
+        # MV-BANDAID-2026-05-18: mirror of pool_view's confidence gate. If
+        # the engine produced an MV but didn't find exact-grade comps AND
+        # has no countable comp basis, the Target number is built on sand.
+        # Suppress just the number (STRIKE/CLOSE call still works since
+        # it's based on bin_price vs MV, just less defensible at the
+        # dollar level). bin_view doesn't have _row_mv_match_quality so
+        # we inline the check against the same fields the worker stamps.
+        _target_unreliable = False
         if target_value is not None and target_value > 0:
+            _mq = str(
+                row.get("_mv_match_quality")
+                or row.get("mv_match_quality")
+                or ""
+            ).lower()
+            _cc = (
+                row.get("_mv_dominant_comp_count")
+                or row.get("_mv_accepted_comp_count")
+                or row.get("_mv_comp_count")
+                or 0
+            )
+            try:
+                _cc = int(_cc)
+            except Exception:
+                _cc = 0
+            if _mq != "exact" and _cc == 0:
+                _target_unreliable = True
+
+        if target_value is not None and target_value > 0 and not _target_unreliable:
             target_block = (
                 f'<div style="{_row_label_css}">Target</div>'
                 f'<div style="font-size:20px;font-weight:700;color:#4ade80;">'
                 f'${target_value:,.0f}</div>'
+            )
+        elif _target_unreliable:
+            target_block = (
+                f'<div style="{_row_label_css}">Target</div>'
+                f'<div style="{_pending_css}">needs more comps</div>'
+                f'<div style="font-size:9px;color:#6b7280;margin-top:3px;">'
+                f'audit on eBay →</div>'
             )
         else:
             target_block = (

@@ -1815,12 +1815,18 @@ input:-webkit-autofill:active,
    gate that turns "Already have an account? Sign in" into shouting.
    Override case+letter-spacing+font-size here so the gate's secondary
    buttons stay sentence case. */
+/* GATE-BUTTON-VISIBILITY-2026-05-18: previous styling (border 0.20, text
+   #b0b0b0) made these buttons render so faintly on a near-black background
+   that users couldn't tell they were clickable. The "Already have an
+   account? Sign in" toggle was reported as effectively invisible. Bumped
+   border opacity 0.20 → 0.45 and text #b0b0b0 → #e4e4e4. Still secondary
+   styling (no fill), but actually visible. */
 [data-testid="baseButton-secondary"],
 .stButton button[kind="secondary"],
 button[kind="secondary"] {
-    background-color: transparent !important;
-    color: #b0b0b0 !important;
-    border: 1px solid rgba(148,163,184,0.20) !important;
+    background-color: rgba(148,163,184,0.04) !important;
+    color: #e4e4e4 !important;
+    border: 1px solid rgba(148,163,184,0.45) !important;
     font-weight: 500 !important;
     font-size: 13px !important;
     text-transform: none !important;
@@ -1831,8 +1837,8 @@ button[kind="secondary"] {
 [data-testid="baseButton-secondary"]:hover,
 button[kind="secondary"]:hover {
     color: #fafafa !important;
-    border-color: rgba(148,163,184,0.40) !important;
-    background-color: rgba(148,163,184,0.05) !important;
+    border-color: rgba(148,163,184,0.70) !important;
+    background-color: rgba(148,163,184,0.10) !important;
 }
 
 /* Google sign-in anchor button. GOOGLE-OAUTH-2026-05-13.
