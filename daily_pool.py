@@ -941,8 +941,18 @@ def main(argv: List[str]) -> int:
         _log_fh = LOG_FILE.open("w", encoding="utf-8", errors="replace", buffering=1)
         _log_fh.write(f"# daily_pool run started {datetime.now().isoformat(timespec='seconds')}\n")
         _log_fh.write(f"# argv={argv}\n# cwd={HERE}\n\n")
-        sys.stdout = _Tee(sys.__stdout__, _log_fh)
-        sys.stderr = _Tee(sys.__stderr__, _log_fh)
+        # LOG-NOISE-2026-05-19: wrap with log_filter.FilteringTee so trace-tag
+        # noise (SUBSET_PARSE_GUARD/RESULT, PLAYER_ANCHOR_REPAIR, etc.) gets
+        # suppressed from BOTH terminal and disk. Worker got this yesterday;
+        # daily_pool was using the unfiltered _Tee and flooding ~80% noise
+        # into Render logs. FilteringTee respects SNIPEWINS_VERBOSE=1 if
+        # full trace is needed. Fallback to _Tee if log_filter not importable.
+        try:
+            from log_filter import FilteringTee as _TeeCls
+        except Exception:
+            _TeeCls = _Tee
+        sys.stdout = _TeeCls(sys.__stdout__, _log_fh)
+        sys.stderr = _TeeCls(sys.__stderr__, _log_fh)
     except Exception as exc:
         print(f"[daily_pool] WARN: could not open log {LOG_FILE}: {exc}")
 

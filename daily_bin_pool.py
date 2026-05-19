@@ -589,8 +589,15 @@ def main(argv: List[str]) -> int:
         log_fh = LOG_FILE.open("w", encoding="utf-8", errors="replace", buffering=1)
         log_fh.write(f"# daily_bin_pool run started {datetime.now().isoformat(timespec='seconds')}\n")
         log_fh.write(f"# argv={argv}\n# cwd={HERE}\n\n")
-        sys.stdout = _Tee(sys.__stdout__, log_fh)
-        sys.stderr = _Tee(sys.__stderr__, log_fh)
+        # LOG-NOISE-2026-05-19: wrap with FilteringTee (see daily_pool.py
+        # for the rationale). Suppresses trace-tag noise from both
+        # terminal and the log file unless SNIPEWINS_VERBOSE=1.
+        try:
+            from log_filter import FilteringTee as _TeeCls
+        except Exception:
+            _TeeCls = _Tee
+        sys.stdout = _TeeCls(sys.__stdout__, log_fh)
+        sys.stderr = _TeeCls(sys.__stderr__, log_fh)
     except Exception as exc:
         print(f"[daily_bin_pool] WARN: couldn't open log {LOG_FILE}: {exc}")
 
