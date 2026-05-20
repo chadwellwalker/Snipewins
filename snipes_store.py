@@ -52,7 +52,7 @@ import json
 import os
 import time
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 
 HERE = Path(__file__).parent
@@ -184,6 +184,9 @@ def add_snipe(email: str, row: Dict[str, Any]) -> Dict[str, Any]:
         "added_at":     time.time(),
         "status":       "active",
         "sms_sent":     False,
+        # ENDING-ALERT-2026-05-20: guards the ending-soon email so each
+        # snipe alerts at most once. Set True after snipe_alerts sends.
+        "alert_email_sent": False,
     }
     snipes.append(snipe)
     _save(store)
@@ -251,6 +254,106 @@ def mark_snipe_resolved(
             s["notes"] = str(notes)[:500]
         found = True
         break
+    if found:
+        _save(store)
+    return found
+
+
+# ── Ending-soon alert support. ENDING-ALERT-2026-05-20 ──────────────────────
+
+def backfill_missing_ends_at() -> int:
+    """Fill `ends_at` on active snipes that don't have it, by looking the
+    item up in the live auction/BIN pools by item_id. Snipes added before
+    the ends_at field existed (or where the pool row lacked the timestamp
+    at add time) can't alert without this. Returns the count backfilled.
+    Read-the-pool / write-the-store; failure-quiet."""
+    import json as _json
+    import os as _os
+
+    # Build an item_id → end_ts map from both pool files (once).
+    end_map: Dict[str, float] = {}
+    for env_var, default_name in (
+        ("SNIPEWINS_AUCTION_POOL_PATH", "daily_pool.json"),
+        ("SNIPEWINS_BIN_POOL_PATH", "bin_pool.json"),
+    ):
+        try:
+            path = Path(_os.environ.get(env_var) or str(HERE / default_name))
+            if not path.exists():
+                continue
+            pool = _json.loads(path.read_text(encoding="utf-8")) or {}
+            for iid, row in (pool.get("items") or {}).items():
+                if not isinstance(row, dict):
+                    continue
+                ts = _safe_float(row.get("_pool_end_dt_ts") or row.get("end_dt_ts"))
+                if ts:
+                    end_map[str(iid)] = ts
+        except Exception:
+            continue
+    if not end_map:
+        return 0
+
+    store = _load()
+    changed = 0
+    for bucket in (store.get("users") or {}).values():
+        for s in (bucket or {}).get("snipes", []) or []:
+            if not isinstance(s, dict):
+                continue
+            if (s.get("status") or "active").lower() != "active":
+                continue
+            if _safe_float(s.get("ends_at")):
+                continue  # already has it
+            iid = str(s.get("item_id") or "")
+            if iid in end_map:
+                s["ends_at"] = end_map[iid]
+                changed += 1
+    if changed:
+        _save(store)
+    return changed
+
+
+def iter_snipes_ending_within(window_seconds: float) -> List[Tuple[str, Dict[str, Any]]]:
+    """Return (email, snipe) pairs for ACTIVE snipes that end within the
+    next `window_seconds`, haven't already had an ending-alert email sent,
+    and haven't already ended. Used by snipe_alerts.run_once() to decide
+    who to notify. Read-only — does not mutate or save the store."""
+    out: List[Tuple[str, Dict[str, Any]]] = []
+    now = time.time()
+    store = _load()
+    for email, bucket in (store.get("users") or {}).items():
+        if email == _ANON_BUCKET:
+            continue
+        for s in (bucket or {}).get("snipes", []) or []:
+            if not isinstance(s, dict):
+                continue
+            if (s.get("status") or "active").lower() != "active":
+                continue
+            if s.get("alert_email_sent"):
+                continue
+            ends_at = _safe_float(s.get("ends_at"))
+            if ends_at is None:
+                continue
+            secs_left = ends_at - now
+            # Must be ending soon but not already over.
+            if 0 < secs_left <= window_seconds:
+                out.append((email, s))
+    return out
+
+
+def mark_alert_email_sent(email: str, item_id: str) -> bool:
+    """Flag a snipe so the ending-soon email fires at most once. Returns
+    True if the snipe was found and updated."""
+    if not item_id:
+        return False
+    em = _normalize_email(email)
+    store = _load()
+    snipes = _user_snipes(store, em)
+    found = False
+    for s in snipes:
+        if str(s.get("item_id") or "") == str(item_id):
+            s["alert_email_sent"]    = True
+            s["alert_email_sent_ts"] = time.time()
+            found = True
+            break
     if found:
         _save(store)
     return found

@@ -1231,6 +1231,16 @@ def _render_trial_badge(st, email: str, remaining_secs: Optional[int], paid: boo
   .sw-trial-email {{
     color: #666;
     font-size: 11px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }}
+  /* TRIAL-BAR-MOBILE-2026-05-20: the email runs off the right edge on
+     phones. Drop it (and its separator) on narrow screens — the user
+     knows their own email; the countdown is what matters here. */
+  @media (max-width: 480px) {{
+    #sw-trial-badge {{ max-width: 100%; box-sizing: border-box; }}
+    .sw-trial-sep, .sw-trial-email {{ display: none; }}
   }}
 </style>
 </head>
@@ -1837,6 +1847,14 @@ input:-ms-input-placeholder {
 .stTextInput > div > div:focus-within {
     border: 1px solid #4ade80 !important;
     box-shadow: 0 0 0 3px rgba(74,222,128,0.18) !important;
+}
+
+/* INPUT-HINT-2026-05-20: hide Streamlit's "Press Enter to submit form"
+   helper text. On mobile it overlaps the password field and reads as a
+   glitch. The button is right there — the hint adds nothing. */
+[data-testid="InputInstructions"],
+div[data-testid="InputInstructions"] {
+    display: none !important;
 }
 
 /* CHROME-AUTOFILL FIX — when the browser autofills a saved email/password

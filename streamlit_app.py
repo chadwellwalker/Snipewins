@@ -66,6 +66,21 @@ st.markdown(
     /* Hide Streamlit's own top decoration */
     [data-testid="stDecoration"] { display: none !important; }
 
+    /* INPUT-HINT-2026-05-20: kill Streamlit's "Press Enter to submit form"
+       helper text app-wide — it overlaps inputs on mobile and adds nothing. */
+    [data-testid="InputInstructions"] { display: none !important; }
+
+    /* MOBILE-HEADER-2026-05-20: on phones the wordmark's faint tagline
+       (#2a2a2a) and timestamp badge (#3a3a3a) read as ghost text "leaking"
+       at the top of the page. They're decorative — hide them on small
+       screens and tighten the wordmark so the header is clean on mobile. */
+    @media (max-width: 640px) {
+        .sw-wordmark-tagline,
+        .sw-wordmark-badge,
+        .sw-wordmark-sep { display: none !important; }
+        .sw-wordmark { padding: 0.35rem 0 0.35rem !important; gap: 0.5rem !important; }
+    }
+
     /* ════════════════════════════════════════════════════
        NAV BUTTONS  (primary = active page, secondary = inactive)
        All buttons share white-space: nowrap to prevent label wrapping.

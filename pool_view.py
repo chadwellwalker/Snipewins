@@ -84,17 +84,15 @@ button[data-testid="stBaseButton-primary"]:active {
 
 
 def _inject_mobile_card_css(st) -> None:
-    """Emit the responsive style block once per session."""
+    """Emit the responsive style block. MUST inject every render — Streamlit
+    rebuilds the DOM each rerun, so a once-per-session guard left the style
+    absent after the first render (mobile cards reverted to the broken
+    4-across layout, View-on-eBay falling off screen). Re-emitting a <style>
+    block every render is idempotent and cheap. MOBILE-CSS-FIX-2026-05-20."""
     try:
-        if st.session_state.get("_snipewins_mobile_card_css_v1"):
-            return
         st.markdown(_MOBILE_CARD_CSS, unsafe_allow_html=True)
-        st.session_state["_snipewins_mobile_card_css_v1"] = True
     except Exception:
-        try:
-            st.markdown(_MOBILE_CARD_CSS, unsafe_allow_html=True)
-        except Exception:
-            pass
+        pass
 
 
 # ── Pool reading (no writes — read-only consumer) ───────────────────────────
