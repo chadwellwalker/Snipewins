@@ -1,0 +1,13 @@
+# THEME-2026-05-20: set the framework-level accent to SnipeWins green.
+# Streamlit's default primaryColor is bright red (#FF4B4B), which was
+# bleeding through on checkboxes, focus rings, and the brief flash you
+# see when a form re-renders on Enter. Setting it here fixes all of those
+# at the source (no CSS race / flash-of-default-color). Background and
+# text colors match the dark palette the app already uses via injected CSS
+# so nothing else shifts.
+[theme]
+base = "dark"
+primaryColor = "#4ade80"
+backgroundColor = "#0a0a0a"
+secondaryBackgroundColor = "#161616"
+textColor = "#fafafa"

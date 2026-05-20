@@ -836,25 +836,25 @@ def _render_login_or_signup_page(st) -> None:
                 value=_existing_optin,
                 key="sw_signup_optin",
             )
-        submitted = st.form_submit_button(
-            button_text,
-            type="primary",
-            use_container_width=True,
-        )
         # TERMS-ACCEPTANCE-2026-05-20: conspicuous agreement notice directly
-        # below the action button. The act of submitting constitutes
-        # acceptance (clickwrap), and this line makes that explicit with
-        # links to the Terms + Privacy pages on the marketing site. Shown
-        # in both signup and login modes so acceptance is always recorded
-        # at the point of action.
+        # ABOVE the action button so it's visible without scrolling (it was
+        # rendering below the button and falling off-screen). The act of
+        # submitting constitutes acceptance (clickwrap), and this makes it
+        # explicit with links to the Terms + Privacy pages. Shown in both
+        # signup and login modes so acceptance is always recorded.
         st.markdown(
-            "<div style='margin-top:10px;font-size:12px;color:#888;text-align:center;line-height:1.5;'>"
+            "<div style='margin:4px 0 12px;font-size:12px;color:#888;text-align:center;line-height:1.5;'>"
             "By continuing, you agree to our "
             "<a href='https://snipewins.com/terms.html' target='_blank' style='color:#60a5fa;text-decoration:none;'>Terms of Service</a>"
             " and "
             "<a href='https://snipewins.com/privacy.html' target='_blank' style='color:#60a5fa;text-decoration:none;'>Privacy Policy</a>."
             "</div>",
             unsafe_allow_html=True,
+        )
+        submitted = st.form_submit_button(
+            button_text,
+            type="primary",
+            use_container_width=True,
         )
 
     if submitted:
@@ -1757,6 +1757,25 @@ button[kind="primary"]:focus,
 button[kind="primaryFormSubmit"]:focus {
     box-shadow: 0 0 0 3px rgba(74,222,128,0.30) !important;
     outline: none !important;
+}
+
+/* GREEN-CHECKBOX-2026-05-20: Streamlit's default checkbox checked-state is
+   bright red (#FF4B4B). The config.toml primaryColor handles this at the
+   framework level, but this is a CSS backstop in case the theme file gets
+   clobbered at boot (the supervisor writes secrets.toml into .streamlit).
+   Covers the BaseWeb checkbox internals across versions. */
+[data-testid="stCheckbox"] [data-baseweb="checkbox"] span[data-checked="true"],
+[data-testid="stCheckbox"] [data-baseweb="checkbox"] div[data-checked="true"],
+[data-testid="stCheckbox"] label span[aria-checked="true"],
+.stCheckbox [data-baseweb="checkbox"] [data-checked="true"] {
+    background-color: #4ade80 !important;
+    border-color: #4ade80 !important;
+}
+/* Green focus ring on text inputs too (default is red) */
+[data-baseweb="input"]:focus-within,
+.stTextInput > div > div:focus-within {
+    border-color: #4ade80 !important;
+    box-shadow: 0 0 0 1px #4ade80 !important;
 }
 
 /* Dark-theme the text inputs inside the gate. We have to defeat Streamlit's
