@@ -325,7 +325,7 @@ def _email_shell(*, kicker: str, kicker_color: str, headline: str, body_html: st
 def _build_trial_expired_html() -> str:
     body = """\
 <p style="margin:0 0 18px 0;font-size:15px;line-height:1.55;color:#b0b0b0;">
-  You just watched SnipeWins do in 10 minutes what takes most people hours of scrolling eBay: surface the cards priced under what they're worth, with the exact number to bid.
+  You just watched SnipeWins do in 10 minutes what takes most people hours of scrolling eBay. It finds the cards priced under what they're worth and tells you the exact number to bid.
 </p>
 <p style="margin:0 0 26px 0;font-size:15px;line-height:1.55;color:#b0b0b0;">
   That feed doesn't stop. Every auction ending in the next 24 hours, comped against real sold listings, sorted by where the money actually is.
@@ -357,7 +357,7 @@ def _build_trial_expired_text() -> str:
     return """\
 Your 10 minutes is up.
 
-You just watched SnipeWins do in 10 minutes what takes most people hours of scrolling eBay: surface the cards priced under what they're worth, with the exact number to bid.
+You just watched SnipeWins do in 10 minutes what takes most people hours of scrolling eBay. It finds the cards priced under what they're worth and tells you the exact number to bid.
 
 That feed doesn't stop. Every auction ending in the next 24 hours, comped against real sold listings, sorted by where the money actually is.
 
@@ -384,7 +384,7 @@ def _build_trial_followup_html() -> str:
   You saw the dashboard two days ago. The founder rate is still $99 because we're early. That number goes to $228 once we hit our launch cap.
 </p>
 <p style="margin:0 0 26px 0;font-size:15px;line-height:1.55;color:#b0b0b0;">
-  What you're paying for: every auction ending in the next 24 hours, comped against real sold listings, with the exact target bid. No bidding wars, no FOMO scrolling, no overpaying. Two or three typical wins clear the year.
+  Here's what you're paying for. Every auction ending in the next 24 hours, comped against real sold listings, with the exact target bid. No bidding wars, no FOMO scrolling, no overpaying. Two or three typical wins clear the year.
 </p>
 <table role="presentation" cellpadding="0" cellspacing="0" style="margin-bottom:18px;">
   <tr><td>
@@ -412,7 +412,7 @@ Still thinking about it?
 
 You saw the dashboard two days ago. The founder rate is still $99 because we're early. That number goes to $228 once we hit our launch cap.
 
-What you're paying for: every auction ending in the next 24 hours, comped against real sold listings, with the exact target bid. No bidding wars, no FOMO scrolling, no overpaying. Two or three typical wins clear the year.
+Here's what you're paying for. Every auction ending in the next 24 hours, comped against real sold listings, with the exact target bid. No bidding wars, no FOMO scrolling, no overpaying. Two or three typical wins clear the year.
 
 Lock in $99/year:
 → https://snipewins.com/checkout/annual
