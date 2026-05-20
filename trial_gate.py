@@ -783,7 +783,10 @@ def _render_login_or_signup_page(st) -> None:
     st.markdown(
         f"<div class='sw-auth-header'>"
         f"<div class='sw-auth-kicker'>SnipeWins</div>"
-        f"<h1 class='sw-auth-h1'>{headline}</h1>"
+        # ANCHOR-FIX-2026-05-20: use a styled <div> instead of <h1> so
+        # Streamlit doesn't attach its auto "anchor link" chain icon to the
+        # heading. Styling is class-based (.sw-auth-h1) so it looks identical.
+        f"<div class='sw-auth-h1'>{headline}</div>"
         f"<p class='sw-auth-sub'>{subline}</p>"
         f"</div>",
         unsafe_allow_html=True,
