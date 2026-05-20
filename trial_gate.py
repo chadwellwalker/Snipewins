@@ -871,29 +871,25 @@ def _render_login_or_signup_page(st) -> None:
             marketing_optin=(optin_value if is_signup else None),
         )
 
-    # Cross-link between the two modes + the forgot-password escape hatch.
-    # Wrapped in spacer columns so the row visually aligns with the 460px
-    # form + Google button width instead of sprawling across the viewport.
-    # AUTH-LAYOUT-V2-2026-05-13.
+    # CROSS-LINK-LAYOUT-2026-05-20: rebuilt. The old 2-column split squeezed
+    # "Already have an account? Sign in" into a half-width button that
+    # truncated to "...Sig". Now the mode-toggle is a single full-width
+    # button (no truncation), and the forgot-password link sits centered
+    # below it — and only on the LOGIN screen, where it's actually relevant
+    # (it read as noise on the signup screen).
     _spacer_l, _mid, _spacer_r = st.columns([1, 3, 1])
     with _mid:
-        _col_a, _col_b = st.columns(2)
-        with _col_a:
-            if is_signup:
-                if st.button("Already have an account? Sign in", key="sw_gate_to_login", use_container_width=True):
-                    st.session_state["sw_gate_mode"] = "login"
-                    st.rerun()
-            else:
-                if st.button("Don't have an account? Sign up", key="sw_gate_to_signup", use_container_width=True):
-                    st.session_state["sw_gate_mode"] = "signup"
-                    st.rerun()
-        with _col_b:
-            # Forgot-password link only matters on the login screen, but
-            # it's cheap to keep visible on both so the user always has
-            # the escape.
+        if is_signup:
+            if st.button("Already have an account? Sign in", key="sw_gate_to_login", use_container_width=True):
+                st.session_state["sw_gate_mode"] = "login"
+                st.rerun()
+        else:
+            if st.button("Don't have an account? Sign up", key="sw_gate_to_signup", use_container_width=True):
+                st.session_state["sw_gate_mode"] = "signup"
+                st.rerun()
             st.markdown(
                 "<a href='?forgot=1' style='display:block;text-align:center;"
-                "padding:10px;color:#60a5fa;font-size:13px;text-decoration:none;'>"
+                "margin-top:10px;color:#60a5fa;font-size:13px;text-decoration:none;'>"
                 "Forgot your password?</a>",
                 unsafe_allow_html=True,
             )
@@ -1759,35 +1755,40 @@ button[kind="primaryFormSubmit"]:focus {
     outline: none !important;
 }
 
-/* GREEN-CHECKBOX-2026-05-20: Streamlit's default checkbox checked-state is
-   bright red (#FF4B4B). The config.toml primaryColor handles this at the
-   framework level, but this is a CSS backstop in case the theme file gets
-   clobbered at boot (the supervisor writes secrets.toml into .streamlit).
-   Covers the BaseWeb checkbox internals across versions. */
-[data-testid="stCheckbox"] [data-baseweb="checkbox"] span[data-checked="true"],
-[data-testid="stCheckbox"] [data-baseweb="checkbox"] div[data-checked="true"],
-[data-testid="stCheckbox"] label span[aria-checked="true"],
-.stCheckbox [data-baseweb="checkbox"] [data-checked="true"] {
+/* GREEN-CHECKBOX-2026-05-20: Streamlit's default checked checkbox is bright
+   red (#FF4B4B). config.toml primaryColor is the real fix (framework level);
+   this is a CSS backstop. The checked box is a BaseWeb <span> whose
+   background BaseWeb sets inline to the theme primary — external !important
+   beats inline (since BaseWeb's inline style has no !important). We tint the
+   box only when the wrapping label reports checked, so unchecked stays empty. */
+[data-testid="stCheckbox"] label[data-checked="true"] > span:first-child,
+[data-testid="stCheckbox"] label[aria-checked="true"] > span:first-child,
+[data-testid="stCheckbox"] input[aria-checked="true"] + span,
+[data-testid="stCheckbox"] [role="checkbox"][aria-checked="true"],
+[data-baseweb="checkbox"] [data-checked="true"] {
     background-color: #4ade80 !important;
     border-color: #4ade80 !important;
-}
-/* Green focus ring on text inputs too (default is red) */
-[data-baseweb="input"]:focus-within,
-.stTextInput > div > div:focus-within {
-    border-color: #4ade80 !important;
-    box-shadow: 0 0 0 1px #4ade80 !important;
 }
 
 /* Dark-theme the text inputs inside the gate. We have to defeat Streamlit's
    BaseWeb defaults at every layer — the wrapper div sets a background, and
    the inner input has its own. */
-[data-baseweb="input"],
-[data-baseweb="input"] > div,
-.stTextInput > div > div,
-.stTextInput > div > div > div {
+/* DOUBLE-BORDER-FIX-2026-05-20: border on the OUTER wrapper ONLY. Previously
+   all four nested levels got their own 1px border + radius, which stacked
+   into a visible doubled box on the right of the password field (worsened
+   by the eye-toggle's extra nested div). Inner levels now get background
+   only, no border. */
+.stTextInput > div > div {
     background-color: #0a0a0a !important;
     border-radius: 10px !important;
     border: 1px solid rgba(148,163,184,0.22) !important;
+}
+[data-baseweb="input"],
+[data-baseweb="input"] > div,
+.stTextInput > div > div > div {
+    background-color: #0a0a0a !important;
+    border: none !important;
+    box-shadow: none !important;
 }
 [data-baseweb="input"] input,
 [data-baseweb="input"] input[type="text"],
@@ -1827,9 +1828,9 @@ input:-ms-input-placeholder {
     font-size: 15px !important;
 }
 
-/* Green ring on focus instead of red — applied to the OUTER wrapper since
-   the inner input has no border. */
-[data-baseweb="input"]:focus-within,
+/* Green ring on focus instead of red — applied to the OUTER wrapper ONLY
+   (the inner levels are now border:none, so only this one paints a ring —
+   no more stacked/doubled box). */
 .stTextInput > div > div:focus-within {
     border: 1px solid #4ade80 !important;
     box-shadow: 0 0 0 3px rgba(74,222,128,0.18) !important;
