@@ -841,6 +841,21 @@ def _render_login_or_signup_page(st) -> None:
             type="primary",
             use_container_width=True,
         )
+        # TERMS-ACCEPTANCE-2026-05-20: conspicuous agreement notice directly
+        # below the action button. The act of submitting constitutes
+        # acceptance (clickwrap), and this line makes that explicit with
+        # links to the Terms + Privacy pages on the marketing site. Shown
+        # in both signup and login modes so acceptance is always recorded
+        # at the point of action.
+        st.markdown(
+            "<div style='margin-top:10px;font-size:12px;color:#888;text-align:center;line-height:1.5;'>"
+            "By continuing, you agree to our "
+            "<a href='https://snipewins.com/terms.html' target='_blank' style='color:#60a5fa;text-decoration:none;'>Terms of Service</a>"
+            " and "
+            "<a href='https://snipewins.com/privacy.html' target='_blank' style='color:#60a5fa;text-decoration:none;'>Privacy Policy</a>."
+            "</div>",
+            unsafe_allow_html=True,
+        )
 
     if submitted:
         em = (email_input or "").strip().lower()
