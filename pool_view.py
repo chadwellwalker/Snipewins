@@ -1235,27 +1235,63 @@ def render_morning_briefing(streamlit, *, max_cards: int = 150) -> None:
         else:
             pill_bg, pill_fg, pill_label = "#1c1c1c", "#888888", "TODAY"
 
+        # ── MV confidence gate ───────────────────────────────────────────
+        # MV-CONFIDENCE-2026-05-20: compute reliability ONCE here, used to
+        # gate the strike badge, the spread pill, AND the target. When the
+        # MV is a fuzzy "≈ SnipeWins estimate" (no exact-grade comps, no
+        # countable comp basis), it's not trustworthy — observed a Brock
+        # Bowers SGC 10 estimated at $70 by relaxing onto PSA-10 comps
+        # (SGC sells under PSA). Showing "STRIKE · 84% SPREAD" off that
+        # number actively misleads. So when MV is unreliable we suppress
+        # the strike badge + spread and replace them with a neutral
+        # "NEEDS COMPS" chip. The MV still shows, flagged as an estimate.
+        _mv_unreliable = False
+        if mv_is_estimate:
+            _mv_unreliable = True
+        elif mv_value is not None and mv_value > 0:
+            _mq = _row_mv_match_quality(row)
+            _cc = (
+                row.get("_mv_dominant_comp_count")
+                or row.get("_mv_accepted_comp_count")
+                or row.get("_mv_comp_count")
+                or 0
+            )
+            try:
+                _cc = int(_cc)
+            except Exception:
+                _cc = 0
+            if _mq != "exact" and _cc == 0:
+                _mv_unreliable = True
+
         # ── Strike Zone badge ────────────────────────────────────────────
         # Replaces the old deal_class badge with a more actionable signal:
         # is the card currently in a strike opportunity, watching range,
         # or wait state? Computed from current_bid vs target_bid.
-        sz_label, sz_bg, sz_fg = _strike_zone_state(cur_price, target_value)
-        sz_rgb = _hex_to_rgb(sz_bg)
-        badge_html = (
-            f'<div style="display:inline-block;padding:4px 10px;'
-            f'background:rgba({sz_rgb},0.15);border:1px solid {sz_bg};'
-            f'border-radius:999px;font-size:10px;font-weight:700;'
-            f'color:{sz_bg};letter-spacing:0.1em;">{sz_label}</div>'
-        )
+        if _mv_unreliable:
+            # Don't flash STRIKE off an untrusted MV — show a neutral chip.
+            badge_html = (
+                f'<div style="display:inline-block;padding:4px 10px;'
+                f'background:rgba(148,163,184,0.10);border:1px solid rgba(148,163,184,0.30);'
+                f'border-radius:999px;font-size:10px;font-weight:700;'
+                f'color:#94a3b8;letter-spacing:0.1em;">NEEDS COMPS</div>'
+            )
+        else:
+            sz_label, sz_bg, sz_fg = _strike_zone_state(cur_price, target_value)
+            sz_rgb = _hex_to_rgb(sz_bg)
+            badge_html = (
+                f'<div style="display:inline-block;padding:4px 10px;'
+                f'background:rgba({sz_rgb},0.15);border:1px solid {sz_bg};'
+                f'border-radius:999px;font-size:10px;font-weight:700;'
+                f'color:{sz_bg};letter-spacing:0.1em;">{sz_label}</div>'
+            )
 
         # ── Spread pill ──────────────────────────────────────────────────
-        # SPREAD-2026-05-12: this is the "where the money is" claim. When
-        # current bid is below MV by a meaningful margin, show a green chip
-        # right next to the strike zone badge so the value gap is the first
-        # thing the eye lands on. Hidden when MV is missing/loading or when
-        # the bid is at/above MV (we don't want to surface those as deals).
+        # SPREAD-2026-05-12: the "where the money is" claim. Suppressed when
+        # MV is unreliable (MV-CONFIDENCE-2026-05-20) — an 84% spread off a
+        # fuzzy estimate is a lie. Also hidden when MV is missing/loading or
+        # the bid is at/above MV.
         spread_html = ""
-        if mv_value is not None and mv_value > 0 and cur_price > 0:
+        if (not _mv_unreliable) and mv_value is not None and mv_value > 0 and cur_price > 0:
             _spread_dollars = float(mv_value) - float(cur_price)
             if _spread_dollars > 0:
                 _spread_pct = _spread_dollars / float(mv_value)
@@ -1441,26 +1477,10 @@ def render_morning_briefing(streamlit, *, max_cards: int = 150) -> None:
         # (not the whole STRIKE/CLOSE call) when the engine isn't
         # confident enough to defend a specific bid level. The user can
         # still see MV, see the spread, and use the Audit-on-eBay link
-        # in View comps to sanity-check.
-        _target_is_unreliable = False
-        if mv_is_estimate:
-            _target_is_unreliable = True
-        elif mv_value is not None and mv_value > 0:
-            _mq = _row_mv_match_quality(row)
-            _cc = (
-                row.get("_mv_dominant_comp_count")
-                or row.get("_mv_accepted_comp_count")
-                or row.get("_mv_comp_count")
-                or 0
-            )
-            try:
-                _cc = int(_cc)
-            except Exception:
-                _cc = 0
-            # Fuzzy MV with zero countable comps = the bare "≈ SnipeWins
-            # estimate" case (no qualifier under MV) — the worst signal.
-            if _mq != "exact" and _cc == 0:
-                _target_is_unreliable = True
+        # in View comps to sanity-check. Reuses _mv_unreliable computed
+        # above (MV-CONFIDENCE-2026-05-20) so the badge, spread, and target
+        # all gate on one consistent confidence determination.
+        _target_is_unreliable = _mv_unreliable
 
         if target_value is not None and target_value > 0 and not _target_is_unreliable:
             target_block = (

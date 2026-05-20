@@ -760,27 +760,59 @@ def render_bin_radar(streamlit, *, max_cards: int = 30) -> None:
         listed_age = _row_listed_age_secs(row)
         listed_str = _format_listed_age(listed_age)
 
+        # MV-CONFIDENCE-2026-05-20: same gate as pool_view. A fuzzy
+        # "≈ SnipeWins estimate" MV (no exact-grade comps, no countable comp
+        # basis) isn't trustworthy — so we don't flash STRIKE / a big spread
+        # off it. Computed once, used for the badge, discount pill, and the
+        # target block below.
+        _mv_unreliable = False
+        if mv_value is not None and mv_value > 0:
+            _mq = str(row.get("_mv_match_quality") or row.get("mv_match_quality") or "").lower()
+            _cc = (
+                row.get("_mv_dominant_comp_count")
+                or row.get("_mv_accepted_comp_count")
+                or row.get("_mv_comp_count")
+                or 0
+            )
+            try:
+                _cc = int(_cc)
+            except Exception:
+                _cc = 0
+            if _mq != "exact" and _cc == 0:
+                _mv_unreliable = True
+
         # Strike Zone badge. RECOMMENDED-OFFER-2026-05-13: pass accepts_offers
         # so an above-target listing that takes Best Offers shows as OFFER
         # rather than dead-weight WAIT.
         _accepts_offers = _row_accepts_offers(row)
-        sz_label, sz_bg, sz_fg = _strike_zone_state(bin_price, target_value, _accepts_offers)
-        sz_rgb = _hex_to_rgb(sz_bg)
-        sz_html = (
-            f'<div style="display:inline-block;padding:4px 10px;'
-            f'background:rgba({sz_rgb},0.15);border:1px solid {sz_bg};'
-            f'border-radius:999px;font-size:10px;font-weight:700;'
-            f'color:{sz_bg};letter-spacing:0.1em;">{sz_label}</div>'
-        )
+        if _mv_unreliable:
+            sz_label = "PENDING"
+            sz_html = (
+                f'<div style="display:inline-block;padding:4px 10px;'
+                f'background:rgba(148,163,184,0.10);border:1px solid rgba(148,163,184,0.30);'
+                f'border-radius:999px;font-size:10px;font-weight:700;'
+                f'color:#94a3b8;letter-spacing:0.1em;">NEEDS COMPS</div>'
+            )
+        else:
+            sz_label, sz_bg, sz_fg = _strike_zone_state(bin_price, target_value, _accepts_offers)
+            sz_rgb = _hex_to_rgb(sz_bg)
+            sz_html = (
+                f'<div style="display:inline-block;padding:4px 10px;'
+                f'background:rgba({sz_rgb},0.15);border:1px solid {sz_bg};'
+                f'border-radius:999px;font-size:10px;font-weight:700;'
+                f'color:{sz_bg};letter-spacing:0.1em;">{sz_label}</div>'
+            )
 
-        # Discount-to-MV badge (only when MV is real)
+        # Discount-to-MV badge (only when MV is real AND trusted)
         # SPREAD-2026-05-12: upgraded from a small inline span to a proper
         # pill matching the Ending Soon treatment. Same threshold (≥$5 AND
         # ≥5%) keeps low-noise listings out of the spread call-out.
+        # MV-CONFIDENCE-2026-05-20: suppressed when MV is unreliable.
         discount = _discount_to_mv(bin_price, mv_value) if mv_value else None
         discount_html = ""
         if (
-            mv_value is not None and mv_value > 0
+            not _mv_unreliable
+            and mv_value is not None and mv_value > 0
             and bin_price > 0
             and discount is not None and discount > 0
         ):
@@ -906,32 +938,10 @@ def render_bin_radar(streamlit, *, max_cards: int = 30) -> None:
                 f'<div style="{_row_label_css}">Market value</div>'
                 f'<div style="{_pending_css}">computing…</div>'
             )
-        # MV-BANDAID-2026-05-18: mirror of pool_view's confidence gate. If
-        # the engine produced an MV but didn't find exact-grade comps AND
-        # has no countable comp basis, the Target number is built on sand.
-        # Suppress just the number (STRIKE/CLOSE call still works since
-        # it's based on bin_price vs MV, just less defensible at the
-        # dollar level). bin_view doesn't have _row_mv_match_quality so
-        # we inline the check against the same fields the worker stamps.
-        _target_unreliable = False
-        if target_value is not None and target_value > 0:
-            _mq = str(
-                row.get("_mv_match_quality")
-                or row.get("mv_match_quality")
-                or ""
-            ).lower()
-            _cc = (
-                row.get("_mv_dominant_comp_count")
-                or row.get("_mv_accepted_comp_count")
-                or row.get("_mv_comp_count")
-                or 0
-            )
-            try:
-                _cc = int(_cc)
-            except Exception:
-                _cc = 0
-            if _mq != "exact" and _cc == 0:
-                _target_unreliable = True
+        # MV-CONFIDENCE-2026-05-20: reuse the single _mv_unreliable
+        # determination computed at the top of the card (gates badge,
+        # discount, AND target consistently).
+        _target_unreliable = _mv_unreliable
 
         if target_value is not None and target_value > 0 and not _target_unreliable:
             target_block = (
