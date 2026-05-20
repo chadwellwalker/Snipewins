@@ -301,6 +301,13 @@ def _email_shell(*, kicker: str, kicker_color: str, headline: str, body_html: st
     <tr><td align="center" style="padding:40px 20px;">
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:480px;background:#161616;border-radius:16px;border:1px solid rgba(148,163,184,0.10);">
         <tr><td style="padding:36px 32px;">
+          <!-- EMAIL-LOGO-2026-05-20: brand wordmark lockup. Rendered as
+               styled text (not SVG/img) so it shows in every email client —
+               Gmail strips inline SVG and many clients block remote images
+               by default. "Wins" carries the #4ade80 accent from the logo. -->
+          <div style="margin-bottom:24px;font-size:20px;font-weight:800;letter-spacing:-0.01em;color:#fafafa;">
+            Snipe<span style="color:#4ade80;">Wins</span>
+          </div>
           <div style="font-size:11px;font-weight:600;letter-spacing:0.18em;color:{kicker_color};text-transform:uppercase;margin-bottom:18px;">{kicker}</div>
           <h1 style="margin:0 0 16px 0;font-size:26px;font-weight:700;color:#fafafa;line-height:1.25;">{headline}</h1>
           {body_html}
