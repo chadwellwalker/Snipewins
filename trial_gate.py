@@ -94,6 +94,15 @@ def enforce_gate(st) -> None:
     # styled <a> instead of a Streamlit button. GOOGLE-OAUTH-2026-05-13.
     if "google_login" in qp and qp["google_login"]:
         try:
+            # GOOGLE-OPTIN-2026-05-20: the landing Google button appends
+            # &optin=1/0 (the daily-briefing consent). Stash it in
+            # session_state BEFORE clearing query params + the OAuth
+            # redirect, since the param won't survive the round-trip to
+            # Google and back. ROUTE -1 applies it when it provisions the
+            # account. Defaults to opted-in if absent (matches the
+            # pre-checked landing checkbox).
+            _pending_optin = str(qp.get("optin") or "1").strip()
+            st.session_state["sw_pending_optin"] = (_pending_optin not in ("0", "false", "no", "off"))
             _clear_query_params(st)
             st.login("google")
             st.stop()
@@ -124,6 +133,15 @@ def enforce_gate(st) -> None:
                 if not trial_accounts.get_user(google_email):
                     trial_accounts.signup_email(google_email, password=None)
                     trial_accounts.start_trial_now(google_email)
+                    # GOOGLE-OPTIN-2026-05-20: apply the consent we stashed
+                    # before the OAuth round-trip so Google signups land on
+                    # the drip list the same as email signups. Only on first
+                    # provision so we never silently flip an existing user.
+                    try:
+                        _opt = st.session_state.pop("sw_pending_optin", True)
+                        trial_accounts.set_marketing_optin(google_email, bool(_opt))
+                    except Exception as _opt_err:
+                        print(f"[GOOGLE_OPTIN_ERR] {type(_opt_err).__name__}: {str(_opt_err)[:120]}")
                 # Set session if not already (also pins ?s= for refresh).
                 if st.session_state.get(SS_EMAIL) != google_email:
                     st.session_state[SS_EMAIL] = google_email
