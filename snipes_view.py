@@ -346,6 +346,29 @@ def render_my_snipes(streamlit) -> None:
     roi = snipes_store.compute_roi(_user_email)
     _render_roi_header(st, roi)
 
+    # ── ENDING-ALERT-2026-05-20: ending-soon email alert opt-in ────────────
+    # This is where users live when they're tracking auctions, so it's the
+    # natural home for the alert toggle. Defaults on (the alert is useful
+    # for cards they deliberately tracked); honored by snipe_alerts.run_once.
+    if _user_email:
+        try:
+            import trial_accounts as _ta
+            _cur_optin = _ta.get_ending_alert_optin(_user_email)
+            _alert_on = st.toggle(
+                "📩 Email me when one of my snipes is ending soon (~15 min left)",
+                value=_cur_optin,
+                key="sw_ending_alert_toggle",
+            )
+            if _alert_on != _cur_optin:
+                _ta.set_ending_alert_optin(_user_email, _alert_on)
+                st.toast(
+                    "Ending-soon alerts on — we'll email you before your snipes close."
+                    if _alert_on else
+                    "Ending-soon alerts off."
+                )
+        except Exception as _alert_ui_err:
+            print(f"[snipes_view] alert toggle error (non-fatal): {type(_alert_ui_err).__name__}: {_alert_ui_err}")
+
     snipes = snipes_store.list_snipes(_user_email)
     if not snipes:
         # EMPTY-STATE-2026-05-13: match the visual treatment from pool_view

@@ -31,7 +31,7 @@ import json
 import os
 import urllib.error
 import urllib.request
-from typing import Optional
+from typing import Any, Dict, Optional
 
 
 # ── Configuration ──────────────────────────────────────────────────────────
@@ -174,6 +174,98 @@ def send_unverified_nudge(email: str, magic_link_url: str) -> bool:
         html=_build_unverified_nudge_html(magic_link_url),
         text=_build_unverified_nudge_text(magic_link_url),
     )
+
+
+def send_ending_soon_alert(email: str, snipe: Dict[str, Any]) -> bool:
+    """Transactional. Sent when one of the user's tracked snipes is about
+    to end (within the alert window) and they have ending-alert opt-in on.
+    `snipe` is a snipes_store record. ENDING-ALERT-2026-05-20."""
+    if not email or not isinstance(snipe, dict):
+        return False
+    _title = str(snipe.get("title") or "your card")[:120]
+    subject = f"Ending soon: {_title}"
+    if not RESEND_API_KEY:
+        print(
+            f"\n[email_sender][DEV-MODE] No RESEND_API_KEY set. send_ending_soon_alert:\n"
+            f"  to:      {email}\n  subject: {subject}\n"
+        )
+        return True
+    return _send_via_resend(
+        to=email, subject=subject,
+        html=_build_ending_soon_html(snipe),
+        text=_build_ending_soon_text(snipe),
+    )
+
+
+def _fmt_money(v: Any) -> str:
+    try:
+        f = float(v)
+        if f <= 0:
+            return "—"
+        return f"${f:,.0f}"
+    except Exception:
+        return "—"
+
+
+def _build_ending_soon_html(snipe: Dict[str, Any]) -> str:
+    _title  = str(snipe.get("title") or "your card")
+    _url    = str(snipe.get("ebay_url") or "https://www.ebay.com")
+    _cur    = _fmt_money(snipe.get("current_bid"))
+    _mv     = _fmt_money(snipe.get("market_value"))
+    _target = _fmt_money(snipe.get("target_bid"))
+    body = f"""\
+<p style="margin:0 0 18px 0;font-size:15px;line-height:1.55;color:#b0b0b0;">
+  One of your snipes is about to end. Here's where it stands right now, and the number to bid.
+</p>
+<div style="background:#0f0f0f;border:1px solid rgba(148,163,184,0.12);border-radius:12px;padding:18px 20px;margin-bottom:22px;">
+  <div style="font-size:15px;font-weight:600;color:#fafafa;line-height:1.35;margin-bottom:14px;">{_title}</div>
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+    <tr>
+      <td style="font-size:11px;color:#888;text-transform:uppercase;letter-spacing:0.08em;padding-bottom:2px;">Current bid</td>
+      <td style="font-size:11px;color:#888;text-transform:uppercase;letter-spacing:0.08em;padding-bottom:2px;">Market value</td>
+      <td style="font-size:11px;color:#888;text-transform:uppercase;letter-spacing:0.08em;padding-bottom:2px;">Your cap</td>
+    </tr>
+    <tr>
+      <td style="font-size:20px;font-weight:700;color:#fafafa;">{_cur}</td>
+      <td style="font-size:20px;font-weight:700;color:#fafafa;">{_mv}</td>
+      <td style="font-size:20px;font-weight:700;color:#4ade80;">{_target}</td>
+    </tr>
+  </table>
+</div>
+<table role="presentation" cellpadding="0" cellspacing="0" style="margin-bottom:8px;">
+  <tr><td>
+    <a href="{_url}" style="display:inline-block;padding:14px 28px;background:#4ade80;color:#0a0a0a;font-weight:700;font-size:15px;border-radius:10px;text-decoration:none;">Bid on eBay &rarr;</a>
+  </td></tr>
+</table>
+<p style="margin:24px 0 0 0;font-size:12px;color:#666;line-height:1.55;">
+  Bid your cap and walk away if it goes higher. There's always another auction. You can turn these alerts off on your My Snipes page.
+</p>"""
+    return _email_shell(
+        kicker="ENDING SOON", kicker_color="#ef4444",
+        headline="Your snipe is about to end.", body_html=body,
+    )
+
+
+def _build_ending_soon_text(snipe: Dict[str, Any]) -> str:
+    _title  = str(snipe.get("title") or "your card")
+    _url    = str(snipe.get("ebay_url") or "https://www.ebay.com")
+    _cur    = _fmt_money(snipe.get("current_bid"))
+    _mv     = _fmt_money(snipe.get("market_value"))
+    _target = _fmt_money(snipe.get("target_bid"))
+    return f"""\
+Your snipe is about to end.
+
+{_title}
+
+Current bid: {_cur}
+Market value: {_mv}
+Your cap: {_target}
+
+Bid on eBay: {_url}
+
+Bid your cap and walk away if it goes higher. There's always another auction.
+You can turn these alerts off on your My Snipes page.
+"""
 
 
 # ── Internals ──────────────────────────────────────────────────────────────

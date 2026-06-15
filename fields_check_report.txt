@@ -1,0 +1,25 @@
+FIELDS + TIER CHECK
+
+Michael Jordan 1986 Fleer #57
+  YOUR token: Basketball Cards 1986 Fleer | Michael Jordan #57
+    Ungraded=$3,646  Grade7=-  Grade8=-  Grade9=-  BGS9.5=-  PSA10=-  BGS10=-  CGC10=-  SGC10=-
+
+2018 Topps Chrome Shohei Ohtani #150
+  YOUR token: Baseball Cards 2018 Topps Chrome | Shohei Ohtani #150
+    Ungraded=$548  Grade7=-  Grade8=-  Grade9=-  BGS9.5=-  PSA10=-  BGS10=-  CGC10=-  SGC10=-
+
+2024 Topps Chrome Black Elly De La Cruz Orange Refractor Autograph
+  YOUR token: Baseball Cards 2024 Topps Chrome Black Autograph | Elly De La Cruz [Orange Refractor] #CBA-ED
+    Ungraded=$1,945  Grade7=-  Grade8=-  Grade9=-  BGS9.5=-  PSA10=-  BGS10=-  CGC10=-  SGC10=-
+
+2024 Bowman Chrome Paul Skenes Fuchsia Refractor #31
+  YOUR token: Baseball Cards 2024 Bowman Chrome | Paul Skenes [Fuchsia Refractor] #31
+    Ungraded=$79  Grade7=-  Grade8=-  Grade9=-  BGS9.5=-  PSA10=-  BGS10=-  CGC10=-  SGC10=-
+
+=== HEAD-TO-HEAD: same Jordan card, your token vs demo token ===
+  YOUR token: Basketball Cards 1986 Fleer | Michael Jordan #57
+    Ungraded=$3,646  Grade7=-  Grade8=-  Grade9=-  BGS9.5=-  PSA10=-  BGS10=-  CGC10=-  SGC10=-
+  DEMO token: Basketball Cards 1986 Fleer | Michael Jordan #57
+    Ungraded=-  Grade7=-  Grade8=-  Grade9=-  BGS9.5=-  PSA10=-  BGS10=-  CGC10=-  SGC10=-
+
+If DEMO shows graded $ and YOURS doesn't -> your plan lacks graded data.

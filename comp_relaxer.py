@@ -34,7 +34,9 @@ Caller pattern:
 """
 from __future__ import annotations
 
+import json
 import re
+import statistics
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
 
@@ -320,6 +322,126 @@ def _compose(*token_groups: List[Any]) -> str:
     return " ".join(tokens)
 
 
+# ── Serial-tier refinement for relaxed (serial-dropped) results ───────────
+# When the ladder drops the /N numbering (Level 4+), the eBay text query
+# can't express "same rarity tier," so the engine's accepted comps can mix a
+# /99 in with /25 and /5 cards (far rarer, far pricier) and premium formats
+# like booklets. That inflates the MV — e.g. a /99 patch auto getting valued
+# at $300 off /25 RPAs when the /99 cluster is really ~$150. This re-filters
+# the accepted comps down to the target card's serial band, drops premium
+# formats the target doesn't share, then recomputes the MV from the survivors.
+#
+# Guard rails:
+#   - Only runs on serial-dropped levels (4+) AND only when the target card
+#     actually has a /N — exact and near-exact levels are untouched.
+#   - Only PRUNES comps we can positively identify as a different rarity tier
+#     or format; comps with no parseable serial are kept (don't over-prune).
+#   - Only overrides the MV when >=2 comps survive — so it can never make a
+#     thinly-supported number worse, only tighten an over-broad one.
+
+# Premium card-format markers. If a comp has one the target lacks, it's a
+# different (pricier) product and shouldn't anchor a serial-band comp set.
+_PREMIUM_FORMAT_MARKERS = ("booklet",)
+
+
+def _serial_band_ratio_ok(target_n: Optional[int], comp_n: Optional[int],
+                          max_ratio: float = 1.6) -> bool:
+    """True if two /N denominators sit in a comparable rarity band, judged by
+    the hobby rarity multiplier (so /99 ↔ /50–/199 is fine, but /99 ↔ /25 or
+    /99 ↔ /5 is not). Unknown → True (we don't prune what we can't judge)."""
+    try:
+        from snipewins_estimate import parallel_rarity_multiplier as _prm
+    except Exception:
+        return True
+    if not target_n or not comp_n:
+        return True
+    tm = _prm(target_n)
+    cm = _prm(comp_n)
+    if tm <= 0 or cm <= 0:
+        return True
+    hi, lo = max(tm, cm), min(tm, cm)
+    return (hi / lo) <= max_ratio
+
+
+def _refine_relaxed_result_by_serial(result: Optional[Dict[str, Any]],
+                                     parsed: ParsedCard) -> Optional[Dict[str, Any]]:
+    """Tighten a serial-dropped relaxed result to the target card's serial band.
+    Returns the (possibly recomputed) result. Never raises."""
+    try:
+        if not result or int(result.get("level") or 0) < 4:
+            return result
+        target_n = parsed.serial_denom
+        if not target_n:
+            return result
+        raw = result.get("comps_json") or ""
+        if not raw:
+            return result
+        try:
+            comps = json.loads(raw)
+        except Exception:
+            return result
+        if not isinstance(comps, list) or len(comps) < 2:
+            return result
+
+        try:
+            from snipewins_estimate import _parse_serial_denominator as _psd
+        except Exception:
+            _psd = None
+
+        target_lc = parsed.title_lc or ""
+        target_premium = {m for m in _PREMIUM_FORMAT_MARKERS if m in target_lc}
+
+        kept: List[Dict[str, Any]] = []
+        for c in comps:
+            if not isinstance(c, dict):
+                continue
+            ct_lc = str(c.get("title") or "").lower()
+            # Drop premium formats the target doesn't share (e.g. booklet).
+            if any((m in ct_lc) and (m not in target_premium) for m in _PREMIUM_FORMAT_MARKERS):
+                continue
+            # Serial-band gate — only prune comps positively identified as a
+            # different rarity tier. No parseable serial → keep.
+            cn = _psd(ct_lc) if _psd else None
+            if cn and not _serial_band_ratio_ok(target_n, cn):
+                continue
+            try:
+                if float(c.get("price") or 0) > 0:
+                    kept.append(c)
+            except Exception:
+                continue
+
+        if len(kept) < 2:
+            return result  # not enough survivors to trust a recompute
+
+        prices = sorted(float(c.get("price") or 0) for c in kept
+                        if float(c.get("price") or 0) > 0)
+        new_mv = round(statistics.median(prices))
+        old_mv = result.get("mv")
+
+        refined = dict(result)
+        refined["mv"] = float(new_mv)
+        refined["comp_count"] = len(kept)
+        refined["accepted_comp_count"] = len(kept)
+        try:
+            refined["comps_json"] = json.dumps(kept, ensure_ascii=False)[:48000]
+        except Exception:
+            pass
+        try:
+            print(
+                f"[comp_relaxer] serial-band refine: target=/{target_n} "
+                f"mv {old_mv}->{new_mv} comps {len(comps)}->{len(kept)}"
+            )
+        except Exception:
+            pass
+        return refined
+    except Exception as exc:
+        try:
+            print(f"[comp_relaxer] serial-band refine error: {exc}")
+        except Exception:
+            pass
+        return result
+
+
 # ── Public valuation API ──────────────────────────────────────────────────
 
 def value_with_relaxation(
@@ -399,7 +521,7 @@ def value_with_relaxation(
             _comps_json = str(getattr(result, "debug_accepted_comps_json", "") or "")
         except Exception:
             _comps_json = ""
-        return {
+        _relaxed_out = {
             "level":               level_info["level"],
             "label":               level_info["label"],
             "description":         level_info["description"],
@@ -410,5 +532,9 @@ def value_with_relaxation(
             "confidence":          str(getattr(result, "confidence", "") or ""),
             "comps_json":          _comps_json,
         }
+        # SERIAL-BAND-2026-05-24: if this level dropped the /N numbering, tighten
+        # the comp set back to the target card's serial band so a /99 isn't
+        # valued off /25s, /5s, or booklets. No-op on exact/near levels.
+        return _refine_relaxed_result_by_serial(_relaxed_out, parsed)
 
     return None  # Even the broadest query found nothing

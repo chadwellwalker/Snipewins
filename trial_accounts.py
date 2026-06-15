@@ -454,6 +454,33 @@ def get_marketing_optin(email: str) -> bool:
     return bool(user.get("marketing_optin", True))
 
 
+def set_ending_alert_optin(email: str, optin: bool) -> bool:
+    """Record whether the user wants an email when one of their tracked
+    snipes is about to end. Toggled on the My Snipes page.
+    ENDING-ALERT-2026-05-20. Returns True on success."""
+    em = _normalize_email(email)
+    data = _load()
+    user = data.get("users", {}).get(em)
+    if not user:
+        return False
+    user["ending_alert_optin"]        = bool(optin)
+    user["ending_alert_optin_set_ts"] = time.time()
+    _save(data)
+    return True
+
+
+def get_ending_alert_optin(email: str) -> bool:
+    """Read the ending-soon email alert preference. Defaults to True —
+    the alert is squarely useful for cards the user deliberately tracked,
+    and they can turn it off on the My Snipes page. Returns False only if
+    the user explicitly turned it off or the email isn't registered."""
+    em = _normalize_email(email)
+    user = (_load().get("users") or {}).get(em)
+    if not user:
+        return False
+    return bool(user.get("ending_alert_optin", True))
+
+
 def has_password(email: str) -> bool:
     """True if the user has ever set a password. Used by the gate to
     decide whether to offer the password login form or only the magic-link

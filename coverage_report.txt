@@ -1,0 +1,82 @@
+SportsCardsPro DEEP coverage — token len=40
+unique cards in pool: 24 | testing 24
+
+=== USABLE COVERAGE ===
+matched the RIGHT card (yr+name):  4/24  (16%)
+has ANY price tier:                22/24  (91%)
+has the EXACT grade you need:      8/24  (33%)
+has an UNGRADED price (fallback):  22/24  (91%)
+
+=== PER-CARD DETAIL ===
+SUSPECT need=GR9   | 2025 Topps Chrome Paul Skenes Ultraviolet All-Stars Gold Ref
+        -> Baseball Cards 2025 Topps Cosmic Chrome Ultraviolet Beam | Paul Skenes [Gold] #UB-20
+        RAW $100  GR9 -  GR8 -  PSA10 -  vol=?
+SUSPECT need=GR9   | 2024 Topps Chrome Black Elly De La Cruz Orange Refractor Aut
+        -> Baseball Cards 2024 Topps Chrome Black Autograph | Elly De La Cruz [Orange Refractor] #CBA-ED
+        RAW $1,945  GR9 -  GR8 -  PSA10 -  vol=?
+OK    need=RAW   | 2024 Bowman Chrome - 25th Anniversary Paul Skenes BC25-18 GO
+        -> Baseball Cards 2024 Bowman Chrome 25th Anniversary | Paul Skenes [Gold Refractor] #BC25-18
+        RAW $328  GR9 -  GR8 -  PSA10 -  vol=?
+SUSPECT need=GR9   | Aaron Judge New York Yankees 2013 Panini BLUE Prizm Auto SGC
+        -> Baseball Cards 2025 Topps Team Set | Aaron Judge [New York Yankees] #NYY-1
+        RAW $2  GR9 -  GR8 -  PSA10 -  vol=?
+OK    need=RAW   | 2025 Bowman Chrome Sapphire Edition - Paul Skenes #30 Gold /
+        -> Baseball Cards 2025 Bowman Chrome | Paul Skenes [Gold Sapphire] #30
+        RAW $128  GR9 -  GR8 -  PSA10 -  vol=?
+SUSPECT need=RAW   | 2024 Panini Spectra Rising Rookie Materials Caleb Williams M
+        -> Football Cards 2024 Panini Spectra Rising Rookie Materials | Caleb Williams [Meta] #RRM-CWS
+        RAW $162  GR9 -  GR8 -  PSA10 -  vol=?
+SUSPECT need=GR9   | 2023 Bowman Draft Chrome Paul Skenes Prospect Auto Aqua Lava
+        -> Baseball Cards 2023 Bowman Draft Chrome Prospect Autographs | Paul Skenes [Aqua Lava] #CDA-PS
+        RAW $750  GR9 -  GR8 -  PSA10 -  vol=?
+SUSPECT need=PSA10 | 2024 Topps Chrome Jackson Holliday #88 PSA 10 GEM MT Rookie 
+        -> Baseball Cards 2024 Topps Chrome | Jackson Holliday #88
+        RAW $1  GR9 -  GR8 -  PSA10 -  vol=?
+SUSPECT need=PSA10 | 2025 TOPPS CHROME BLACK #PS - PAUL SKENES SUPER FUTURE AUTO 
+        -> Baseball Cards 2025 Topps Chrome Black Super Futures Autograph | Paul Skenes [Gold] #FSA-PS
+        RAW $593  GR9 -  GR8 -  PSA10 -  vol=?
+OK    need=RAW   | 2025 Donruss Optic Ashton Jeanty Hidden Potential Purple Sta
+        -> Football Cards 2025 Panini Donruss Optic Hidden Potential Autograph | Ashton Jeanty [Purple Stars] #5
+        RAW $95  GR9 -  GR8 -  PSA10 -  vol=?
+SUSPECT need=PSA10 | 2024 BOWMAN CHROME FUCHSIA REFRACTOR #31 PAUL SKENES ROOKIE 
+        -> Baseball Cards 2024 Bowman Chrome | Paul Skenes [Fuchsia Refractor] #31
+        RAW $79  GR9 -  GR8 -  PSA10 -  vol=?
+SUSPECT need=RAW   | 2025 Topps Chrome Black Gunnar Henderson #3 Gold Mini Diamon
+        -> Baseball Cards 2025 Topps Chrome Black | Gunnar Henderson [Gold Mini-Diamond Refractor] #3
+        RAW $13  GR9 -  GR8 -  PSA10 -  vol=?
+SUSPECT need=RAW   | 2024 Prizm Deca Bo Nix Purple /99🚨Broncos Rookie SSP🚨PSA MT 
+        -> Football Cards 2024 Panini Prizm Deca | Bo Nix [Purple] #92
+        RAW $124  GR9 -  GR8 -  PSA10 -  vol=?
+SUSPECT need=PSA10 | 2024 Topps Stadium Club - Chrome Refractor #211 Jackson Holl
+        -> Baseball Cards 2024 Topps Stadium Club | Jackson Holliday [Chrome Refractor] #211
+        RAW $4  GR9 -  GR8 -  PSA10 -  vol=?
+SUSPECT need=GR9   | 2024 Bowman Chrome Purple Refractor 59/250 Paul Skenes PSA 9
+        -> Baseball Cards 2024 Topps Chrome Rookie Autograph | Paul Skenes [Purple Refractor] #RA-PS
+        RAW $713  GR9 -  GR8 -  PSA10 -  vol=?
+SUSPECT need=GR9   | 2024 Topps Chrome Cosmic Supernova Black Eclipse Paul Skenes
+        -> Baseball Cards 2024 Topps Cosmic Chrome Supernova | Paul Skenes [Black Eclipse Refractor] #SPN-9
+        RAW $1,000  GR9 -  GR8 -  PSA10 -  vol=?
+SUSPECT need=PSA10 | 2025 Panini Prizm Purple Ice #352 Cam Ward Titans RC Rookie 
+        -> Football Cards 2025 Panini Prizm | Cam Ward [Purple Ice] #352
+        RAW $220  GR9 -  GR8 -  PSA10 -  vol=?
+SUSPECT need=RAW   | 2025 Panini Select Ashton Jeanty RC Rookie Orange Pulsar Jer
+        -> Football Cards 2025 Panini Select Jumbo Rookie Signature Swatch Prizm | Ashton Jeanty [Neon Orange Pulsar] #JRS-AJY
+        RAW -  GR9 -  GR8 -  PSA10 -  vol=?
+SUSPECT need=RAW   | 2025 Panini Select Caleb Williams Concourse White Prizm #/35
+        -> Football Cards 2025 Panini Select | Caleb Williams [White Prizm] #73
+        RAW $130  GR9 -  GR8 -  PSA10 -  vol=?
+SUSPECT need=PSA10 | Bo Nix 2024 Panini Prizm Fireworks RC Green Ice Rookie #23 B
+        -> Football Cards 2024 Panini Prizm Fireworks | Bo Nix [Green Ice] #23
+        RAW $7  GR9 -  GR8 -  PSA10 -  vol=?
+SUSPECT need=PSA10 | 2024 Topps Chrome Update Stratospheric Stars Gold Jackson Ho
+        -> Baseball Cards 2024 Topps Chrome Update Stratospheric Stars | Jackson Holliday [Gold Refractor] #SSC-12
+        RAW $40  GR9 -  GR8 -  PSA10 -  vol=?
+SUSPECT need=PSA10 | 2024 Topps Chrome Gilded Gold Lava #38 Jackson  Holliday RC 
+        -> Baseball Cards 2024 Topps Gilded Collection | Jackson Holliday [Gold Lava Refractor] #38
+        RAW -  GR9 -  GR8 -  PSA10 -  vol=?
+OK    need=RAW   | ASHTON JEANTY 2025 PANINI DONRUSS OPTIC ROOKIE AUTO /350 #20
+        -> Football Cards 2025 Panini Donruss Optic | Ashton Jeanty [ RPS Autograph] #202
+        RAW $86  GR9 -  GR8 -  PSA10 -  vol=?
+SUSPECT need=PSA10 | Topps Chrome Black Paul Skenes #109 Gold Mini-Diamond /50 PS
+        -> Baseball Cards 2025 Topps Chrome Black | Paul Skenes [Gold Mini-Diamond Refractor] #109
+        RAW $79  GR9 -  GR8 -  PSA10 -  vol=?

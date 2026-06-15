@@ -237,7 +237,17 @@ def _finding_item_price(item: Dict[str, Any]) -> float:
     except ValueError:
         return 0.0
 
+
+
+def _ebay_comps_disabled() -> bool:
+    """eBay sold/active COMP fetching is OFF by default — value comes from the
+    SportsCardsPro price guide. Discovery scans (auction/BIN) are unaffected.
+    Set SNIPEWINS_ENABLE_EBAY_COMPS=1 to re-enable comp network calls."""
+    return os.environ.get("SNIPEWINS_ENABLE_EBAY_COMPS", "0") != "1"
+
 def search_completed_items_finding(keywords: str, limit: int = 40) -> List[Dict[str, Any]]:
+    if _ebay_comps_disabled():
+        return []
     """
     Browse-only compatibility wrapper for historical comp callers.
 
@@ -281,6 +291,8 @@ _RATE_LIMIT_COOLDOWN_SECONDS = _RATE_LIMIT_COOLDOWN_LADDER_SECONDS[0]  # back-co
 
 
 def search_market_comps_browse(keyword: str, limit: int = 40) -> List[Dict[str, Any]]:
+    if _ebay_comps_disabled():
+        return []
     """
     Active listings (auction + fixed price) for comp proxy when sold API is unavailable.
 
@@ -401,6 +413,8 @@ def infer_comp_sale_type(item: Dict[str, Any], pool_kind: str) -> str:
 
 
 def search_comp_pool(keywords: str, limit: int = 40) -> Tuple[List[Dict[str, Any]], str]:
+    if _ebay_comps_disabled():
+        return [], "comps_disabled"
     """
     Browse-only market comp pool.
     """

@@ -2989,7 +2989,23 @@ def _grade_bucket_match(
         lg = _extract_psa_grade(listing_title)
         cg = _extract_psa_grade(comp_title)
         if lg is not None and cg is not None and lg == cg:
-            return True, "exact_grade"
+            # GRADE-COMPANY-FIX-2026-05-20: same numeric grade is NOT an exact
+            # match unless the grading COMPANY also matches. Previously an
+            # SGC 10 with a PSA 10 comp returned "exact_grade" — but PSA
+            # commands a premium over SGC/CGC, so this valued SGC/BGS/CGC
+            # cards at PSA prices AND flagged them as exact (observed: Brock
+            # Bowers SGC 10 estimated at $70 off PSA-10 sales). Demote
+            # cross-company same-number matches to "cross_grade" so they
+            # don't commit to a confident MV; the confidence gate then shows
+            # "NEEDS COMPS" honestly until real same-company comps exist.
+            _lcompany = _grade_company_from_title(listing_title)
+            _ccompany = _grade_company_from_title(comp_title)
+            if _lcompany and _ccompany and _lcompany == _ccompany:
+                return True, "exact_grade"
+            if _lcompany and _ccompany and _lcompany != _ccompany:
+                return True, "cross_grade"
+            # Company undeterminable on one side — be conservative.
+            return True, "cross_grade"
         if lg is not None and cg is not None:
             return True, "cross_grade"
         return True, "graded_other"
@@ -3309,6 +3325,33 @@ def _card_ladder_lookup(item_id: str, title: str) -> Optional[HybridValuation]:
     return None
 
 
+def _scp_valuation_only(title: str) -> Optional[HybridValuation]:
+    """SportsCardsPro graded price-guide lookup (local CSV store). No eBay network.
+    Primary external valuation source now that eBay sold comps are unavailable."""
+    try:
+        import scp_price_store as _scp
+        r = _scp.lookup((title or "").strip())
+    except Exception:
+        return None
+    mv = r.get("market_value")
+    if not mv or mv <= 0:
+        return None
+    gk = str(r.get("grade_key") or "RAW")
+    sc = float(r.get("score") or 0.0)
+    vol = int(r.get("sales_volume") or 0)
+    conf = "high" if (sc >= 0.85 and vol >= 10) else ("medium" if sc >= 0.6 else "low")
+    return HybridValuation(
+        value=mv,
+        value_low=round(mv * 0.85, 2),
+        value_high=round(mv * 1.15, 2),
+        tier="scp_" + gk.lower(),
+        market_value_source="sportscardspro_csv",
+        confidence=conf,
+        comp_count=vol,
+        notes="SportsCardsPro " + gk + ": " + str(r.get("matched") or "") + " | " + str(r.get("matched_set") or ""),
+    )
+
+
 def _format_rejection_summary(counter: Counter, limit: int = 8) -> str:
     if not counter:
         return ""
@@ -3483,6 +3526,11 @@ def run_hybrid_valuation(
     cl = _card_ladder_lookup(iid, title)
     if cl is not None:
         return cl
+
+    # 1.5) SportsCardsPro graded price guide — primary value source
+    scp_hv = _scp_valuation_only(title)
+    if scp_hv is not None:
+        return scp_hv
 
     if radar_fast_mode:
         print(f"[RADAR][MV] fast_mode_skip_live_comps=True title={(title or '')[:80]!r}")

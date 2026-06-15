@@ -387,11 +387,9 @@ def _render_comp_summary(streamlit, row: Dict[str, Any]) -> None:
             if _audit_title and len(_audit_title) >= 8:
                 from urllib.parse import quote_plus as _qp
                 import re as _re
-                _clean = _re.sub(
-                    r"\b(PSA|BGS|SGC|CGC)\s*\d+(?:\.\d+)?\b", "",
-                    _audit_title, flags=_re.IGNORECASE,
-                ).strip()
-                _clean = _re.sub(r"\s+", " ", _clean)[:140]
+                # AUDIT-GRADE-2026-05-24: keep the grade in the audit query so a
+                # graded card audits against same-grade sold listings, not raw.
+                _clean = _re.sub(r"\s+", " ", _audit_title).strip()[:140]
                 _audit_url = (
                     f"https://www.ebay.com/sch/i.html?_nkw={_qp(_clean)}"
                     f"&LH_Sold=1&LH_Complete=1"
@@ -531,8 +529,9 @@ def _render_comp_summary(streamlit, row: Dict[str, Any]) -> None:
         if _audit_title and len(_audit_title) >= 8:
             from urllib.parse import quote_plus as _qp
             import re as _re
-            _clean = _re.sub(r"\b(PSA|BGS|SGC|CGC)\s*\d+(?:\.\d+)?\b", "", _audit_title, flags=_re.IGNORECASE).strip()
-            _clean = _re.sub(r"\s+", " ", _clean)[:140]
+            # AUDIT-GRADE-2026-05-24: keep the grade so graded cards audit
+            # against same-grade sold listings, not raw.
+            _clean = _re.sub(r"\s+", " ", _audit_title).strip()[:140]
             _audit_url = (
                 f"https://www.ebay.com/sch/i.html?_nkw={_qp(_clean)}"
                 f"&LH_Sold=1&LH_Complete=1"
@@ -779,6 +778,18 @@ def render_bin_radar(streamlit, *, max_cards: int = 30) -> None:
             except Exception:
                 _cc = 0
             if _mq != "exact" and _cc == 0:
+                _mv_unreliable = True
+            # SINGLE-COMP-2026-05-24: one sale isn't a market — a confident MV
+            # built on a single comp collapses onto whatever that lone comp
+            # was. Treat single-comp MVs as unreliable. Only fires when a
+            # comp-count field reads exactly 1, so multi-comp cards and rows
+            # with unknown/missing counts are never affected. (Mirror of the
+            # pool_view gate.)
+            try:
+                _exact_seen = int(row.get("_mv_exact_grade_comp_count") or 0)
+            except Exception:
+                _exact_seen = 0
+            if max(_cc, _exact_seen) == 1:
                 _mv_unreliable = True
 
         # Strike Zone badge. RECOMMENDED-OFFER-2026-05-13: pass accepts_offers

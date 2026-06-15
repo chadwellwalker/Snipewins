@@ -1,0 +1,30 @@
+Store: {'built': True, 'rows': 179316, 'sets': 16, 'players': 1853, 'rows_with_psa10': 77821, 'db': 'C:\\Users\\chadw\\Downloads\\Python Coding-20260614T224057Z-3-001\\Python Coding\\scp_prices.db'}
+
+Cards in pool: 24 | matched a product: 23 (95%) | priced at grade: 19 (79%)
+
+LISTING                                            GRADE  VALUE     SCORE MATCH/REASON
+------------------------------------------------------------------------------------------------------------------------
+2025 Topps Chrome Paul Skenes Ultraviolet All-Star GR9    -         1.35  Paul Skenes [Gold] #300
+2024 Topps Chrome Black Elly De La Cruz Orange Ref GR9    -         1.45  Elly De La Cruz [Orange Refractor]
+2024 Bowman Chrome - 25th Anniversary Paul Skenes  RAW    $189.25   1.4   Paul Skenes [Gold Refractor] #31
+Aaron Judge New York Yankees 2013 Panini BLUE Priz GR9    -         0.0   low_match_score
+2025 Bowman Chrome Sapphire Edition - Paul Skenes  RAW    $127.50   1.65  Paul Skenes [Gold Sapphire] #30
+2024 Panini Spectra Rising Rookie Materials Caleb  RAW    $202.50   1.35  Caleb Williams [Meta] #111
+2023 Bowman Draft Chrome Paul Skenes Prospect Auto GR9    $138.82   1.1   Paul Skenes [Aqua Wave] #BDC-14
+2024 Topps Chrome Jackson Holliday #88 PSA 10 GEM  PSA10  $28.48    1.1   Jackson Holliday #88
+2025 TOPPS CHROME BLACK #PS - PAUL SKENES SUPER FU PSA10  -         1.35  Paul Skenes [Black] #300
+2025 Donruss Optic Ashton Jeanty Hidden Potential  RAW    $157.00   1.267 Ashton Jeanty [Purple Stars] #202
+2024 BOWMAN CHROME FUCHSIA REFRACTOR #31 PAUL SKEN PSA10  $279.54   1.65  Paul Skenes [Fuchsia Refractor] #3
+2025 Topps Chrome Black Gunnar Henderson #3 Gold M RAW    $15.00    1.4   Gunnar Henderson [Purple Mini Diam
+2024 Prizm Deca Bo Nix Purple /99🚨Broncos Rookie S RAW    $210.00   1.1   Bo Nix [Purple] #309
+2024 Topps Stadium Club - Chrome Refractor #211 Ja PSA10  $43.00    1.7   Jackson Holliday [Chrome Refractor
+2024 Bowman Chrome Purple Refractor 59/250 Paul Sk GR9    $34.37    1.35  Paul Skenes [Refractor] #31
+2024 Topps Chrome Cosmic Supernova Black Eclipse P GR9    -         1.25  Paul Skenes [Black Eclipse Refract
+2025 Panini Prizm Purple Ice #352 Cam Ward Titans  PSA10  $605.00   1.65  Cam Ward [Purple Ice] #352
+2025 Panini Select Ashton Jeanty RC Rookie Orange  RAW    $30.00    1.1   Ashton Jeanty [Orange] #315
+2025 Panini Select Caleb Williams Concourse White  RAW    $139.75   1.4   Caleb Williams [White Prizm] #473
+Bo Nix 2024 Panini Prizm Fireworks RC Green Ice Ro PSA10  $422.07   1.4   Bo Nix [Green Ice] #309
+2024 Topps Chrome Update Stratospheric Stars Gold  PSA10  $400.00   1.05  Jackson Holliday [Gold Refractor] 
+2024 Topps Chrome Gilded Gold Lava #38 Jackson  Ho PSA10  $400.00   1.05  Jackson Holliday [Gold Refractor] 
+ASHTON JEANTY 2025 PANINI DONRUSS OPTIC ROOKIE AUT RAW    $1.23     1.15  Ashton Jeanty #202
+Topps Chrome Black Paul Skenes #109 Gold Mini-Diam PSA10  $299.99   1.3   Paul Skenes [Gold Mini-Diamond Ref

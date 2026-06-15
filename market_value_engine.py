@@ -366,6 +366,43 @@ def get_market_value_for_item(
             "raw_vs_graded": "unknown",
         }
 
+    # ── Primary source: SportsCardsPro CSV price store ──────────────────────
+    # eBay's Finding (sold) API is decommissioned and Marketplace Insights is
+    # partner-gated, so we value cards from SportsCardsPro's daily graded price
+    # guide instead. Zero per-card API calls, no eBay quota. The eBay block below
+    # is retained ONLY as a fallback when the local store hasn't been built yet.
+    try:
+        import scp_price_store as _scp
+        _r = _scp.lookup(title)
+        if _r.get("reason") != "store_not_built":
+            mv = _r.get("market_value")
+            score = float(_r.get("score") or 0.0)
+            vol = int(_r.get("sales_volume") or 0)
+            grade_key = _r.get("grade_key", "RAW")
+            if mv is None:
+                conf, low_conf = "LOW", True
+            elif score >= 0.85 and vol >= 10:
+                conf, low_conf = "HIGH", False
+            elif score >= 0.6:
+                conf, low_conf = "MEDIUM", False
+            else:
+                conf, low_conf = "LOW", True
+            return {
+                "market_value": mv,
+                "confidence": conf,
+                "low_confidence": low_conf,
+                "comp_count": vol,                       # yearly sales volume = liquidity proxy
+                "source": "sportscardspro_csv",
+                "comp_pool": "scp_" + str(grade_key).lower(),
+                "comp_recency": "daily_guide",
+                "raw_vs_graded": "all_raw" if grade_key == "RAW" else "all_graded",
+                "scp_match": _r.get("matched"),
+                "scp_match_score": round(score, 3),
+                "scp_reason": _r.get("reason"),
+            }
+    except Exception:
+        pass  # fall through to legacy eBay path on any error
+
     items, pool_kind = fetch_ebay_comp_items(
         title, limit=limit, grade_filter=True, target_title=title
     )

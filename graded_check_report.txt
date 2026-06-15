@@ -1,0 +1,36 @@
+GRADED-DATA CONTROL CHECK (mainstream liquid cards)
+
+Michael Jordan 1986 Fleer #57
+   -> Basketball Cards 1986 Fleer | Michael Jordan #57
+   RAW $3,646  GR9 -  GR8 -  PSA10 -
+
+2018 Topps Chrome Shohei Ohtani #150
+   -> Baseball Cards 2018 Topps Chrome | Shohei Ohtani #150
+   RAW $548  GR9 -  GR8 -  PSA10 -
+
+2017 Topps Update Aaron Judge #US300
+   -> Baseball Cards 2017 Topps Chrome Update | Aaron Judge [Refractor] #HMT40
+   RAW $464  GR9 -  GR8 -  PSA10 -
+
+2023 Topps Chrome Corbin Carroll #220
+   -> Baseball Cards 2023 Topps Chrome Platinum Anniversary | Corbin Carroll [Refractor] #350
+   RAW $4  GR9 -  GR8 -  PSA10 -
+
+2003 Topps Chrome LeBron James #111
+   -> Basketball Cards 2003 Topps Chrome | LeBron James #111
+   RAW $1,471  GR9 -  GR8 -  PSA10 -
+
+2024 Topps Chrome Paul Skenes #168
+   -> Baseball Cards 2024 Topps Chrome Update | Paul Skenes [Refractor] #USC88
+   RAW $36  GR9 -  GR8 -  PSA10 -
+
+2021 Bowman Chrome Wander Franco
+   -> Baseball Cards 2021 Bowman Chrome Prospects | Wander Franco [Aqua Refractor Mega Box Mojo] #BCP-57
+   RAW $2  GR9 -  GR8 -  PSA10 -
+
+2020 Topps Chrome Luis Robert
+   -> Baseball Cards 2020 Topps Chrome | Luis Robert #60
+   RAW $1  GR9 -  GR8 -  PSA10 -
+
+=== 0/8 mainstream cards returned a GRADED price ===
+VERDICT: token returns NO graded data -> plan/tier issue (fixable via SportsCardsPro).

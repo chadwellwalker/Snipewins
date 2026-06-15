@@ -1,0 +1,12 @@
+ID vs TEXT-SEARCH test (Jordan 1986 Fleer #57, known PriceCharting ID 72584)
+
+Method A — text search (q=):
+  q: id=72584 | Michael Jordan #57
+    Ungraded=$3,646  Gr7=-  Gr8=-  Gr9=-  Gr9.5=-  PSA10=-  BGS10=-  CGC10=-  SGC10=-
+
+Method B — id lookup (id=72584):
+  id: id=72584 | Michael Jordan #57
+    Ungraded=$3,646  Gr7=-  Gr8=-  Gr9=-  Gr9.5=-  PSA10=-  BGS10=-  CGC10=-  SGC10=-
+
+If Method B shows Gr9/PSA10 $ and Method A doesn't -> we just query by id. No upgrade needed.
+If BOTH show only Ungraded -> graded is an account entitlement, not a query method.

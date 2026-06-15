@@ -786,6 +786,16 @@ def main(argv: List[str]) -> int:
             except Exception as _ner_err:
                 print(f"[valuation_worker] near_end_refresher error (non-fatal): "
                       f"{type(_ner_err).__name__}: {str(_ner_err)[:140]}")
+            # ENDING-ALERT-2026-05-20: email users when one of their tracked
+            # snipes is about to end. Own cadence guard (~2 min) inside
+            # run_once, so calling every cycle is cheap. Own try/except so
+            # an alert failure can't take down the worker.
+            try:
+                import snipe_alerts
+                snipe_alerts.run_once()
+            except Exception as _alert_err:
+                print(f"[valuation_worker] snipe_alerts error (non-fatal): "
+                      f"{type(_alert_err).__name__}: {str(_alert_err)[:140]}")
         try:
             time.sleep(args.interval)
         except KeyboardInterrupt:

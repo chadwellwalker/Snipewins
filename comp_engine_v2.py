@@ -1029,6 +1029,44 @@ def get_market_value_for_item(title: str, limit: int = 40) -> Dict[str, Any]:
     Compatibility wrapper — same interface as market_value_engine.get_market_value_for_item().
     Returns a plain dict so callers don't need to know about CompResult.
     """
+    # SnipeWins: SportsCardsPro graded price guide is the PRIMARY market-value
+    # source. eBay sold comps are dead (Finding API decommissioned), so we value
+    # from the local SCP store first and only fall back to the legacy comp path
+    # if there's no match. This keeps eBay's API budget free for discovery.
+    try:
+        import scp_price_store as _scp
+        _r = _scp.lookup(title)
+        if _r.get("market_value") is not None:
+            _gk = _r.get("grade_key", "RAW")
+            _sc = float(_r.get("score") or 0.0)
+            _vol = int(_r.get("sales_volume") or 0)
+            if _sc >= 0.85 and _vol >= 10:
+                _conf = "HIGH"
+            elif _sc >= 0.6:
+                _conf = "MEDIUM"
+            else:
+                _conf = "LOW"
+            return {
+                "market_value": _r["market_value"],
+                "confidence": _conf,
+                "low_confidence": _sc < 0.6,
+                "comp_count": _vol,
+                "comp_pool": _vol,
+                "match_tier": "scp_" + str(_gk).lower(),
+                "tier_description": "SportsCardsPro " + str(_gk) + " | " + str(_r.get("matched_set", "")),
+                "insufficient_data": False,
+                "comp_recency": "daily_guide",
+                "raw_vs_graded": "raw" if _gk == "RAW" else "graded",
+                "price_cv": None,
+                "raw_average": None,
+                "error": None,
+                "source": "sportscardspro_csv",
+                "scp_match": _r.get("matched"),
+                "scp_score": round(_sc, 3),
+            }
+    except Exception:
+        pass
+
     result = get_comp_value(title)
 
     # Recency: oldest comp age in days
