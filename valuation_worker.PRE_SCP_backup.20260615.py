@@ -722,11 +722,14 @@ def main(argv: List[str]) -> int:
         else:
             try:
                 import daily_budget
-                # SCP-2026: valuation is now a free local SportsCardsPro lookup
-                # (no eBay API), so it must NOT be gated by the eBay daily budget.
-                # The budget only limits DISCOVERY (pool/bin scans). Never skip here.
-                if False:
-                    pass
+                if daily_budget.is_budget_exceeded():
+                    _summ = daily_budget.get_budget_summary()
+                    print(
+                        f"[valuation_worker] DAILY BUDGET REACHED "
+                        f"({_summ['calls_today']}/{_summ['daily_budget']} calls today) — "
+                        f"skipping cycle until UTC rollover",
+                        flush=True,
+                    )
                 else:
                     _result = run_batch(batch_size=DEFAULT_LOOP_BATCH)
                     # DAILY-BUDGET-2026-05-15: each card processed in a batch
