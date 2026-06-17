@@ -513,8 +513,8 @@ def _render_comp_summary(streamlit, row: Dict[str, Any]) -> None:
                         _src = str(_c.get("sale_type") or "")
                         _used_marker = "✓" if str(_c.get("value_tier") or "") == "used_in_final_value" else "·"
                         st.markdown(
-                            f"  {_used_marker} ${_p:,.0f}  ·  {_d or 'date unknown'}  "
-                            f"·  _{_src}_  \n   <span style='color:#888;font-size:13px;'>{_t}</span>",
+                            f"  {_used_marker} ${_p:,.0f}  ·  _{_src or 'guide value'}_  "
+                            f"\n   <span style='color:#888;font-size:13px;'>{_t}</span>",
                             unsafe_allow_html=True,
                         )
     except Exception:

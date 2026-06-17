@@ -791,8 +791,8 @@ def _render_comp_summary(streamlit, row: Dict[str, Any]) -> None:
                         _src = str(_c.get("sale_type") or "")
                         _used_marker = "✓" if str(_c.get("value_tier") or "") == "used_in_final_value" else "·"
                         st.markdown(
-                            f"  {_used_marker} ${_p:,.0f}  ·  {_d or 'date unknown'}  "
-                            f"·  _{_src}_  \n   <span style='color:#888;font-size:13px;'>{_t}</span>",
+                            f"  {_used_marker} ${_p:,.0f}  ·  _{_src or 'guide value'}_  "
+                            f"\n   <span style='color:#888;font-size:13px;'>{_t}</span>",
                             unsafe_allow_html=True,
                         )
     except Exception:
@@ -1499,10 +1499,12 @@ def render_morning_briefing(streamlit, *, max_cards: int = 150) -> None:
         _target_is_unreliable = _mv_unreliable
 
         if target_value is not None and target_value > 0 and not _target_is_unreliable:
+            _tb_label = str(row.get("target_bid_pct_label") or "70% of market value")
             target_block = (
                 f'<div style="{_label_css}">Target</div>'
                 f'<div style="font-size:20px;font-weight:700;color:#4ade80;">'
                 f'${target_value:,.0f}</div>'
+                f'<div style="font-size:9px;color:#6b7280;margin-top:3px;">{_tb_label}</div>'
             )
         elif _target_is_unreliable:
             # MV exists but is fuzzy — don't put a dollar Target on it.

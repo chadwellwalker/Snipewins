@@ -3360,13 +3360,18 @@ def _scp_valuation_only(title: str) -> Optional[HybridValuation]:
         headline_label = ""
     comp_rows = []
     for c in (r.get("comps") or []):
-        if "label" in c:  # exact card grade ladder
-            ctitle = f"{c['label']} - SportsCardsPro guide"
-            vt = "used_in_final_value" if c.get("label") == headline_label else "accepted_grade"
-        else:             # same-player comparable parallel (proxy)
-            ctitle = f"{c.get('title','')} - {c.get('set','')}"
-            vt = "accepted_proxy"
-        comp_rows.append({"title": ctitle, "price": c.get("price"), "value_tier": vt, "sold_date": ""})
+        _glabel = c.get("grade_label")
+        _name = str(c.get("title") or "").strip()
+        _set = str(c.get("set") or "").strip()
+        if _glabel:  # exact-card grade ladder line
+            ctitle = (f"{_glabel} - {_name}" + (f" ({_set})" if _set else "")) if _name else f"{_glabel} - SportsCardsPro guide"
+        else:        # comparable parallel (proxy)
+            ctitle = (f"{_name} - {_set}").strip(" -") or "comparable parallel"
+        vt = "used_in_final_value" if c.get("used") else ("accepted_grade" if _glabel else "accepted_proxy")
+        comp_rows.append({
+            "title": ctitle, "price": c.get("price"), "value_tier": vt,
+            "sold_date": "", "sale_type": str(c.get("sale_type") or ""),
+        })
     if comp_rows and not any(x["value_tier"] == "used_in_final_value" for x in comp_rows):
         comp_rows[0]["value_tier"] = "used_in_final_value"
     if src == "scp_proxy":
@@ -6079,8 +6084,18 @@ def apply_hybrid_result_to_watchlist_row(
     row["mv_strict_lane_comp_count"] = str(getattr(result, "mv_strict_lane_comp_count", 0) or 0)
     row["mv_relaxed_fallback_used"] = "1" if getattr(result, "mv_relaxed_fallback_used", False) else ""
 
-    if auto_target_enabled and update_target_bid:
-        row["target_bid"] = str(round(float(result.value) * float(target_bid_ratio), 2))
+    # Always publish a target bid = market value x ratio (default 70%). This is a
+    # displayed suggestion, not an auto-bid; auto_target_enabled only governs
+    # unattended bidding (disabled). Showing the number is what users want.
+    try:
+        _tv = float(result.value or 0)
+    except Exception:
+        _tv = 0.0
+    if _tv > 0:
+        _ratio = float(target_bid_ratio or 0.70)
+        row["target_bid"] = str(round(_tv * _ratio, 2))
+        row["target_bid_pct_label"] = f"{int(round(_ratio * 100))}% of market value"
+        row.setdefault("target_bid_source", "scp_market_value")
     cp = _safe_float(row.get("current_price"), 0.0) or 0.0
     row["max_buy_price"] = str(round(float(result.value) * 0.70, 2))
     row["estimated_profit"] = str(round(float(result.value) - cp, 2))
