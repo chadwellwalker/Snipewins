@@ -376,15 +376,29 @@ def _compute_mv_for_row(row: Dict[str, Any]) -> Dict[str, Any]:
         except Exception:
             return default
 
-    estimated = _get("estimated_value", None)
-    if estimated is not None:
-        try:
-            out["true_mv"] = float(estimated)
-            out["market_value"] = float(estimated)
-            out["truth"] = "TRUE"
-            out["truth_level"] = "WORKER_RESCUE"
-        except Exception:
-            pass
+    # FIX 2026-06-17: HybridValuation has no `estimated_value` field — it exposes
+    # `value` / `true_market_value`. The old code read the wrong name, so the
+    # computed value (incl. every SCP hit) was never stamped onto the pool row
+    # and the board stayed empty. Read the real fields now.
+    _hv_value = _get("value", None)
+    _hv_true_mv = _get("true_market_value", None)
+    _hv_truth = _get("valuation_truth_tier", None)
+    _hv_review = _get("review_estimate_value", None)
+    try:
+        if _hv_true_mv is not None and float(_hv_true_mv) > 0:
+            _tmv = float(_hv_true_mv)
+            out["true_mv"] = _tmv
+            out["true_market_value"] = _tmv
+            out["market_value_true"] = _tmv
+            out["market_value"] = _tmv
+            out["truth"] = str(_hv_truth or "TRUE")
+            out["valuation_truth_tier"] = str(_hv_truth or "TRUE")
+        elif _hv_value is not None and float(_hv_value) > 0:
+            out["market_value"] = float(_hv_value)
+        if _hv_review is not None and float(_hv_review) > 0:
+            out["review_estimate_value"] = float(_hv_review)
+    except Exception:
+        pass
 
     for field in ("confidence", "comp_count", "lane_quality", "sale_mode",
                   "weighted_median", "trimmed_mean", "lane_recency_score"):
