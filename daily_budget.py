@@ -55,6 +55,12 @@ BUDGET_FILE = Path(
 DEFAULT_DAILY_BUDGET = 4500
 DAILY_BUDGET = int(os.environ.get("SNIPEWINS_DAILY_CALL_BUDGET") or DEFAULT_DAILY_BUDGET)
 
+# Steals/BIN scanner gets a HARD slice of the daily budget so it can never
+# starve the time-sensitive auction (Ending Soon) discovery. The rest of the
+# budget is reserved for auctions.
+DEFAULT_BIN_DAILY_CAP = 1200
+BIN_DAILY_CAP = int(os.environ.get("SNIPEWINS_BIN_DAILY_CALL_CAP") or DEFAULT_BIN_DAILY_CAP)
+
 
 # Per-process lock — the three scanner processes don't share memory but
 # each process can have multiple writers (e.g. concurrent comp fetches in
@@ -106,11 +112,9 @@ def _save(state: Dict[str, Any]) -> None:
 
 # ── Public API ─────────────────────────────────────────────────────────────
 
-def record_calls(n: int) -> int:
-    """Increment today's call counter by n. Returns the post-increment
-    total. Safe to call with n=0 (no-op write skipped). Catches all
-    exceptions internally — a budget bookkeeping failure must NEVER
-    crash the scanner."""
+def record_calls(n: int, lane: str = "other") -> int:
+    """Increment today's call counter by n (and the per-lane counter).
+    lane is one of: "auction", "bin", "other". Safe with n=0. Never raises."""
     try:
         n = int(n or 0)
     except (TypeError, ValueError):
@@ -121,6 +125,9 @@ def record_calls(n: int) -> int:
         with _FILE_LOCK:
             state = _load()
             state["calls_today"] = int(state.get("calls_today") or 0) + n
+            lanes = state.get("calls_by_lane") or {}
+            lanes[lane] = int(lanes.get(lane) or 0) + n
+            state["calls_by_lane"] = lanes
             state["ymd_utc"] = _today_ymd_utc()
             state["last_update_ts"] = time.time()
             _save(state)
@@ -128,6 +135,21 @@ def record_calls(n: int) -> int:
     except Exception as exc:
         print(f"[daily_budget] record_calls failure (non-fatal): {type(exc).__name__}: {exc}")
         return 0
+
+
+def lane_calls_today(lane: str) -> int:
+    try:
+        return int((_load().get("calls_by_lane") or {}).get(lane) or 0)
+    except Exception:
+        return 0
+
+
+def is_bin_budget_exceeded() -> bool:
+    """True if the global budget is spent OR the BIN/Steals lane has used its
+    reserved slice. Protects auction discovery from BIN starvation."""
+    if is_budget_exceeded():
+        return True
+    return lane_calls_today("bin") >= BIN_DAILY_CAP
 
 
 def get_calls_today() -> int:

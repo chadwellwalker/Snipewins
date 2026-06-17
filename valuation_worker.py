@@ -60,7 +60,9 @@ BIN_POOL_FILE = Path(os.environ.get("SNIPEWINS_BIN_POOL_PATH")     or str(HERE /
 
 DEFAULT_BATCH_SIZE = 20
 DEFAULT_LOOP_INTERVAL_SECS = 60
-DEFAULT_LOOP_BATCH = 5  # smaller batch in loop mode so we cycle faster
+# SCP-2026: valuation is now FREE (local SportsCardsPro lookup, no eBay API),
+# so we value many rows per cycle to drain the BIN/Steals pool fast.
+DEFAULT_LOOP_BATCH = int(os.environ.get("SNIPEWINS_WORKER_LOOP_BATCH") or 400)
 
 
 # SCAN-PAUSE-2026-05-15: operator kill switch. Set SNIPEWINS_SCAN_PAUSED=1

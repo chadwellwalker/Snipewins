@@ -45,6 +45,13 @@ _YEAR_RE = re.compile(r"\b(19[5-9]\d|20[0-4]\d)\b")
 _NUM_RE = re.compile(r"#\s*([A-Za-z]{0,4}-?\d+[A-Za-z]?)")
 _SET_STOP = {"cards", "baseball", "football", "basketball", "hockey", "soccer",
              "racing", "wrestling", "ufc", "pokemon"}
+# Unambiguous SET names (not parallels). If a listing names one of these and the
+# matched product's set doesn't, it's a different product -> reject. Excludes
+# words that double as parallels (chrome, prizm, optic, refractor, gold, cosmic).
+_HARD_SETS = {"stadium", "club", "heritage", "ginter", "allen", "gallery", "gypsy",
+              "archives", "museum", "tribute", "inception", "contenders", "immaculate",
+              "flawless", "obsidian", "finest", "sapphire", "mosaic", "spectra", "select",
+              "treasures", "national", "definitive", "sterling"}
 
 
 def _norm(s: str) -> str:
@@ -218,6 +225,10 @@ def lookup(title: str, *, min_score: float = 0.45) -> Dict[str, Any]:
             set_overlap = len(cset & toks)
             if cset and set_overlap == 0:
                 continue                              # different set entirely — skip
+            # Reject when the listing names an unambiguous set this product isn't
+            # (e.g. "Stadium Club"/"Heritage" listing vs flagship Topps product).
+            if (toks & _HARD_SETS) - (cset & _HARD_SETS):
+                continue
             score = 0.0
             if cset:
                 set_ratio = set_overlap / len(cset)
@@ -232,10 +243,10 @@ def lookup(title: str, *, min_score: float = 0.45) -> Dict[str, Any]:
                 score += 0.05 * inter
             else:
                 score += 0.15
+            if year and row["year"] and row["year"] != year:
+                continue                              # different year — never cross-year match
             if year and row["year"] == year:
                 score += 0.2
-            elif year and row["year"] and row["year"] != year:
-                score -= 0.25
             if listing_num and row["card_number"] and listing_num == _norm(row["card_number"]):
                 score += 0.25
             if score > best_score:

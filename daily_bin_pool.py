@@ -505,7 +505,7 @@ def fetch_and_update() -> Dict[str, Any]:
     # too early than too late.
     try:
         import daily_budget
-        daily_budget.record_calls(specs_attempted)
+        daily_budget.record_calls(specs_attempted, lane="bin")
     except Exception as _bud_err:
         print(f"[daily_bin_pool] daily_budget record failure (non-fatal): {_bud_err}")
 
@@ -618,7 +618,7 @@ def main(argv: List[str]) -> int:
         else:
             try:
                 import daily_budget
-                if daily_budget.is_budget_exceeded():
+                if daily_budget.is_bin_budget_exceeded():
                     _summ = daily_budget.get_budget_summary()
                     print(
                         f"[daily_bin_pool] DAILY BUDGET REACHED "
