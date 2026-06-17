@@ -126,6 +126,17 @@ def _safe_float(v: Any, default: Optional[float] = None) -> Optional[float]:
         return default
 
 
+def _safe_int(v: Any, default: int = 0) -> int:
+    """Tolerant int parse — used by apply_hybrid_result_to_watchlist_row.
+    Was referenced but never defined in this module (latent NameError)."""
+    try:
+        if v is None or v == "":
+            return default
+        return int(float(v))
+    except (TypeError, ValueError):
+        return default
+
+
 def _load_card_ladder_db() -> Dict[str, Any]:
     global _CARD_LADDER_CACHE, _CARD_LADDER_MTIME
     path = os.getenv("CARD_LADDER_LOOKUP_JSON", DEFAULT_CARD_LADDER_PATH)
@@ -3200,7 +3211,9 @@ def _true_mv_contract_reasons(
     _source = str(source or "").strip().lower()
     _exact = int(exact_comp_count or 0)
     _true_mv = _safe_float(true_mv)
-    if _source == "support_comp_engine":
+    if _source == "support_comp_engine" or _source.startswith("scp") or _source == "sportscardspro_csv":
+        # SportsCardsPro price-guide values are a trusted external market value
+        # (this product values from SCP, not eBay exact comps). Treat as TRUE.
         if not _true_mv or _true_mv <= 0:
             _reasons.append("true_mv_missing")
         return _reasons
@@ -3365,6 +3378,8 @@ def _scp_valuation_only(title: str) -> Optional[HybridValuation]:
     print(f"[SCP_HIT] mv=${mv} grade={gk} tier={tier} src={src} comps={len(comp_rows)}", flush=True)
     return HybridValuation(
         value=mv,
+        true_market_value=mv,
+        valuation_truth_tier="TRUE",
         value_low=r.get("value_low") or round(mv * 0.85, 2),
         value_high=r.get("value_high") or round(mv * 1.15, 2),
         tier=("scp_" + tier) if tier else ("scp_" + gk.lower()),
