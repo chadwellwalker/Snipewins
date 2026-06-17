@@ -296,3 +296,109 @@ if __name__ == "__main__":
         print(rebuild_store())
         print("rebuilt in {:.1f}s".format(time.time() - t))
     print(store_stats())
+
+
+# ── Valuation + comps breakdown (for the "View Comps" dropdown) ───────────────
+# Tiered per product spec:
+#   1) exact card, exact grade  -> use it; comps = that card's full grade ladder
+#   2) exact card, other grade  -> use nearest grade of the SAME card
+#   3) no value for exact card  -> estimate from the SAME PLAYER's comparable
+#                                  parallels across all sets (clearly disclaimed)
+
+_GRADE_DISPLAY = {
+    "loose_price": "Ungraded", "cib_price": "Grade 7", "new_price": "Grade 8",
+    "graded_price": "Grade 9", "box_only_price": "BGS 9.5", "manual_only_price": "PSA 10",
+    "bgs_10_price": "BGS 10", "condition_17_price": "CGC 10", "condition_18_price": "SGC 10",
+}
+_AUTO_RE = re.compile(r"\b(auto|autograph|signature|signed|sig)\b", re.IGNORECASE)
+
+
+def _grade_ladder(row) -> List[Dict[str, Any]]:
+    out = []
+    for col, label in _GRADE_DISPLAY.items():
+        v = row[col] if col in row.keys() else None
+        if isinstance(v, int) and v > 0:
+            out.append({"label": label, "price": round(v / 100.0, 2)})
+    out.sort(key=lambda x: x["price"])
+    return out
+
+
+def _proxy(cur, player: str, grade_col: str, is_auto: bool, ultra: bool) -> Dict[str, Any]:
+    rows = cur.execute("SELECT * FROM products WHERE player_norm=?", (player,)).fetchall()
+    cands = []
+    for r in rows:
+        price = r[grade_col] if (isinstance(r[grade_col], int) and r[grade_col] > 0) else None
+        if price is None:
+            price = r["manual_only_price"] or r["loose_price"]
+        if not (isinstance(price, int) and price > 0):
+            continue
+        par = (r["parallel_norm"] or "")
+        if is_auto and not _AUTO_RE.search(par + " " + (r["product_name"] or "")):
+            continue
+        cands.append((price, r))
+    if not cands:
+        return {}
+    cands.sort(key=lambda t: t[0], reverse=True)
+    # ultra-rare (/1-/5, 1/1) -> bias to the player's top tier; else use the middle
+    pool = cands[: max(3, len(cands) // 4)] if ultra else cands
+    prices = sorted(p for p, _ in pool)
+    mid = prices[len(prices) // 2]
+    comps = [{
+        "title": f"{r['product_name']}",
+        "set": r["console_name"],
+        "price": round(p / 100.0, 2),
+    } for p, r in pool[:6]]
+    return {
+        "market_value": round(mid / 100.0, 2),
+        "value_low": round(prices[0] / 100.0, 2),
+        "value_high": round(prices[-1] / 100.0, 2),
+        "comps": comps,
+        "n_comparables": len(pool),
+    }
+
+
+def value_with_comps(title: str, *, min_score: float = 0.45, proxy: bool = True) -> Dict[str, Any]:
+    """Tiered value + a comps breakdown for the UI dropdown."""
+    base = lookup(title, min_score=min_score)
+    grade_key = base.get("grade_key", "RAW")
+    grade_col = GRADE_COLUMN.get(grade_key, "loose_price")
+    if not DB_PATH.exists():
+        return {**base, "valuation_tier": "store_not_built", "comps": []}
+    con = _conn(); cur = con.cursor()
+    try:
+        scp_id = base.get("scp_id")
+        row = cur.execute("SELECT * FROM products WHERE scp_id=?", (scp_id,)).fetchone() if scp_id else None
+
+        # Tier 1 & 2: exact card matched
+        if row is not None:
+            ladder = _grade_ladder(row)
+            if base.get("market_value"):
+                return {**base, "valuation_tier": "exact_grade", "source": "scp_exact",
+                        "comps": ladder, "disclaimer": ""}
+            if ladder:  # exact card, but not at this grade -> use nearest grade of SAME card
+                near = min(ladder, key=lambda x: x["price"])  # ungraded/cheapest as conservative floor
+                return {**base, "market_value": near["price"], "valuation_tier": "same_card_other_grade",
+                        "source": "scp_exact_other_grade", "comps": ladder,
+                        "disclaimer": f"No {grade_key} guide value for this exact card — showing its {near['label']} value."}
+
+        # Tier 3: no exact value -> same-player comparable parallels
+        if proxy and base.get("reason") in ("no_player_match", "low_match_score", "grade_price_missing", None) or (row is None and proxy):
+            player = base.get("matched")
+            # re-derive player from the title against the store
+            toks = frozenset(_tokens(title))
+            pnorm = _detect_player(toks, cur)
+            if pnorm:
+                is_auto = bool(_AUTO_RE.search(title))
+                ultra = bool(re.search(r"/\s*([1-9]|1[0-9]|2[0-5])\b", title)) or "1/1" in title or "1 of 1" in title.lower() or "superfractor" in title.lower()
+                est = _proxy(cur, pnorm, grade_col, is_auto, ultra)
+                if est.get("market_value"):
+                    disp = pnorm.title()
+                    return {"market_value": est["market_value"], "value_low": est["value_low"],
+                            "value_high": est["value_high"], "grade_key": grade_key,
+                            "valuation_tier": "player_parallel_estimate", "source": "scp_proxy",
+                            "comps": est["comps"], "n_comparables": est["n_comparables"],
+                            "matched": None,
+                            "disclaimer": f"No exact comp for this card. Estimated from {est['n_comparables']} comparable {disp} parallels across sets."}
+        return {**base, "valuation_tier": "none", "comps": []}
+    finally:
+        con.close()

@@ -3326,30 +3326,54 @@ def _card_ladder_lookup(item_id: str, title: str) -> Optional[HybridValuation]:
 
 
 def _scp_valuation_only(title: str) -> Optional[HybridValuation]:
-    """SportsCardsPro graded price-guide lookup (local CSV store). No eBay network.
-    Primary external valuation source now that eBay sold comps are unavailable."""
+    """SportsCardsPro price-guide valuation (local store, no eBay). Tiered:
+    exact card+grade -> nearest grade of same card -> same-player parallel estimate.
+    Emits a comps breakdown for the View Comps dropdown."""
+    import json as _json
     try:
         import scp_price_store as _scp
-        r = _scp.lookup((title or "").strip())
+        r = _scp.value_with_comps((title or "").strip())
     except Exception:
         return None
     mv = r.get("market_value")
     if not mv or mv <= 0:
         return None
     gk = str(r.get("grade_key") or "RAW")
-    sc = float(r.get("score") or 0.0)
-    vol = int(r.get("sales_volume") or 0)
-    conf = "high" if (sc >= 0.85 and vol >= 10) else ("medium" if sc >= 0.6 else "low")
-    print(f"[SCP_HIT] mv=${mv} grade={gk} score={sc} match={str(r.get('matched'))[:48]}", flush=True)
+    tier = str(r.get("valuation_tier") or "")
+    src = str(r.get("source") or "sportscardspro_csv")
+    try:
+        headline_label = _scp._GRADE_DISPLAY.get(_scp.GRADE_COLUMN.get(gk, "loose_price"), "")
+    except Exception:
+        headline_label = ""
+    comp_rows = []
+    for c in (r.get("comps") or []):
+        if "label" in c:  # exact card grade ladder
+            ctitle = f"{c['label']} - SportsCardsPro guide"
+            vt = "used_in_final_value" if c.get("label") == headline_label else "accepted_grade"
+        else:             # same-player comparable parallel (proxy)
+            ctitle = f"{c.get('title','')} - {c.get('set','')}"
+            vt = "accepted_proxy"
+        comp_rows.append({"title": ctitle, "price": c.get("price"), "value_tier": vt, "sold_date": ""})
+    if comp_rows and not any(x["value_tier"] == "used_in_final_value" for x in comp_rows):
+        comp_rows[0]["value_tier"] = "used_in_final_value"
+    if src == "scp_proxy":
+        conf = "estimate_only"
+    else:
+        sc = float(r.get("score") or 0.0); vol = int(r.get("sales_volume") or 0)
+        conf = "high" if (sc >= 0.85 and vol >= 10) else ("medium" if sc >= 0.6 else "low")
+    note = r.get("disclaimer") or ("SportsCardsPro " + gk + ": " + str(r.get("matched") or ""))
+    print(f"[SCP_HIT] mv=${mv} grade={gk} tier={tier} src={src} comps={len(comp_rows)}", flush=True)
     return HybridValuation(
         value=mv,
-        value_low=round(mv * 0.85, 2),
-        value_high=round(mv * 1.15, 2),
-        tier="scp_" + gk.lower(),
-        market_value_source="sportscardspro_csv",
+        value_low=r.get("value_low") or round(mv * 0.85, 2),
+        value_high=r.get("value_high") or round(mv * 1.15, 2),
+        tier=("scp_" + tier) if tier else ("scp_" + gk.lower()),
+        market_value_source=src,
+        valuation_basis=src,
         confidence=conf,
-        comp_count=vol,
-        notes="SportsCardsPro " + gk + ": " + str(r.get("matched") or "") + " | " + str(r.get("matched_set") or ""),
+        comp_count=len(comp_rows),
+        notes=note,
+        debug_accepted_comps_json=_json.dumps(comp_rows, ensure_ascii=False),
     )
 
 
