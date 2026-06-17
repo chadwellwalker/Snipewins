@@ -64,6 +64,11 @@ DEFAULT_LOOP_INTERVAL_SECS = 60
 # so we value many rows per cycle to drain the BIN/Steals pool fast.
 DEFAULT_LOOP_BATCH = int(os.environ.get("SNIPEWINS_WORKER_LOOP_BATCH") or 400)
 
+# Bump this whenever valuation logic changes so already-valued rows + cached
+# entries get force-recomputed on the next cycle (otherwise fixes never reach
+# cards that already have a "confident" value).
+VALUATION_VERSION = "scp_2026_06_17_brandproxy"
+
 
 # SCAN-PAUSE-2026-05-15: operator kill switch. Set SNIPEWINS_SCAN_PAUSED=1
 # in Render env to halt all eBay calls without suspending the service
@@ -270,6 +275,8 @@ def _compute_mv_for_row(row: Dict[str, Any]) -> Dict[str, Any]:
     try:
         import mv_cache
         _cached = mv_cache.lookup(title)
+        if _cached and str(_cached.get("_mv_engine_version") or "") != VALUATION_VERSION:
+            _cached = None  # stale valuation version -> force recompute
         if _cached:
             print(
                 f"[valuation_worker] CACHE HIT for item={item_id[:24]} "
@@ -368,6 +375,7 @@ def _compute_mv_for_row(row: Dict[str, Any]) -> Dict[str, Any]:
     out: Dict[str, Any] = {
         "_mv_compute_attempted": True,
         "_mv_computed_at":       time.time(),
+        "_mv_engine_version":    VALUATION_VERSION,
     }
 
     def _get(name: str, default=None):
@@ -489,7 +497,7 @@ def find_unvalued_rows(
     for item_id, row in items.items():
         if not isinstance(row, dict):
             continue
-        if _row_has_confident_mv(row):
+        if _row_has_confident_mv(row) and str(row.get("_mv_engine_version") or "") == VALUATION_VERSION:
             continue
         if not skip_time_check:
             secs = _row_seconds_remaining(row)
