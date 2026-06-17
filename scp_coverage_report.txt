@@ -1,48 +1,48 @@
-Store: {'built': True, 'rows': 179316, 'sets': 16, 'players': 1853, 'rows_with_psa10': 77821, 'db': 'C:\\Users\\chadw\\Downloads\\Python Coding-20260614T224057Z-3-001\\Python Coding\\scp_prices.db'}
+Store: {'built': True, 'rows': 326345, 'sets': 37, 'players': 2455, 'rows_with_psa10': 126792, 'db': 'C:\\Users\\chadw\\Downloads\\Python Coding-20260614T224057Z-3-001\\Python Coding\\scp_prices.db'}
 
 Unique cards in feed: 28743
-  priced:            8332 (28%)
-  matched, no grade$: 955  (rare inserts / thin graded data — not a missing set)
-  NO match:          19456  (likely a missing set CSV)
+  priced:            14277 (49%)
+  matched, no grade$: 1740  (rare inserts / thin graded data — not a missing set)
+  NO match:          12726  (likely a missing set CSV)
 
 === SETS TO DOWNLOAD (ranked by how many of your feed cards they'd cover) ===
-  [1745] NFL  2023 UNKNOWN  (uncertain set — eyeball a few)
-  [1639] NFL  2022 UNKNOWN  (uncertain set — eyeball a few)
-  [1175] NFL  2020 UNKNOWN  (uncertain set — eyeball a few)
   [1031] NFL  2021 UNKNOWN  (uncertain set — eyeball a few)
-  [ 835] NFL  2024 UNKNOWN  (uncertain set — eyeball a few)
-  [ 563] NFL  2025 UNKNOWN  (uncertain set — eyeball a few)
-  [ 414] https://www.sportscardspro.com/console/baseball-cards-2025-topps-finest
+  [ 559] NFL  2023 UNKNOWN  (uncertain set — eyeball a few)
+  [ 468] NFL  2022 UNKNOWN  (uncertain set — eyeball a few)
+  [ 412] NFL  2024 UNKNOWN  (uncertain set — eyeball a few)
   [ 370] MLB  2022 Topps (flagship)  (uncertain set — eyeball a few)
   [ 354] MLB  2024 Topps (flagship)  (uncertain set — eyeball a few)
-  [ 352] https://www.sportscardspro.com/console/football-cards-2023-panini-donruss-optic
-  [ 342] MLB  2025 Topps (flagship)  (uncertain set — eyeball a few)
-  [ 338] https://www.sportscardspro.com/console/football-cards-2023-panini-spectra
-  [ 323] https://www.sportscardspro.com/console/football-cards-2024-panini-donruss-optic
-  [ 315] https://www.sportscardspro.com/console/football-cards-2024-panini-mosaic
+  [ 333] MLB  2025 Topps (flagship)  (uncertain set — eyeball a few)
+  [ 308] NFL  2020 UNKNOWN  (uncertain set — eyeball a few)
   [ 291] NFL  2019 UNKNOWN  (uncertain set — eyeball a few)
   [ 278] NFL  2018 UNKNOWN  (uncertain set — eyeball a few)
   [ 269] https://www.sportscardspro.com/console/baseball-cards-2024-topps-finest
-  [ 250] https://www.sportscardspro.com/console/football-cards-2024-panini-select
   [ 245] https://www.sportscardspro.com/console/football-cards-2022-panini-spectra
-  [ 228] https://www.sportscardspro.com/console/football-cards-2020-panini-mosaic
+  [ 244] NFL  2025 UNKNOWN  (uncertain set — eyeball a few)
   [ 223] MLB  2023 Topps (flagship)  (uncertain set — eyeball a few)
   [ 202] MLB  2026 Topps (flagship)  (uncertain set — eyeball a few)
   [ 188] https://www.sportscardspro.com/console/football-cards-2025-panini-mosaic
-  [ 185] https://www.sportscardspro.com/console/baseball-cards-2025-topps-stadium-club
-  [ 175] https://www.sportscardspro.com/console/football-cards-2022-panini-donruss-optic
   [ 175] MLB  2018 Topps (flagship)  (uncertain set — eyeball a few)
-  [ 172] NFL  ? UNKNOWN  (uncertain set — eyeball a few)
   [ 165] https://www.sportscardspro.com/console/football-cards-2020-panini-spectra
-  [ 153] https://www.sportscardspro.com/console/football-cards-2020-panini-donruss-optic
+  [ 144] https://www.sportscardspro.com/console/football-cards-2023-panini-donruss-optic
   [ 136] https://www.sportscardspro.com/console/football-cards-2021-panini-spectra
+  [ 134] https://www.sportscardspro.com/console/football-cards-2022-panini-donruss-optic
   [ 131] https://www.sportscardspro.com/console/football-cards-2021-panini-donruss-optic
   [ 128] MLB  2021 Topps (flagship)  (uncertain set — eyeball a few)
   [ 121] https://www.sportscardspro.com/console/football-cards-2023-panini-select
+  [ 120] NFL  ? UNKNOWN  (uncertain set — eyeball a few)
   [ 118] https://www.sportscardspro.com/console/baseball-cards-2022-topps-stadium-club
   [ 113] MLB  2020 Topps (flagship)  (uncertain set — eyeball a few)
   [ 113] https://www.sportscardspro.com/console/baseball-cards-2020-bowman-draft-chrome
+  [ 112] https://www.sportscardspro.com/console/football-cards-2024-panini-donruss-optic
   [ 107] https://www.sportscardspro.com/console/baseball-cards-2022-bowman
   [ 104] https://www.sportscardspro.com/console/football-cards-2023-panini-mosaic
   [ 104] https://www.sportscardspro.com/console/baseball-cards-2023-topps-finest
   [  99] NFL  2017 UNKNOWN  (uncertain set — eyeball a few)
+  [  94] https://www.sportscardspro.com/console/football-cards-2020-panini-select
+  [  91] https://www.sportscardspro.com/console/football-cards-2022-panini-mosaic
+  [  88] https://www.sportscardspro.com/console/baseball-cards-2023-bowman
+  [  86] NBA  2023 UNKNOWN  (uncertain set — eyeball a few)
+  [  84] https://www.sportscardspro.com/console/baseball-cards-2020-bowman
+  [  82] https://www.sportscardspro.com/console/baseball-cards-2017-bowman-draft-chrome
+  [  79] NBA  2024 UNKNOWN  (uncertain set — eyeball a few)

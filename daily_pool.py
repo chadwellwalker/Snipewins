@@ -806,7 +806,7 @@ def fetch_and_update(window_hours: float = DEFAULT_WINDOW_HOURS) -> Dict[str, An
     # 50 search calls + auth/probe overhead.
     try:
         import daily_budget
-        daily_budget.record_calls(60, lane="auction")
+        daily_budget.record_calls(130, lane="auction")
     except Exception as _bud_err:
         print(f"[daily_pool] daily_budget record failure (non-fatal): {_bud_err}")
 

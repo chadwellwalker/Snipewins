@@ -385,24 +385,6 @@ def main(argv: List[str]) -> int:
     if _n_loaded:
         _supervisor(f"loaded {_n_loaded} env vars from .env")
 
-    # SCP-2026: make sure the SportsCardsPro price store exists before the
-    # scanners/worker start. CSVs are committed to the repo; rebuild the SQLite
-    # store from them if it's missing or empty (fresh Render disk, or env path
-    # points at an empty volume). Without this, valuation returns "no comps".
-    try:
-        import scp_price_store as _scp
-        _repo_csv = _scp.HERE / "scp_csv"
-        _have_csv = _repo_csv.exists() and any(_repo_csv.glob("*.csv"))
-        _st = _scp.store_stats()
-        if _have_csv and (not _st.get("built") or int(_st.get("rows") or 0) < 1000):
-            _supervisor("SCP store missing/empty — rebuilding from bundled CSVs...")
-            _info = _scp.rebuild_store(csv_dir=_repo_csv)
-            _supervisor(f"SCP store rebuilt: {_info.get('rows')} rows / {len(_info.get('files', []))} sets at {_info.get('db')}")
-        else:
-            _supervisor(f"SCP store OK: {_st.get('rows')} rows / {_st.get('sets')} sets")
-    except Exception as _scp_err:
-        _supervisor(f"SCP store boot-check failed (non-fatal): {type(_scp_err).__name__}: {_scp_err}")
-
     _supervisor(
         f"supervisor starting "
         f"({', '.join(s['name'] for s in specs)}) — "

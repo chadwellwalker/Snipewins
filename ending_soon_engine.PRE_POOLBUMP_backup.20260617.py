@@ -394,8 +394,8 @@ _CLASS_PRIORITY = {"ELITE": 0, "STRONG": 1, "GOOD": 2, "WEAK": 3, "PASS": 4, "UN
 # primary_cap was still being computed as min(_PRIMARY_LANE_SCAN_TARGET=16,
 # _lane_cap), so the cohort produced only 16 lanes. Bumping primary target to
 # 30 and secondary to 15 means a healthy cycle now produces ~45 unique lanes.
-_PRIMARY_LANE_SCAN_TARGET = 50
-_SECONDARY_LANE_SCAN_TARGET = 30
+_PRIMARY_LANE_SCAN_TARGET = 30
+_SECONDARY_LANE_SCAN_TARGET = 15
 _PRIMARY_PASS_MIN_CANDIDATES = 12
 _DAILY_BROWSE_BUDGET_TOTAL = 5000
 _ENDING_SOON_DAILY_BUDGET = 2200
@@ -413,7 +413,7 @@ _MAX_LANES_PER_CYCLE = 50
 _MAX_ROWS_ADMITTED_PER_CYCLE = 100
 _MAX_ROWS_TO_VALUATION_PER_CYCLE = 24
 _MAX_COMP_LOOKUPS_PER_CYCLE = 24
-_ES_MAX_VISIBLE_BOARD_ROWS = 45
+_ES_MAX_VISIBLE_BOARD_ROWS = 15
 _ES_MAX_WATCHLIST_ROWS = 10
 _ES_VISIBLE_BOARD_FLOOR = 4
 _ES_SPILLOVER_FETCH_WINDOW_HOURS = 12.0
@@ -807,7 +807,7 @@ _ES_COHORT_CORE_SIZE = 30
 # Rotating cohort: a slice of lower-priority targets, rotated across scans
 _ES_COHORT_ROTATING_SIZE = 45
 # Total max specs sent to the lane executor per scan (before budget capping)
-_ES_MAX_COHORT_SIZE = 130
+_ES_MAX_COHORT_SIZE = 75
 # Rotation interval in seconds — how long before the rotating slice advances
 _ES_ROTATION_INTERVAL_SECS = 180  # 3 min
 
