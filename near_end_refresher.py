@@ -334,7 +334,7 @@ def _refresh_tier(
         # queries and near-end refreshes can't sum past 5,000/day.
         try:
             import daily_budget as _global_budget
-            _global_budget.record_calls(1)
+            _global_budget.record_calls(1, lane="near_end")
         except Exception:
             pass
         if not result:

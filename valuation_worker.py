@@ -747,10 +747,13 @@ def main(argv: List[str]) -> int:
                     # snapshot every cycle so drift is visible in logs.
                     try:
                         _bs = daily_budget.get_budget_summary()
+                        _lanes = _bs.get("by_lane") or {}
+                        _lanestr = " ".join(f"{k}={v}" for k, v in sorted(_lanes.items()))
                         print(
                             f"[BUDGET_PULSE] source=worker "
                             f"calls={_bs['calls_today']}/{_bs['daily_budget']} "
-                            f"pct={_bs['pct_used']}% remaining={_bs['remaining']}",
+                            f"pct={_bs['pct_used']}% remaining={_bs['remaining']} "
+                            f"by_lane[{_lanestr}]",
                             flush=True,
                         )
                     except Exception:

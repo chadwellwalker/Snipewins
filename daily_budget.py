@@ -178,6 +178,7 @@ def get_budget_summary() -> Dict[str, Any]:
         "pct_used":      round(100.0 * calls / max(1, DAILY_BUDGET), 1),
         "ymd_utc":       _today_ymd_utc(),
         "budget_file":   str(BUDGET_FILE),
+        "by_lane":       dict((_load().get("calls_by_lane") or {})),
     }
 
 
