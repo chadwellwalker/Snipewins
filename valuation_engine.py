@@ -3340,6 +3340,7 @@ def _scp_valuation_only(title: str) -> Optional[HybridValuation]:
     sc = float(r.get("score") or 0.0)
     vol = int(r.get("sales_volume") or 0)
     conf = "high" if (sc >= 0.85 and vol >= 10) else ("medium" if sc >= 0.6 else "low")
+    print(f"[SCP_HIT] mv=${mv} grade={gk} score={sc} match={str(r.get('matched'))[:48]}", flush=True)
     return HybridValuation(
         value=mv,
         value_low=round(mv * 0.85, 2),
