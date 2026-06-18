@@ -33,6 +33,11 @@ HERE = Path(__file__).parent
 # env: SNIPEWINS_AUCTION_POOL_PATH=/data/daily_pool.json.
 from snipewins_paths import state_path
 POOL_FILE = state_path("SNIPEWINS_AUCTION_POOL_PATH", "daily_pool.json")
+# Flat shipping estimate added to the bid when judging a deal. eBay sold-card
+# shipping clusters around $5 (audited $4.99-$6.25). Used for spread/strike/target
+# math only — the displayed bid stays the eBay bid. Real per-listing shipping
+# (row["shipping_cost"], captured at discovery) overrides this when present.
+SHIPPING_EST = float(os.environ.get("SNIPEWINS_SHIPPING_EST") or 5.0)
 
 
 # MOBILE-CSS-2026-05-17: see bin_view.py for the full rationale. Inline
@@ -1223,6 +1228,15 @@ def render_morning_briefing(streamlit, *, max_cards: int = 150) -> None:
         if len(title) > 110:
             title = title[:107].rstrip() + "…"
         cur_price = _row_current_price(row)
+        # Effective cost = bid + shipping (real if captured at discovery, else the
+        # flat estimate). A "$8 below MV" steal isn't a steal if shipping eats it.
+        try:
+            _ship = float(row.get("shipping_cost"))
+            if _ship < 0:
+                _ship = SHIPPING_EST
+        except (TypeError, ValueError):
+            _ship = SHIPPING_EST
+        eff_cost = (cur_price + _ship) if (cur_price and cur_price > 0) else cur_price
         has_real_mv = _row_has_real_mv(row)
         # Three-tier MV resolution:
         #   1. Real comp-backed MV from the engine → use it
@@ -1319,7 +1333,7 @@ def render_morning_briefing(streamlit, *, max_cards: int = 150) -> None:
                 f'{"ESTIMATE" if (mv_value and mv_value > 0) else "NO COMPS"}</div>'
             )
         else:
-            sz_label, sz_bg, sz_fg = _strike_zone_state(cur_price, target_value)
+            sz_label, sz_bg, sz_fg = _strike_zone_state(eff_cost, target_value)
             sz_rgb = _hex_to_rgb(sz_bg)
             badge_html = (
                 f'<div style="display:inline-block;padding:4px 10px;'
@@ -1335,7 +1349,7 @@ def render_morning_briefing(streamlit, *, max_cards: int = 150) -> None:
         # the bid is at/above MV.
         spread_html = ""
         if (not _mv_unreliable) and mv_value is not None and mv_value > 0 and cur_price > 0:
-            _spread_dollars = float(mv_value) - float(cur_price)
+            _spread_dollars = float(mv_value) - float(eff_cost)
             if _spread_dollars > 0:
                 _spread_pct = _spread_dollars / float(mv_value)
                 # Only label as a meaningful spread when >= $5 AND >= 5% — keeps

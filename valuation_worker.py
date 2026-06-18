@@ -68,7 +68,7 @@ DEFAULT_LOOP_BATCH = int(os.environ.get("SNIPEWINS_WORKER_LOOP_BATCH") or 400)
 # Bump this whenever valuation logic changes so already-valued rows + cached
 # entries get force-recomputed on the next cycle (otherwise fixes never reach
 # cards that already have a "confident" value).
-VALUATION_VERSION = "scp_2026_06_18_bowman_noest"
+VALUATION_VERSION = "scp_2026_06_18_clear_stale"
 
 
 # SCAN-PAUSE-2026-05-15: operator kill switch. Set SNIPEWINS_SCAN_PAUSED=1
@@ -408,6 +408,15 @@ def _compute_mv_for_row(row: Dict[str, Any]) -> Dict[str, Any]:
             out["valuation_truth_tier"] = str(_hv_truth or "TRUE")
         elif _hv_value is not None and float(_hv_value) > 0:
             out["market_value"] = float(_hv_value)
+        else:
+            # NO COMPS: the engine produced no usable value. Explicitly CLEAR any
+            # stale value/target so a re-price that drops to NO COMPS doesn't leave
+            # the previous number (e.g. a $200 "SnipeWins estimate") on the row.
+            # The pool row is merged key-by-key, so we must null these out, not omit.
+            for _k in ("market_value", "true_mv", "true_market_value", "market_value_true",
+                       "truth", "valuation_truth_tier", "review_estimate_value",
+                       "target_bid", "target_bid_pct_label", "_mv_comps_json"):
+                out[_k] = None
         if _hv_review is not None and float(_hv_review) > 0:
             out["review_estimate_value"] = float(_hv_review)
     except Exception:
