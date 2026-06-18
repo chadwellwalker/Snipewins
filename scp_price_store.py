@@ -464,7 +464,17 @@ def value_with_comps(title: str, *, min_score: float = 0.45, proxy: bool = True)
         scp_id = base.get("scp_id")
         row = cur.execute("SELECT * FROM products WHERE scp_id=?", (scp_id,)).fetchone() if scp_id else None
 
-        if row is not None:
+        # Rarity guard: a serial /1-/25 card must NOT take a base-parallel exact
+        # match that lacks its rarity color (e.g. "Black Refractor /10" matching
+        # a plain "[Refractor]"). SCP rarely has the serialed variant, so the base
+        # value is wrong — route to the tier-matched proxy instead.
+        _ser = re.search(r"/\s*(\d{1,4})", title)
+        _low_serial = bool(_ser and int(_ser.group(1)) <= 25)
+        _listing_colors = set(_tokens(title)) & set(_COLOR_TIER.keys())
+        _matched_par = set((row["parallel_norm"] or "").split()) if row is not None else set()
+        _rarity_mismatch = bool(_low_serial and _listing_colors and not (_listing_colors & _matched_par))
+
+        if row is not None and not _rarity_mismatch:
             ladder = _grade_ladder(row)
             headline_col = grade_col
             # Order: the grade we used first (checkmark), then nearest by price.
