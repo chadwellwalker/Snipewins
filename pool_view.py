@@ -166,6 +166,28 @@ def _row_has_confident_mv(row: Dict[str, Any]) -> bool:
         return False
 
 
+_EMOJI_RE = re.compile(
+    "[\U0001F000-\U0001FAFF\U00002600-\U000027BF\U0001F1E6-\U0001F1FF"
+    "\U00002190-\U000021FF\U00002B00-\U00002BFF\uFE0F\u2122\u2B50]+",
+    flags=re.UNICODE,
+)
+_TITLE_CAPS_FIX = [("Psa", "PSA"), ("Bgs", "BGS"), ("Sgc", "SGC"), ("Cgc", "CGC"),
+                   ("Rc", "RC"), ("Rpa", "RPA"), ("Ssp", "SSP"), ("Sp", "SP"),
+                   ("Nfl", "NFL"), ("Mlb", "MLB"), ("Nba", "NBA"), ("Rookie Card", "Rookie Card")]
+
+
+def _clean_card_title(t: str) -> str:
+    """Strip emoji spam and de-ALL-CAPS raw eBay titles so the board is scannable."""
+    t = _EMOJI_RE.sub("", t or "")
+    t = re.sub(r"\s+", " ", t).strip(" -|\u00b7")
+    letters = [c for c in t if c.isalpha()]
+    if letters and sum(1 for c in letters if c.isupper()) / len(letters) > 0.7:
+        t = t.title()
+        for a, b in _TITLE_CAPS_FIX:
+            t = re.sub(rf"\b{a}\b", b, t)
+    return t
+
+
 def _row_target_bid(row: Dict[str, Any]) -> Optional[float]:
     for k in ("target_bid", "_final_target_bid", "_bid_anchor"):
         v = (row or {}).get(k)
@@ -383,7 +405,7 @@ def _strike_zone_state(
         PENDING  — no target yet (worker still computing MV)
     """
     if not target_bid or target_bid <= 0:
-        return "PENDING", "#888888", "#fafafa"
+        return "NO COMPS", "#888888", "#fafafa"
     if not current_bid or current_bid <= 0:
         # No bids yet — anything ≤ target is a strike opportunity
         return "STRIKE", "#4ade80", "#fff"
@@ -1193,7 +1215,7 @@ def render_morning_briefing(streamlit, *, max_cards: int = 150) -> None:
     # real valuation) are suppressed so the dashboard doesn't lie.
     for row in _filtered:
         secs = _row_seconds_remaining(row) or 0
-        title = str(row.get("title") or row.get("source_title") or "").strip()
+        title = _clean_card_title(str(row.get("title") or row.get("source_title") or ""))
         # Trim aggressively long titles but preserve the first ~100 chars so
         # the player + product + parallel are still readable.
         if len(title) > 110:
@@ -1291,7 +1313,8 @@ def render_morning_briefing(streamlit, *, max_cards: int = 150) -> None:
                 f'<div style="display:inline-block;padding:4px 10px;'
                 f'background:rgba(148,163,184,0.10);border:1px solid rgba(148,163,184,0.30);'
                 f'border-radius:999px;font-size:10px;font-weight:700;'
-                f'color:#94a3b8;letter-spacing:0.1em;">NEEDS COMPS</div>'
+                f'color:#94a3b8;letter-spacing:0.1em;">'
+                f'{"ESTIMATE" if (mv_value and mv_value > 0) else "NO COMPS"}</div>'
             )
         else:
             sz_label, sz_bg, sz_fg = _strike_zone_state(cur_price, target_value)

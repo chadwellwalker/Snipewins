@@ -76,6 +76,8 @@ def _status_badge_html(status: str) -> str:
     s = (status or "active").lower()
     if s == "won":
         bg, fg, label = "#4ade80", "#fff", "WON"
+    elif s == "ended":
+        bg, fg, label = "#6b7280", "#fff", "ENDED \u2014 MARK WON/LOST"
     elif s == "lost":
         bg, fg, label = "#888888", "#fafafa", "LOST"
     else:
@@ -162,7 +164,12 @@ def _render_snipe_card(streamlit, snipe: Dict[str, Any], snipes_store) -> None:
 
     end_str   = _format_secs_remaining(ends_at)
     added_str = _format_added_ago(added_at)
-    status_html = _status_badge_html(status)
+    # #2: an auction that has ended but is still tagged "active" is stale — show
+    # an ENDED badge prompting the user to mark it Won/Lost, not a live "ACTIVE".
+    _display_status = status
+    if status == "active" and str(end_str).strip().lower() == "ended":
+        _display_status = "ended"
+    status_html = _status_badge_html(_display_status)
 
     # Image cell
     if thumb and isinstance(thumb, str) and thumb.startswith("http"):
