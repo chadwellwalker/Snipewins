@@ -52,6 +52,11 @@ _HARD_SETS = {"stadium", "club", "heritage", "ginter", "allen", "gallery", "gyps
               "archives", "museum", "tribute", "inception", "contenders", "immaculate",
               "flawless", "obsidian", "finest", "sapphire", "mosaic", "spectra", "select",
               "treasures", "national", "definitive", "sterling"}
+# Multi-word SET names whose name contains a color word. When present, that color
+# is part of the SET, not the card's parallel.
+_SET_COLOR_PHRASES = {"chrome black": "black", "topps black": "black",
+                      "chrome platinum": "platinum", "cosmic chrome": "cosmic",
+                      "chrome cosmic": "cosmic", "black chrome": "black"}
 
 
 def _norm(s: str) -> str:
@@ -254,6 +259,19 @@ def lookup(title: str, *, min_score: float = 0.45) -> Dict[str, Any]:
 
         rows = cur.execute("SELECT * FROM products WHERE player_norm=?", (player,)).fetchall()
         leftover = toks - set(player.split())
+        listing_is_auto = bool(_AUTO_RE.search(title))
+        # Color words that are part of a SET name ("Topps Chrome Black", "Chrome
+        # Platinum", "Cosmic Chrome") are not parallels — strip them from parallel
+        # matching so they don't false-match a "[Black Border]" parallel.
+        _nt = _norm(title)
+        _rawtoks = _tokens(title)
+        for _ph, _w in _SET_COLOR_PHRASES.items():
+            # Only strip when the color word appears once (pure set name). If it
+            # appears twice it's also the parallel ("Chrome Black ... Black Refractor")
+            # and must be kept so the [Black] parallel can match.
+            if _ph in _nt and _rawtoks.count(_w) <= 1:
+                leftover = leftover - {_w}
+        listing_colors = leftover & set(_COLOR_TIER.keys())
         best, best_score = None, 0.0
         for row in rows:
             cset = set((row["console_norm"] or "").split()) - _SET_STOP
@@ -280,6 +298,16 @@ def lookup(title: str, *, min_score: float = 0.45) -> Dict[str, Any]:
                 score += 0.05 * inter
             else:
                 score += 0.15
+            # Auto must match auto: an autograph card is a different (pricier)
+            # product than the base parallel. Don't let "Auto /499" match base "#88".
+            prod_is_auto = bool(_AUTO_RE.search((row["parallel_norm"] or "") + " " + (row["product_name"] or "")))
+            if listing_is_auto != prod_is_auto:
+                continue
+            # Wrong parallel color: if the listing names a color the product lacks
+            # ("Blue Refractor" vs base "[Black Border]"), demote it.
+            _missing = listing_colors - par
+            if _missing:
+                score -= 0.3 * len(_missing)
             if year and row["year"] and row["year"] != year:
                 continue                              # different year — never cross-year match
             if year and row["year"] == year:
@@ -397,7 +425,8 @@ def _grade_ladder(row) -> List[Dict[str, Any]]:
 
 
 def _proxy(cur, player: str, grade_col: str, is_auto: bool, ultra: bool,
-           listing_brand: str, listing_tier: Optional[int] = None) -> Dict[str, Any]:
+           listing_brand: str, listing_tier: Optional[int] = None,
+           listing_year: str = "") -> Dict[str, Any]:
     rows = cur.execute("SELECT * FROM products WHERE player_norm=?", (player,)).fetchall()
     cands = []  # (price, row, cand_tier)
     for r in rows:
@@ -424,6 +453,19 @@ def _proxy(cur, player: str, grade_col: str, is_auto: bool, ultra: bool,
         near = [c for c in cands if c[2] is not None and abs(c[2] - listing_tier) <= 1]
         if len(near) >= 2:
             cands = near
+    # Year guard: prefer same-year comps; otherwise allow within 1 year; beyond
+    # that, refuse (a 2013 card must not be valued off 2025 parallels — this also
+    # blocks same-name different-era players, e.g. Cam Ward hockey vs football).
+    if listing_year and listing_year.isdigit():
+        _ly = int(listing_year)
+        sy = [c for c in cands if (c[1]["year"] or "") == listing_year]
+        near = [c for c in cands if c[1]["year"] and abs(int(c[1]["year"]) - _ly) <= 1]
+        if sy:
+            cands = sy
+        elif near:
+            cands = near
+        else:
+            return {}
     prices = sorted(p for p, _, _ in cands)
     n = len(prices)
     if ultra:
@@ -515,7 +557,8 @@ def value_with_comps(title: str, *, min_score: float = 0.45, proxy: bool = True)
                 ultra = bool(re.search(r"/\s*([1-5])\b", title)) or bool(_SUPER_RE.search(title))
                 listing_brand = _brand_family(title)
                 listing_tier = _tier_of(title)
-                est = _proxy(cur, pnorm, grade_col, is_auto, ultra, listing_brand, listing_tier)
+                _ly = (_YEAR_RE.search(title).group(1) if _YEAR_RE.search(title) else "")
+                est = _proxy(cur, pnorm, grade_col, is_auto, ultra, listing_brand, listing_tier, _ly)
                 if est.get("market_value"):
                     disp = pnorm.title()
                     return {"market_value": est["market_value"], "value_low": est["value_low"],

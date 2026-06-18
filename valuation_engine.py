@@ -3577,6 +3577,24 @@ def run_hybrid_valuation(
     if scp_hv is not None:
         return scp_hv
 
+    # SCP declined. For serialized premium cards (/1-/50) the legacy eBay comp
+    # path is decommissioned and only yields junk (e.g. $2 for a /15 auto). Show
+    # NO COMPS rather than a misleading low estimate.
+    _ser_m = re.search(r"/\s*(\d{1,4})", title or "")
+    if _ser_m and int(_ser_m.group(1)) <= 50:
+        return HybridValuation(
+            notes="Serialized card with no SportsCardsPro guide match - no reliable comp.",
+            confidence="estimate_only",
+            market_value_source="none",
+            valuation_basis="no_scp_match_serialized",
+            valuation_failure_reason="serialized_no_scp_match",
+            valuation_final_status="no_estimate",
+            comp_search_attempted=False,
+            debug_accepted_comps_json="[]",
+            debug_valuation_pipeline_json=json.dumps(
+                {"final_status": "no_estimate", "reason": "serialized_no_scp_match"}, ensure_ascii=False),
+        )
+
     if radar_fast_mode:
         print(f"[RADAR][MV] fast_mode_skip_live_comps=True title={(title or '')[:80]!r}")
         return HybridValuation(
