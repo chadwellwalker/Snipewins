@@ -1207,7 +1207,9 @@ def render_morning_briefing(streamlit, *, max_cards: int = 150) -> None:
         snipewins_est: Optional[Dict[str, Any]] = None
         if has_real_mv:
             mv_value = float(row.get("true_mv") or row.get("market_value") or 0)
-            target_value = _row_target_bid(row)
+            # Target is ALWAYS 70% of the current market value, computed live so
+            # it can never drift from a stale stored _final_target_bid.
+            target_value = round(mv_value * 0.70, 2) if mv_value and mv_value > 0 else None
             mv_is_estimate = False
         else:
             snipewins_est = _row_snipewins_estimate(row)

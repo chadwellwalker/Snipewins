@@ -174,6 +174,39 @@ def rebuild_store(csv_dir: Optional[Path] = None) -> Dict[str, Any]:
             "db": str(DB_PATH)}
 
 
+# Team / checklist "players" — SCP stores team cards with the team as the
+# product name, which the matcher can mistake for a player. Exclude them.
+_TEAM_NAMES = set()
+for _city, _nick in [
+    ("new york","yankees"),("new york","mets"),("los angeles","dodgers"),("los angeles","angels"),
+    ("boston","red sox"),("chicago","cubs"),("chicago","white sox"),("houston","astros"),
+    ("atlanta","braves"),("philadelphia","phillies"),("san francisco","giants"),("san diego","padres"),
+    ("seattle","mariners"),("toronto","blue jays"),("baltimore","orioles"),("tampa bay","rays"),
+    ("minnesota","twins"),("cleveland","guardians"),("detroit","tigers"),("kansas city","royals"),
+    ("milwaukee","brewers"),("cincinnati","reds"),("pittsburgh","pirates"),("st louis","cardinals"),
+    ("washington","nationals"),("miami","marlins"),("colorado","rockies"),("arizona","diamondbacks"),
+    ("texas","rangers"),("oakland","athletics"),
+    ("kansas city","chiefs"),("buffalo","bills"),("cincinnati","bengals"),("baltimore","ravens"),
+    ("dallas","cowboys"),("philadelphia","eagles"),("san francisco","49ers"),("detroit","lions"),
+    ("green bay","packers"),("miami","dolphins"),("new york","jets"),("new york","giants"),
+    ("las vegas","raiders"),("denver","broncos"),("los angeles","chargers"),("los angeles","rams"),
+    ("minnesota","vikings"),("chicago","bears"),("atlanta","falcons"),("carolina","panthers"),
+    ("new orleans","saints"),("tampa bay","buccaneers"),("seattle","seahawks"),("arizona","cardinals"),
+    ("houston","texans"),("indianapolis","colts"),("jacksonville","jaguars"),("tennessee","titans"),
+    ("cleveland","browns"),("pittsburgh","steelers"),("new england","patriots"),("washington","commanders"),
+    ("boston","celtics"),("golden state","warriors"),("los angeles","lakers"),("milwaukee","bucks"),
+    ("denver","nuggets"),("oklahoma city","thunder"),("dallas","mavericks"),("phoenix","suns"),
+    ("new york","knicks"),("philadelphia","76ers"),("miami","heat"),("cleveland","cavaliers"),
+    ("memphis","grizzlies"),("minnesota","timberwolves"),("new orleans","pelicans"),("sacramento","kings"),
+    ("san antonio","spurs"),("orlando","magic"),("indiana","pacers"),("atlanta","hawks"),
+    ("chicago","bulls"),("toronto","raptors"),("brooklyn","nets"),("houston","rockets"),
+    ("detroit","pistons"),("charlotte","hornets"),("portland","trail blazers"),("utah","jazz"),
+    ("washington","wizards"),
+]:
+    _TEAM_NAMES.add(_norm(_city + " " + _nick))
+    _TEAM_NAMES.add(_norm(_nick))
+
+
 _PLAYER_CACHE: Optional[List[Tuple[str, frozenset]]] = None
 
 
@@ -183,7 +216,8 @@ def _load_players(cur) -> List[Tuple[str, frozenset]]:
         rows = cur.execute(
             "SELECT DISTINCT player_norm FROM products WHERE player_norm!=''"
         ).fetchall()
-        _PLAYER_CACHE = [(r[0], frozenset(r[0].split())) for r in rows]
+        _PLAYER_CACHE = [(r[0], frozenset(r[0].split())) for r in rows
+                         if r[0] and r[0] not in _TEAM_NAMES]
     return _PLAYER_CACHE
 
 

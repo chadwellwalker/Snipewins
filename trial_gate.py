@@ -171,7 +171,17 @@ def enforce_gate(st) -> None:
     if "account" in qp and qp["account"]:
         _account_email = st.session_state.get(SS_EMAIL)
         if not _account_email:
-            # Not logged in — fall through to the login page below.
+            # Google-OAuth users may not have SS_EMAIL pinned yet on a fresh
+            # page nav — trust st.user.is_logged_in so they reach their account
+            # page instead of being bounced to the signup form.
+            try:
+                _u2 = getattr(st, "user", None)
+                if _u2 is not None and getattr(_u2, "is_logged_in", False):
+                    _account_email = (getattr(_u2, "email", "") or "").strip().lower()
+            except Exception:
+                _account_email = None
+        if not _account_email:
+            # Truly not logged in — fall through to the login page below.
             pass
         else:
             _render_account_page(st, trial_accounts, _account_email)
