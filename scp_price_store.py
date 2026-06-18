@@ -62,7 +62,10 @@ def _norm(s: str) -> str:
 
 
 def _tokens(s: str) -> List[str]:
-    return [t for t in _norm(s).replace("#", " ").replace("/", " ").split() if t]
+    # Split on # / and - so glued junk in real eBay titles ("-Caleb", "Mini-Diamond",
+    # "BDC-14") doesn't hide the player/parallel. Card numbers use a separate field.
+    raw = _norm(s).replace("#", " ").replace("/", " ").replace("-", " ")
+    return [t for t in raw.split() if t]
 
 
 def _cents(v: Any) -> Optional[int]:
