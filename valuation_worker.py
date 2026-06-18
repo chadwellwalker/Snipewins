@@ -68,7 +68,7 @@ DEFAULT_LOOP_BATCH = int(os.environ.get("SNIPEWINS_WORKER_LOOP_BATCH") or 400)
 # Bump this whenever valuation logic changes so already-valued rows + cached
 # entries get force-recomputed on the next cycle (otherwise fixes never reach
 # cards that already have a "confident" value).
-VALUATION_VERSION = "scp_2026_06_18_auto_setcolor"
+VALUATION_VERSION = "scp_2026_06_18_bowman_noest"
 
 
 # SCAN-PAUSE-2026-05-15: operator kill switch. Set SNIPEWINS_SCAN_PAUSED=1
@@ -318,7 +318,11 @@ def _compute_mv_for_row(row: Dict[str, Any]) -> Dict[str, Any]:
         getattr(result, "value", None) is not None
         and getattr(result, "value", 0) > 0
     )
-    if not _engine_produced_value:
+    # When the engine DELIBERATELY declined a serialized card (no SportsCardsPro
+    # match), don't let comp_relaxer manufacture a "SnipeWins estimate" — a guessed
+    # number on a /25 auto is exactly what we are trying to stop. Keep it NO COMPS.
+    _deliberate_no_comp = str(getattr(result, "valuation_basis", "") or "") == "no_scp_match_serialized"
+    if not _engine_produced_value and not _deliberate_no_comp:
         try:
             import comp_relaxer
             player_hint = str(

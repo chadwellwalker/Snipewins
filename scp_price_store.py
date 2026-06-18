@@ -280,6 +280,12 @@ def lookup(title: str, *, min_score: float = 0.45) -> Dict[str, Any]:
             set_overlap = len(cset & toks)
             if cset and set_overlap == 0:
                 continue                              # different set entirely — skip
+            # Bowman and Topps (flagship/Chrome) are different product lines that
+            # share the word "chrome". A "Bowman Chrome" listing must not match a
+            # "Topps Chrome" product (or vice versa) — that's how a $61 Bowman
+            # insert got valued off a $406 Topps Chrome parallel.
+            if ("bowman" in toks) != ("bowman" in (row["console_norm"] or "")):
+                continue
             # Reject when the listing names an unambiguous set this product isn't
             # (e.g. "Stadium Club"/"Heritage" listing vs flagship Topps product).
             if (toks & _HARD_SETS) - (cset & _HARD_SETS):
