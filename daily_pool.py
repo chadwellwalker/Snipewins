@@ -55,7 +55,8 @@ HERE = Path(__file__).parent
 # via SNIPEWINS_AUCTION_POOL_PATH in Render. WITHOUT this env var, every
 # redeploy starts the pool from 0 and the scanner has to rebuild — wasted
 # eBay quota and an empty Ending Soon page after every push.
-POOL_FILE = Path(os.environ.get("SNIPEWINS_AUCTION_POOL_PATH") or str(HERE / "daily_pool.json"))
+from snipewins_paths import state_path
+POOL_FILE = state_path("SNIPEWINS_AUCTION_POOL_PATH", "daily_pool.json")
 LOG_FILE = HERE / "daily_pool.log"
 
 DEFAULT_WINDOW_HOURS = 24.0

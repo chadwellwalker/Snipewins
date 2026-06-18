@@ -46,9 +46,8 @@ from typing import Any, Dict
 
 
 HERE = Path(__file__).parent
-BUDGET_FILE = Path(
-    os.environ.get("SNIPEWINS_DAILY_BUDGET_PATH") or str(HERE / "daily_call_budget.json")
-)
+from snipewins_paths import state_path
+BUDGET_FILE = state_path("SNIPEWINS_DAILY_BUDGET_PATH", "daily_call_budget.json")
 
 # Default 4500 (10% buffer under eBay's 5,000/day Browse API cap).
 # Override per-environment via env var.

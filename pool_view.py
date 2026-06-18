@@ -31,7 +31,8 @@ HERE = Path(__file__).parent
 # PERSISTENT-POOL-2026-05-15: must match the path used by daily_pool.py
 # (writer) so the dashboard reads what the scanner just wrote. Render
 # env: SNIPEWINS_AUCTION_POOL_PATH=/data/daily_pool.json.
-POOL_FILE = Path(os.environ.get("SNIPEWINS_AUCTION_POOL_PATH") or str(HERE / "daily_pool.json"))
+from snipewins_paths import state_path
+POOL_FILE = state_path("SNIPEWINS_AUCTION_POOL_PATH", "daily_pool.json")
 
 
 # MOBILE-CSS-2026-05-17: see bin_view.py for the full rationale. Inline

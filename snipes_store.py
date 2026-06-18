@@ -277,7 +277,8 @@ def backfill_missing_ends_at() -> int:
         ("SNIPEWINS_BIN_POOL_PATH", "bin_pool.json"),
     ):
         try:
-            path = Path(_os.environ.get(env_var) or str(HERE / default_name))
+            from snipewins_paths import state_path as _state_path
+            path = _state_path(env_var, default_name)
             if not path.exists():
                 continue
             pool = _json.loads(path.read_text(encoding="utf-8")) or {}

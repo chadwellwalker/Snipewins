@@ -24,7 +24,8 @@ from typing import Any, Dict, List, Optional, Tuple
 HERE = Path(__file__).parent
 # PERSISTENT-POOL-2026-05-15: must match the path used by daily_bin_pool.py
 # (writer). Render env: SNIPEWINS_BIN_POOL_PATH=/data/bin_pool.json.
-POOL_FILE = Path(os.environ.get("SNIPEWINS_BIN_POOL_PATH") or str(HERE / "bin_pool.json"))
+from snipewins_paths import state_path
+POOL_FILE = state_path("SNIPEWINS_BIN_POOL_PATH", "bin_pool.json")
 
 
 # MOBILE-CSS-2026-05-17: cards were squished on phones because the 4-column

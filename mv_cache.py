@@ -40,7 +40,8 @@ HERE = Path(__file__).parent
 # cache and the worker re-computes every card from scratch — directly
 # burning eBay quota. Same env-var pattern as accounts.json / snipes.json
 # / daily_call_budget.json. In Render env: SNIPEWINS_MV_CACHE_PATH=/data/mv_cache.json
-CACHE_FILE = Path(os.environ.get("SNIPEWINS_MV_CACHE_PATH") or str(HERE / "mv_cache.json"))
+from snipewins_paths import state_path
+CACHE_FILE = state_path("SNIPEWINS_MV_CACHE_PATH", "mv_cache.json")
 
 
 # ── Tunables ────────────────────────────────────────────────────────────────

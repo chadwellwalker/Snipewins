@@ -53,14 +53,10 @@ HERE = Path(__file__).parent
 
 # Match daily_pool.py's path discovery so we read/write the same file in
 # both local-dev and Render (where /data is the persistent disk).
-POOL_FILE = Path(
-    os.environ.get("SNIPEWINS_AUCTION_POOL_PATH") or str(HERE / "daily_pool.json")
-)
+from snipewins_paths import state_path
+POOL_FILE = state_path("SNIPEWINS_AUCTION_POOL_PATH", "daily_pool.json")
 
-STATE_FILE = Path(
-    os.environ.get("SNIPEWINS_NEAR_END_STATE_PATH")
-    or str(HERE / "near_end_refresh_state.json")
-)
+STATE_FILE = state_path("SNIPEWINS_NEAR_END_STATE_PATH", "near_end_refresh_state.json")
 
 # Separate near-end budget — 1500 calls/day default. Empirically:
 #   TIER_3 worst case (10 cards in <5min for 5min straight, refreshed every
@@ -69,7 +65,7 @@ STATE_FILE = Path(
 #   TIER_1 typical (40 cards in 1-6h, refreshed every 600s) = 40 × 36 = 1440 calls
 # Real load is well under these worst-case numbers because tiers narrow
 # as auctions end. 1500/day gives plenty of headroom.
-NEAR_END_BUDGET = int(os.environ.get("SNIPEWINS_NEAR_END_BUDGET") or 1500)
+NEAR_END_BUDGET = int(os.environ.get("SNIPEWINS_NEAR_END_BUDGET") or 1000)
 
 # Tier definitions: (min_secs_remaining, max_secs_remaining, refresh_interval_secs)
 # Tier 3 is most aggressive — the last 5 minutes is when bidding spikes

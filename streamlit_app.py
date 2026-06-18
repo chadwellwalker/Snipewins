@@ -11498,8 +11498,9 @@ elif _active_page_id == "settings":
                     return (f"{int(_age/86400)}d ago", "#f87171")
                 except Exception:
                     return ("?", "#888888")
-            _pool_age, _pool_color = _file_age_str(_hh / "daily_pool.json")
-            _bin_age, _bin_color = _file_age_str(_hh / "bin_pool.json")
+            from snipewins_paths import state_path as _sp
+            _pool_age, _pool_color = _file_age_str(_sp("SNIPEWINS_AUCTION_POOL_PATH", "daily_pool.json"))
+            _bin_age, _bin_color = _file_age_str(_sp("SNIPEWINS_BIN_POOL_PATH", "bin_pool.json"))
             # Rate-limit state read directly from ebay_search module globals
             try:
                 import ebay_search as _es_health

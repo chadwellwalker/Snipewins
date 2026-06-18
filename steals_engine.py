@@ -20,7 +20,8 @@ from typing import Any, Dict, List, Optional
 import scp_price_store as scp
 
 HERE = Path(__file__).parent
-BIN_POOL = Path(os.environ.get("SNIPEWINS_BIN_POOL_PATH") or str(HERE / "bin_pool.json"))
+from snipewins_paths import state_path
+BIN_POOL = state_path("SNIPEWINS_BIN_POOL_PATH", "bin_pool.json")
 STEALS_OUT = Path(os.environ.get("SNIPEWINS_STEALS_PATH") or str(HERE / "steals.json"))
 
 # Grade filters mirror the SportsCardsPro scanner UI checkboxes.
