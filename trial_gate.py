@@ -1171,15 +1171,20 @@ def _render_trial_badge(st, email: str, remaining_secs: Optional[int], paid: boo
     _inject_gate_css(st)
     if paid:
         # Paid users — no countdown needed, stay with the simple inline markdown.
-        # STRIPE-AUTOFLIP-2026-05-15: append a discrete "Account" link that
-        # routes to ?account=1 → the Manage Subscription page. Same nav-link
-        # treatment as the landing's Log in link; only there if they look for it.
+        # Carry the durable session token (?s=) on the Account link so the
+        # full-page nav to ?account=1 can still restore login (ROUTE 0) instead
+        # of bouncing the user to the sign-in page. ACCOUNT-ROUTE-FIX-2026-06-17.
+        try:
+            _acct_tok = str(st.query_params.get("s", "") or "")
+        except Exception:
+            _acct_tok = ""
+        _acct_href = f"?account=1&s={_acct_tok}" if _acct_tok else "?account=1"
         st.markdown(
             f"<div class='sw-trial-badge sw-trial-badge-paid'>"
             f"<span class='sw-trial-badge-dot' style='background:#4ade80;'></span>"
             f"Member · <strong>{email}</strong>"
             f"<span style='color:#444;margin:0 6px;'>·</span>"
-            f"<a href='?account=1' style='color:#60a5fa;font-size:11px;"
+            f"<a href='{_acct_href}' target='_self' style='color:#60a5fa;font-size:11px;"
             f"text-decoration:none;'>Account</a>"
             f"</div>",
             unsafe_allow_html=True,
@@ -1911,12 +1916,12 @@ button[kind="secondary"] {
     background-color: rgba(148,163,184,0.04) !important;
     color: #e4e4e4 !important;
     border: 1px solid rgba(148,163,184,0.45) !important;
-    font-weight: 500 !important;
-    font-size: 13px !important;
+    font-weight: 600 !important;
+    font-size: 15px !important;
     text-transform: none !important;
     letter-spacing: 0 !important;
     border-radius: 10px !important;
-    padding: 10px 14px !important;
+    padding: 12px 18px !important;
 }
 [data-testid="baseButton-secondary"]:hover,
 button[kind="secondary"]:hover {
