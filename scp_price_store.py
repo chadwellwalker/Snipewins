@@ -354,9 +354,9 @@ _SUPER_RE = re.compile(r"superfractor|1\s*of\s*1|\b1/1\b", re.IGNORECASE)
 _COLOR_TIER = {
     "superfractor": 0, "black": 0,
     "red": 1, "gold": 1,
-    "orange": 2, "purple": 2, "pink": 2, "magenta": 2,
+    "orange": 2, "purple": 2, "pink": 2, "magenta": 2, "fuchsia": 2, "rose": 1,
     "green": 3, "blue": 3, "aqua": 3, "teal": 3,
-    "silver": 4, "bronze": 4, "yellow": 4,
+    "silver": 4, "bronze": 4, "yellow": 4, "white": 4,
 }
 _SERIAL_RE_T = re.compile(r"/\s*(\d{1,4})\b")
 
@@ -475,7 +475,9 @@ def value_with_comps(title: str, *, min_score: float = 0.45, proxy: bool = True)
         _low_serial = bool(_ser and int(_ser.group(1)) <= 25)
         _listing_colors = set(_tokens(title)) & set(_COLOR_TIER.keys())
         _matched_par = set((row["parallel_norm"] or "").split()) if row is not None else set()
-        _rarity_mismatch = bool(_low_serial and _listing_colors and not (_listing_colors & _matched_par))
+        # Fire when the listing names a rarity color the matched product lacks
+        # ("Rose Gold" vs base "[Gold]" -> missing {rose} -> reject exact, use proxy).
+        _rarity_mismatch = bool(_low_serial and (_listing_colors - _matched_par))
 
         if row is not None and not _rarity_mismatch:
             ladder = _grade_ladder(row)
@@ -521,6 +523,12 @@ def value_with_comps(title: str, *, min_score: float = 0.45, proxy: bool = True)
                             "valuation_tier": "player_parallel_estimate", "source": "scp_proxy",
                             "comps": est["comps"], "n_comparables": est["n_comparables"], "matched": None,
                             "disclaimer": f"No exact comp for this card. Estimated from {est['n_comparables']} comparable {disp} parallels (same brand)."}
+        # If we deliberately rejected the exact match (rarity mismatch) and the
+        # proxy produced nothing, don't surface the rejected base price — a wrong
+        # cheap value is worse than NO COMPS. Drop it.
+        if _rarity_mismatch:
+            return {**base, "market_value": None, "matched": None, "source": None,
+                    "valuation_tier": "rarity_no_comp", "comps": []}
         return {**base, "valuation_tier": "none", "comps": []}
     finally:
         con.close()
