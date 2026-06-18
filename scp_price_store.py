@@ -299,7 +299,11 @@ def lookup(title: str, *, min_score: float = 0.45) -> Dict[str, Any]:
                     score -= 0.45                     # weak set overlap -> likely wrong set
             par = set((row["parallel_norm"] or "").split())
             if par:
-                inter = len(par & leftover)
+                # Brand/set words ("topps", "bowman", "panini") appear in every
+                # listing and must NOT count as a parallel match — otherwise a base
+                # "[Topps Logo]" parallel spuriously matches any Topps card.
+                _par_left = leftover - {"topps", "bowman", "panini"}
+                inter = len(par & _par_left)
                 score += 0.6 * (inter / len(par))
                 score += 0.05 * inter
             else:
@@ -432,12 +436,16 @@ def _grade_ladder(row) -> List[Dict[str, Any]]:
 
 def _proxy(cur, player: str, grade_col: str, is_auto: bool, ultra: bool,
            listing_brand: str, listing_tier: Optional[int] = None,
-           listing_year: str = "") -> Dict[str, Any]:
+           listing_year: str = "", listing_bowman: bool = False) -> Dict[str, Any]:
     rows = cur.execute("SELECT * FROM products WHERE player_norm=?", (player,)).fetchall()
     cands = []  # (price, row, cand_tier)
     for r in rows:
         rb = _brand_family(r["console_name"])
         if listing_brand and rb and rb != listing_brand:
+            continue
+        # Bowman and Topps share the "topps" family bucket but are different
+        # product lines — don't proxy a Topps card off Bowman parallels.
+        if listing_bowman != ("bowman" in (r["console_name"] or "").lower()):
             continue
         price = r[grade_col] if (isinstance(r[grade_col], int) and r[grade_col] > 0) else None
         if price is None:
@@ -564,7 +572,8 @@ def value_with_comps(title: str, *, min_score: float = 0.45, proxy: bool = True)
                 listing_brand = _brand_family(title)
                 listing_tier = _tier_of(title)
                 _ly = (_YEAR_RE.search(title).group(1) if _YEAR_RE.search(title) else "")
-                est = _proxy(cur, pnorm, grade_col, is_auto, ultra, listing_brand, listing_tier, _ly)
+                _lb = "bowman" in _norm(title)
+                est = _proxy(cur, pnorm, grade_col, is_auto, ultra, listing_brand, listing_tier, _ly, _lb)
                 if est.get("market_value"):
                     disp = pnorm.title()
                     return {"market_value": est["market_value"], "value_low": est["value_low"],

@@ -68,7 +68,7 @@ DEFAULT_LOOP_BATCH = int(os.environ.get("SNIPEWINS_WORKER_LOOP_BATCH") or 400)
 # Bump this whenever valuation logic changes so already-valued rows + cached
 # entries get force-recomputed on the next cycle (otherwise fixes never reach
 # cards that already have a "confident" value).
-VALUATION_VERSION = "scp_2026_06_18_clear_stale"
+VALUATION_VERSION = "scp_2026_06_19_brandword"
 
 
 # SCAN-PAUSE-2026-05-15: operator kill switch. Set SNIPEWINS_SCAN_PAUSED=1
