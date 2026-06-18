@@ -1899,6 +1899,13 @@ def is_non_single_card_listing(title_or_item: Any) -> bool:
 
 
 def should_exclude_from_single_card_valuation(title_or_item: Any) -> Tuple[bool, str, str]:
+    # Reject digital / app-only cards (Topps Bunt, NFT, "digital card") — these
+    # are not physical cards and must never appear on the feed.
+    _t = title_or_item if isinstance(title_or_item, str) else (
+        str((title_or_item or {}).get("title", "")) if isinstance(title_or_item, dict) else str(title_or_item or ""))
+    _tl = " " + _t.lower() + " "
+    if re.search(r"\bdigital\b|\bnft\b|topps\s+bunt|\bbunt\b|\bvirtual\b", _tl):
+        return True, "digital", "digital_or_app_card"
     listing_type = classify_listing_type(title_or_item)
     reason = listing_type_exclusion_reason(listing_type)
     return bool(reason), listing_type, reason

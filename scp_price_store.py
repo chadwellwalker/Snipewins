@@ -311,6 +311,33 @@ _PANINI_HINTS = ("panini", "prizm", "select", "optic", "mosaic", "donruss", "con
                  "immaculate", "flawless", "national treasures", "chronicles", "zenith",
                  "revolution", "score", "luminance", "xr", "playbook", "origins")
 _SUPER_RE = re.compile(r"superfractor|1\s*of\s*1|\b1/1\b", re.IGNORECASE)
+# Coarse rarity tier (0 = rarest). Serial number wins; else infer from the
+# parallel color. Used so a Black /10 comps against Black/Orange-tier parallels,
+# not Green /99.
+_COLOR_TIER = {
+    "superfractor": 0, "black": 0,
+    "red": 1, "gold": 1,
+    "orange": 2, "purple": 2, "pink": 2, "magenta": 2,
+    "green": 3, "blue": 3, "aqua": 3, "teal": 3,
+    "silver": 4, "bronze": 4, "yellow": 4,
+}
+_SERIAL_RE_T = re.compile(r"/\s*(\d{1,4})\b")
+
+
+def _tier_of(text: str) -> Optional[int]:
+    t = (text or "").lower()
+    m = _SERIAL_RE_T.search(t)
+    if m:
+        n = int(m.group(1))
+        if n <= 5: return 0
+        if n <= 10: return 1
+        if n <= 25: return 2
+        if n <= 99: return 3
+        return 4
+    for c, tier in _COLOR_TIER.items():
+        if c in t:
+            return tier
+    return None
 
 
 def _brand_family(text: str) -> str:
@@ -332,11 +359,11 @@ def _grade_ladder(row) -> List[Dict[str, Any]]:
     return out
 
 
-def _proxy(cur, player: str, grade_col: str, is_auto: bool, ultra: bool, listing_brand: str) -> Dict[str, Any]:
+def _proxy(cur, player: str, grade_col: str, is_auto: bool, ultra: bool,
+           listing_brand: str, listing_tier: Optional[int] = None) -> Dict[str, Any]:
     rows = cur.execute("SELECT * FROM products WHERE player_norm=?", (player,)).fetchall()
-    cands = []
+    cands = []  # (price, row, cand_tier)
     for r in rows:
-        # Same brand family only (Panini cards comp vs Panini, Topps vs Topps).
         rb = _brand_family(r["console_name"])
         if listing_brand and rb and rb != listing_brand:
             continue
@@ -347,33 +374,41 @@ def _proxy(cur, player: str, grade_col: str, is_auto: bool, ultra: bool, listing
             continue
         par = (r["parallel_norm"] or "")
         pname = (r["product_name"] or "")
-        # Exclude 1/1-tier (Superfractor / 1-of-1) unless the listing itself is ultra.
         if _SUPER_RE.search(par + " " + pname) and not ultra:
             continue
         if is_auto and not _AUTO_RE.search(par + " " + pname):
             continue
-        cands.append((price, r))
+        cands.append((price, r, _tier_of(pname)))
     if not cands:
         return {}
-    prices = sorted(p for p, _ in cands)
+    # Rarity-tier match: keep parallels within +-1 tier of the listing (a /10
+    # comps against /5-/25-tier, not /99). Fall back to all if too few.
+    if listing_tier is not None:
+        near = [c for c in cands if c[2] is not None and abs(c[2] - listing_tier) <= 1]
+        if len(near) >= 2:
+            cands = near
+    prices = sorted(p for p, _, _ in cands)
     n = len(prices)
     if ultra:
-        top = sorted((p for p, _ in cands), reverse=True)[: max(3, n // 4)]
+        top = sorted((p for p, _, _ in cands), reverse=True)[: max(3, n // 4)]
         center = sorted(top)[len(top) // 2]
     else:
-        # IQR-trim so a lone high/low parallel doesn't skew the estimate.
         lo, hi = n // 4, max(n // 4 + 1, (3 * n) // 4)
         trimmed = prices[lo:hi] or prices
         center = trimmed[len(trimmed) // 2]
-    # Show the comps CLOSEST to the estimate first (most representative).
-    cands.sort(key=lambda t: abs(t[0] - center))
+    # Order by tier-closeness first, then price-closeness to the estimate.
+    def _key(c):
+        ct = c[2]
+        td = abs(ct - listing_tier) if (ct is not None and listing_tier is not None) else 2
+        return (td, abs(c[0] - center))
+    cands.sort(key=_key)
     shown = cands[:6]
-    shown_prices = [p for p, _ in shown]
+    shown_prices = [p for p, _, _ in shown]
     comps = [{
         "title": r["product_name"], "set": r["console_name"],
         "price": round(p / 100.0, 2), "sale_type": "comparable parallel",
         "used": (idx == 0),
-    } for idx, (p, r) in enumerate(shown)]
+    } for idx, (p, r, _ct) in enumerate(shown)]
     return {
         "market_value": round(center / 100.0, 2),
         "value_low": round(min(shown_prices) / 100.0, 2),
@@ -430,7 +465,8 @@ def value_with_comps(title: str, *, min_score: float = 0.45, proxy: bool = True)
                 is_auto = bool(_AUTO_RE.search(title))
                 ultra = bool(re.search(r"/\s*([1-5])\b", title)) or bool(_SUPER_RE.search(title))
                 listing_brand = _brand_family(title)
-                est = _proxy(cur, pnorm, grade_col, is_auto, ultra, listing_brand)
+                listing_tier = _tier_of(title)
+                est = _proxy(cur, pnorm, grade_col, is_auto, ultra, listing_brand, listing_tier)
                 if est.get("market_value"):
                     disp = pnorm.title()
                     return {"market_value": est["market_value"], "value_low": est["value_low"],
