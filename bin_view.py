@@ -200,6 +200,24 @@ def _row_has_real_mv(row: Dict[str, Any]) -> bool:
     return True
 
 
+# Flat shipping estimate added to the BIN price when judging a deal (matches
+# pool_view). eBay card shipping clusters ~$5; real per-listing shipping
+# (row["shipping_cost"], captured at discovery) overrides when present.
+SHIPPING_EST = float(os.environ.get("SNIPEWINS_SHIPPING_EST") or 5.0)
+
+
+def _eff_bin_cost(row: Dict[str, Any]) -> float:
+    """BIN price + shipping — the true out-of-pocket cost used for strike/spread."""
+    p = _row_current_price(row)
+    try:
+        ship = float(row.get("shipping_cost"))
+        if ship < 0:
+            ship = SHIPPING_EST
+    except (TypeError, ValueError):
+        ship = SHIPPING_EST
+    return (p + ship) if (p and p > 0) else p
+
+
 def _row_target_bid(row: Dict[str, Any]) -> Optional[float]:
     for k in ("target_bid", "_final_target_bid", "_bid_anchor"):
         v = (row or {}).get(k)
@@ -208,6 +226,15 @@ def _row_target_bid(row: Dict[str, Any]) -> Optional[float]:
                 return float(v)
         except Exception:
             pass
+    # Fallback: the worker stamps the MV but not a target_bid (pool_view computes
+    # it live; bin_view used to read a stored value that never existed -> every
+    # BIN was PENDING). Compute it live: target = 70% of market value.
+    mv = (row or {}).get("true_mv") or (row or {}).get("market_value")
+    try:
+        if mv is not None and float(mv) > 0:
+            return round(float(mv) * 0.70, 2)
+    except Exception:
+        pass
     return None
 
 
@@ -612,7 +639,7 @@ def render_bin_radar(streamlit, *, max_cards: int = 30) -> None:
         discount = _discount_to_mv(bin_price, mv) if mv else None
         sort_key = -(discount or -1.0)   # negate so high discount = low sort key = top
         actionable.append((sort_key, row))
-        sz_label, _, _ = _strike_zone_state(bin_price, target, _row_accepts_offers(row))
+        sz_label, _, _ = _strike_zone_state(_eff_bin_cost(row), target, _row_accepts_offers(row))
         if sz_label == "STRIKE":
             strike_count += 1
         elif sz_label == "CLOSE":
@@ -719,7 +746,7 @@ def render_bin_radar(streamlit, *, max_cards: int = 30) -> None:
     for _sort_key, row in actionable:
         bin_price = _row_current_price(row)
         target = _row_target_bid(row) if _row_has_real_mv(row) else None
-        sz_label, _, _ = _strike_zone_state(bin_price, target, _row_accepts_offers(row))
+        sz_label, _, _ = _strike_zone_state(_eff_bin_cost(row), target, _row_accepts_offers(row))
         if _filter_label == "Strikes only" and sz_label != "STRIKE":
             continue
         if _filter_label == "Strike · Close · Offer" and sz_label not in {"STRIKE", "CLOSE", "OFFER"}:
@@ -806,7 +833,7 @@ def render_bin_radar(streamlit, *, max_cards: int = 30) -> None:
                 f'color:#94a3b8;letter-spacing:0.1em;">NEEDS COMPS</div>'
             )
         else:
-            sz_label, sz_bg, sz_fg = _strike_zone_state(bin_price, target_value, _accepts_offers)
+            sz_label, sz_bg, sz_fg = _strike_zone_state(_eff_bin_cost(row), target_value, _accepts_offers)
             sz_rgb = _hex_to_rgb(sz_bg)
             sz_html = (
                 f'<div style="display:inline-block;padding:4px 10px;'
@@ -828,7 +855,7 @@ def render_bin_radar(streamlit, *, max_cards: int = 30) -> None:
             and bin_price > 0
             and discount is not None and discount > 0
         ):
-            _spread_dollars = float(mv_value) - float(bin_price)
+            _spread_dollars = float(mv_value) - float(_eff_bin_cost(row))
             if _spread_dollars >= 5.0 and discount >= 0.05:
                 _spread_label = f"${_spread_dollars:,.0f} BELOW MV · {int(discount * 100)}% SPREAD"
                 discount_html = (
