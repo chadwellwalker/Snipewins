@@ -329,6 +329,14 @@ def lookup(title: str, *, min_score: float = 0.45) -> Dict[str, Any]:
             _extra = (par & set(_COLOR_TIER)) - listing_colors
             if _extra:
                 score -= 0.4 * len(_extra)
+            # Prefer the PLAINEST product when the listing doesn't name the parallel.
+            # The base "#1" listing ties with both "[Batting]" and "[Batting Refractor]"
+            # of the same number; without this it grabbed the $29K refractor. Penalize
+            # every extra parallel word the product carries that the listing doesn't,
+            # so the cheaper base ("[Batting]") wins.
+            _extra_par_tokens = par - leftover
+            if _extra_par_tokens:
+                score -= 0.18 * len(_extra_par_tokens)
             if year and row["year"] and row["year"] != year:
                 continue                              # different year — never cross-year match
             if year and row["year"] == year:
