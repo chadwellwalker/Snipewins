@@ -297,22 +297,12 @@ def _render_snipe_actions(streamlit, snipe: Dict[str, Any], snipes_store) -> Non
                     st.toast(f"Marked as won — paid ${fp:,.0f}", icon="🏆")
                     st.rerun()
         with col_lost:
-            with st.expander("✗ Mark Lost", expanded=False):
-                fp = st.number_input(
-                    "What did it sell for?",
-                    min_value=0.0,
-                    step=1.0,
-                    format="%.2f",
-                    key=f"lost_price_{item_id}",
-                    help="Optional — what someone else paid. Helps track if our target was right.",
-                )
-                if st.button("Confirm Lost", key=f"confirm_lost_{item_id}", use_container_width=True):
-                    snipes_store.mark_snipe_resolved(
-                        _user_email, item_id, "lost",
-                        final_price=fp if fp > 0 else None,
-                    )
-                    st.toast("Marked as lost", icon="📉")
-                    st.rerun()
+            # One-click Mark Lost — no price entry. Losing an auction isn't something
+            # users want to log; Mark Won keeps the price field since that's the fun part.
+            if st.button("✗ Mark Lost", key=f"confirm_lost_{item_id}", use_container_width=True):
+                snipes_store.mark_snipe_resolved(_user_email, item_id, "lost", final_price=None)
+                st.toast("Marked as lost", icon="📉")
+                st.rerun()
         with col_remove:
             if st.button("🗑 Remove", key=f"remove_{item_id}", use_container_width=True):
                 snipes_store.remove_snipe(_user_email, item_id)
