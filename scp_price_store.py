@@ -51,7 +51,11 @@ _SET_STOP = {"cards", "baseball", "football", "basketball", "hockey", "soccer",
 _HARD_SETS = {"stadium", "club", "heritage", "ginter", "allen", "gallery", "gypsy",
               "archives", "museum", "tribute", "inception", "contenders", "immaculate",
               "flawless", "obsidian", "finest", "sapphire", "mosaic", "spectra", "select",
-              "treasures", "national", "definitive", "sterling"}
+              "treasures", "national", "definitive", "sterling",
+              # Distinct Topps lines that share "chrome" with the flagship — a
+              # "Chrome Platinum"/"Chrome Update"/"Cosmic" card must match its OWN
+              # set, never base Topps Chrome (these are now loaded).
+              "platinum", "update", "cosmic", "pristine"}
 # Multi-word SET names whose name contains a color word. When present, that color
 # is part of the SET, not the card's parallel.
 _SET_COLOR_PHRASES = {"chrome black": "black", "topps black": "black",

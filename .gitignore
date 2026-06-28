@@ -95,3 +95,5 @@ bin_pool.json
 accounts.json
 snipes.json
 app_state.json
+
+scp_prices.db
