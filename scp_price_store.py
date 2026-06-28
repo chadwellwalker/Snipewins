@@ -322,6 +322,13 @@ def lookup(title: str, *, min_score: float = 0.45) -> Dict[str, Any]:
             _missing = listing_colors - par
             if _missing:
                 score -= 0.3 * len(_missing)
+            # Symmetric guard: penalize when the PRODUCT names a rarity color the
+            # listing does NOT — a base "#1" must not match a rarer "[Blue Refractor]
+            # #1" (that's the $15K Ohtani inflation), and a "Green Refractor" must
+            # not match a "[Blue Refractor]" of the same number.
+            _extra = (par & set(_COLOR_TIER)) - listing_colors
+            if _extra:
+                score -= 0.4 * len(_extra)
             if year and row["year"] and row["year"] != year:
                 continue                              # different year — never cross-year match
             if year and row["year"] == year:

@@ -793,6 +793,10 @@ def render_bin_radar(streamlit, *, max_cards: int = 30) -> None:
         # off it. Computed once, used for the badge, discount pill, and the
         # target block below.
         _mv_unreliable = False
+        # Only an EXACT match earns a confident STRIKE; a proxy is an estimate.
+        _src = str(row.get("market_value_source") or row.get("_mv_market_value_source") or "").lower()
+        if "proxy" in _src or "estimate" in _src:
+            _mv_unreliable = True
         if mv_value is not None and mv_value > 0:
             _mq = str(row.get("_mv_match_quality") or row.get("mv_match_quality") or "").lower()
             _cc = (

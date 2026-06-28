@@ -1287,6 +1287,12 @@ def render_morning_briefing(streamlit, *, max_cards: int = 150) -> None:
         # the strike badge + spread and replace them with a neutral
         # "NEEDS COMPS" chip. The MV still shows, flagged as an estimate.
         _mv_unreliable = False
+        # Only an EXACT SportsCardsPro match earns a confident STRIKE. A proxy /
+        # comparable-parallel value is an estimate (it can pick a wrong-set or
+        # wrong-card comp), so it must not flash STRIKE — show ESTIMATE instead.
+        _src = str(row.get("market_value_source") or row.get("_mv_market_value_source") or "").lower()
+        if "proxy" in _src or "estimate" in _src:
+            _mv_unreliable = True
         if mv_is_estimate:
             _mv_unreliable = True
         elif mv_value is not None and mv_value > 0:
