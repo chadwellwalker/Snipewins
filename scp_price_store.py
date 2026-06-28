@@ -326,8 +326,19 @@ def lookup(title: str, *, min_score: float = 0.45) -> Dict[str, Any]:
                 continue                              # different year — never cross-year match
             if year and row["year"] == year:
                 score += 0.2
-            if listing_num and row["card_number"] and listing_num == _norm(row["card_number"]):
-                score += 0.25
+            # Card-number discipline: if the listing names a card number and this
+            # product has a DIFFERENT one, it's a different card — never an exact
+            # match (this is what let "Meteoric Rise #MR-12" match base "#17" and
+            # flash a $943 STRIKE). Skip it; the card falls to a labeled proxy.
+            # Compare card numbers with dashes/spaces stripped so "USC-200" ==
+            # "USC200" and "BDC-118" == "BDC118" (SCP and eBay format them differently).
+            _rn = _norm(row["card_number"] or "").replace("-", "").replace(" ", "")
+            _ln = listing_num.replace("-", "").replace(" ", "")
+            if _ln and _rn:
+                if _ln == _rn:
+                    score += 0.30
+                else:
+                    continue
             if score > best_score:
                 best, best_score = row, score
 
