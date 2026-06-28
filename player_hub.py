@@ -313,10 +313,10 @@ DEFAULT_TARGET_GROUP_LINKS: Dict[str, List[str]] = {
 # Without auto lanes, serial lanes, or configured premium subsets these products generate
 # broad product-bound queries that waste scan budget and never survive truth/supply gates.
 _NBA_WEAK_PRODUCT_TARGETS_SUPPRESS: frozenset = frozenset({
-    "hoops_nba",
+    # Chadwell-confirmed (2026-06-28): Hoops, Court Kings, Revolution are liquid
+    # NBA sets we WANT to scan, so they're no longer suppressed. Chronicles/Flux
+    # stay suppressed (low resale, not on the confirmed liquid list).
     "chronicles_nba",
-    "revolution_nba",
-    "court_kings_nba",
     "flux_nba",
 })
 

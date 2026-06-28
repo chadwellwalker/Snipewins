@@ -812,14 +812,16 @@ _ES_MAX_COHORT_SIZE = 130
 _ES_ROTATION_INTERVAL_SECS = 180  # 3 min
 
 # ── Cross-sport cohort allocation (when sport_filter=None/"All") ─────────────
-# Per-sport core + rotating slots; total adjusted for _ES_MAX_COHORT_SIZE=75.
-# Allocation roughly proportional to target volume (NFL 1139, MLB 560, NBA 91).
-_ES_CROSS_SPORT_NFL_CORE = 24
-_ES_CROSS_SPORT_NFL_ROT  = 18
-_ES_CROSS_SPORT_MLB_CORE = 14
-_ES_CROSS_SPORT_MLB_ROT  =  9
-_ES_CROSS_SPORT_NBA_CORE =  6
-_ES_CROSS_SPORT_NBA_ROT  =  4
+# Per-sport core + rotating slots. Chadwell-confirmed 2026-06-28 floor:
+# NFL 40% / MLB 35% / NBA 25% of the ~75-slot cohort, so NBA discovery is
+# guaranteed a daily share instead of being drained by baseball/football first.
+# (Was NFL 56% / MLB 31% / NBA 13%.)
+_ES_CROSS_SPORT_NFL_CORE = 18
+_ES_CROSS_SPORT_NFL_ROT  = 12
+_ES_CROSS_SPORT_MLB_CORE = 16
+_ES_CROSS_SPORT_MLB_ROT  = 10
+_ES_CROSS_SPORT_NBA_CORE = 11
+_ES_CROSS_SPORT_NBA_ROT  =  8
 _ES_DIVERSITY_STABLE_CORE_SIZE = 12
 _ES_DIVERSITY_RECENT_PLAYER_PENALTY = 18.0
 _ES_DIVERSITY_RECENT_PRODUCT_PENALTY = 10.0
@@ -1761,8 +1763,12 @@ _BUDGET_STATE: Dict[str, Any] = {
 }
 
 _TARGET_SPORT_BROAD_INTAKE_PRODUCTS: Dict[str, List[str]] = {
-    "NBA": ["Prizm", "Select", "Donruss Optic", "Mosaic"],
-    "NFL": ["Prizm", "Select", "Donruss Optic", "Mosaic"],
+    # Liquid scan sets per sport (Chadwell-confirmed 2026-06-28). Ordered by
+    # liquidity so the broad-intake cap keeps the highest-resale sets first.
+    "MLB": ["Topps Chrome", "Bowman Chrome", "Bowman Chrome Prospects", "Bowman Draft Chrome",
+            "Topps Chrome Platinum", "Topps Chrome Update", "Topps Cosmic Chrome", "Topps Finest", "Prizm"],
+    "NFL": ["Prizm", "Select", "Donruss Optic", "Mosaic", "Contenders", "Spectra", "Phoenix", "Absolute"],
+    "NBA": ["Prizm", "Select", "Donruss Optic", "Mosaic", "Court Kings", "NBA Hoops", "Revolution"],
 }
 _NBA_VETERAN_LIVE_SUPPLY_PRODUCTS: List[str] = [
     "Prizm",
@@ -24462,6 +24468,20 @@ _PLAYER_MASTER: List[Dict[str, Any]] = [
     {"name": "Kon Knueppel",       "sport": "Basketball", "tier": 3, "tier_label": "3", "rookie_year": 2025},
     {"name": "Keyonte George",     "sport": "Basketball", "tier": 3, "tier_label": "3", "rookie_year": 2023},
     {"name": "Jalen Duren",        "sport": "Basketball", "tier": 3, "tier_label": "3", "rookie_year": 2022},
+
+    # ── CONFIRMED ADDITIONS 2026-06-28 (Chadwell — liquidity expansion) ───────
+    {"name": "Fernando Tatis Jr.", "sport": "Baseball",   "tier": 1, "tier_label": "1B", "rookie_year": 2019},
+    {"name": "A.J. Brown",         "sport": "Football",   "tier": 2, "tier_label": "2",  "rookie_year": 2019},
+    {"name": "Nico Collins",       "sport": "Football",   "tier": 2, "tier_label": "2",  "rookie_year": 2021},
+    {"name": "Brock Purdy",        "sport": "Football",   "tier": 2, "tier_label": "2",  "rookie_year": 2022},
+    {"name": "Matthew Stafford",   "sport": "Football",   "tier": 2, "tier_label": "2",  "rookie_year": 2009},
+    {"name": "DK Metcalf",         "sport": "Football",   "tier": 2, "tier_label": "2",  "rookie_year": 2019},
+    {"name": "Jerry Rice",         "sport": "Football",   "tier": 1, "tier_label": "0",  "rookie_year": 1985},
+    {"name": "Barry Sanders",      "sport": "Football",   "tier": 1, "tier_label": "0",  "rookie_year": 1989},
+    {"name": "Joe Montana",        "sport": "Football",   "tier": 1, "tier_label": "0",  "rookie_year": 1979},
+    {"name": "Walter Payton",      "sport": "Football",   "tier": 1, "tier_label": "0",  "rookie_year": 1975},
+    {"name": "Randy Moss",         "sport": "Football",   "tier": 1, "tier_label": "0",  "rookie_year": 1998},
+    {"name": "Kevin Durant",       "sport": "Basketball", "tier": 1, "tier_label": "1B", "rookie_year": 2007},
 ]
 
 _SPORT_DISPLAY = {"Football": "NFL", "Baseball": "MLB", "Basketball": "NBA"}
@@ -27715,7 +27735,7 @@ def _build_query_specs(sport_filter=None):
         _BROAD_INTAKE_PRODUCTS: Dict[str, List[str]] = {
             "NBA": list(_TARGET_SPORT_BROAD_INTAKE_PRODUCTS.get("NBA") or []),
             "NFL": list(_TARGET_SPORT_BROAD_INTAKE_PRODUCTS.get("NFL") or []),
-            "MLB": ["Topps Chrome", "Prizm"],
+            "MLB": list(_TARGET_SPORT_BROAD_INTAKE_PRODUCTS.get("MLB") or []),
         }
         _broad_specs_added = 0
         _broad_existing_queries: set = {
