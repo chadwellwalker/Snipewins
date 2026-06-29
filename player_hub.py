@@ -615,9 +615,15 @@ def ensure_buy_universe_seed(state: Dict[str, Any]) -> Dict[str, Any]:
     for tid, meta in DEFAULT_PRODUCT_TARGETS.items():
         if tid not in bu["product_targets"]:
             bu["product_targets"][tid] = dict(meta)
+        elif bu["product_targets"][tid].get("active") is False:
+            # SELF-HEAL: a diverged/worker-rewritten persisted state had deactivated
+            # default products — this is what silently dropped NBA from the scan.
+            # Re-assert any default product to active.
+            bu["product_targets"][tid]["active"] = True
+    # Always re-assert default target->group links (a diverged state may have lost
+    # the NBA product links, leaving nba_all unreachable).
     for tid, gids in DEFAULT_TARGET_GROUP_LINKS.items():
-        if tid not in bu["target_group_links"]:
-            bu["target_group_links"][tid] = list(gids)
+        bu["target_group_links"][tid] = list(gids)
     upgrade_all_product_targets(bu)
 
     # Auto-seed all SEED_PLAYERS into their sport bucket groups (nfl_all, mlb_all, nba_all).

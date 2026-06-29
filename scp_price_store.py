@@ -473,9 +473,31 @@ _GRADE_DISPLAY = {
     "bgs_10_price": "BGS 10", "condition_17_price": "CGC 10", "condition_18_price": "SGC 10",
 }
 _AUTO_RE = re.compile(r"\b(auto|autograph|signature|signed|sig)\b", re.IGNORECASE)
+# Cross-comp groups — which products are comparable. A high-end patch/RPA card
+# (National Treasures/Immaculate/Flawless) must NOT proxy against a mid-tier set
+# (Phoenix/Spectra), Chrome stays with Chrome, Prizm-family with Prizm-family.
+# First matching substring wins, so order matters (most specific first).
+_PRODUCT_GROUP_MAP = [
+    ("national treasures", "highend"), ("immaculate", "highend"), ("flawless", "highend"),
+    ("definitive", "highend"), ("dynasty", "highend"), ("sterling", "highend"),
+    ("museum", "highend"), ("transcendent", "highend"), ("five star", "highend"),
+    ("panini one", "highend"), ("noir", "highend"), ("opulence", "highend"),
+    ("optic", "prizm"), ("prizm", "prizm"), ("select", "prizm"), ("mosaic", "prizm"),
+    ("finest", "chrome"), ("sapphire", "chrome"), ("chrome", "chrome"), ("bowman", "chrome"),
+    ("phoenix", "midpanini"), ("spectra", "midpanini"), ("certified", "midpanini"),
+    ("zenith", "midpanini"), ("absolute", "midpanini"), ("illusions", "midpanini"),
+    ("luminance", "midpanini"), ("origins", "midpanini"), ("obsidian", "midpanini"),
+    ("contenders", "contenders"), ("score", "score"),
+]
+def _product_group(text: str) -> str:
+    t = (text or "").lower()
+    for _sub, _grp in _PRODUCT_GROUP_MAP:
+        if _sub in t:
+            return _grp
+    return ""
 # Relic/patch/memorabilia signal — these are physically different (and usually far
 # pricier) cards than a plain parallel; must not match a non-relic product.
-_RELIC_RE = re.compile(r"\b(patch|jersey|relic|memorabilia|swatch|laundry|button|rpa|materials?|game[ -]?used|prime)\b", re.IGNORECASE)
+_RELIC_RE = re.compile(r"\b(patch\w*|jersey|relic|memorabilia|swatch|laundry|button|rpa|materials?|game[ -]?used|dual\s+patch|combo\s+patch)\b", re.IGNORECASE)
 # Multi-player signal (dual/combo/booklet) — a different card than a solo.
 _MULTI_RE = re.compile(r"\b(dual|triple|quad|combo|synced|duos?|tandem|booklet)\b", re.IGNORECASE)
 _PANINI_HINTS = ("panini", "prizm", "select", "optic", "mosaic", "donruss", "contenders",
@@ -534,12 +556,17 @@ def _grade_ladder(row) -> List[Dict[str, Any]]:
 def _proxy(cur, player: str, grade_col: str, is_auto: bool, ultra: bool,
            listing_brand: str, listing_tier: Optional[int] = None,
            listing_year: str = "", listing_bowman: bool = False,
-           is_relic: bool = False, is_multi: bool = False) -> Dict[str, Any]:
+           is_relic: bool = False, is_multi: bool = False,
+           listing_group: str = "") -> Dict[str, Any]:
     rows = cur.execute("SELECT * FROM products WHERE player_norm=?", (player,)).fetchall()
     cands = []  # (price, row, cand_tier)
     for r in rows:
         rb = _brand_family(r["console_name"])
         if listing_brand and rb and rb != listing_brand:
+            continue
+        # Cross-comp group gate: don't proxy across product tiers (a $XX Phoenix
+        # parallel must not stand in for a National Treasures /99 patch).
+        if listing_group and _product_group(r["console_name"]) != listing_group:
             continue
         # Bowman and Topps share the "topps" family bucket but are different
         # product lines — don't proxy a Topps card off Bowman parallels.
@@ -676,7 +703,8 @@ def value_with_comps(title: str, *, min_score: float = 0.45, proxy: bool = True)
                 _ly = (_YEAR_RE.search(title).group(1) if _YEAR_RE.search(title) else "")
                 _lb = "bowman" in _norm(title)
                 est = _proxy(cur, pnorm, grade_col, is_auto, ultra, listing_brand, listing_tier, _ly, _lb,
-                             is_relic=bool(_RELIC_RE.search(title)), is_multi=bool(_MULTI_RE.search(title)))
+                             is_relic=bool(_RELIC_RE.search(title)), is_multi=bool(_MULTI_RE.search(title)),
+                             listing_group=_product_group(title))
                 if est.get("market_value"):
                     disp = pnorm.title()
                     return {"market_value": est["market_value"], "value_low": est["value_low"],
