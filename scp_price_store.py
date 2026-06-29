@@ -63,6 +63,22 @@ _SET_COLOR_PHRASES = {"chrome black": "black", "topps black": "black",
                       "chrome cosmic": "cosmic", "black chrome": "black"}
 
 
+# Parallel DESIGN/pattern words (not colors, not generic). Two parallels that
+# differ on any of these are different cards even at the same #: "Blue Mini-Diamond"
+# != "Blue Lava", "Gold Wave" != "Gold Refractor", "Tri-Color" != "Cosmic". Used to
+# stop same-#/same-color cross-parallel matches (the Bo Nix $6,200 class).
+_PARALLEL_DESIGN_WORDS = {
+    "lava", "wave", "raywave", "geometric", "mini", "diamond", "cosmic", "shimmer",
+    "vibrations", "etch", "mojo", "nebula", "pulsar", "atomic", "velocity", "fusion",
+    "sparkle", "snakeskin", "lazer", "laser", "interstellar", "supernova", "eclipse",
+    "toile", "speckle", "logofractor", "crackle", "voltage", "marble", "kaboom",
+    "downtown", "batting", "equinox", "fluorescent", "padparadscha", "scope", "disco",
+    "shock", "dragon", "zebra", "fireworks", "kaleidoscope", "stained", "glass",
+    "tie", "dye", "fractal", "vinyl", "lunar", "nova", "stella", "meteoric", "careers",
+    "voltaic", "breakaway", "concourse", "premier", "die", "cut", "deca", "honeycomb",
+    "tiger", "leopard", "giraffe", "elephant", "butterfly", "flash", "lazer",
+}
+
 def _norm(s: str) -> str:
     s = unicodedata.normalize("NFKD", str(s or ""))
     s = s.encode("ascii", "ignore").decode("ascii").lower()
@@ -301,7 +317,7 @@ def lookup(title: str, *, min_score: float = 0.45) -> Dict[str, Any]:
                 score += 0.05 * set_overlap   # prefer the more specific set when several match
                 if set_ratio < 0.5:
                     score -= 0.45                     # weak set overlap -> likely wrong set
-            par = set((row["parallel_norm"] or "").split())
+            par = set(_tokens(row["parallel_norm"] or ""))
             if par:
                 # Brand/set words ("topps", "bowman", "panini") appear in every
                 # listing and must NOT count as a parallel match — otherwise a base
@@ -337,6 +353,13 @@ def lookup(title: str, *, min_score: float = 0.45) -> Dict[str, Any]:
             _extra_par_tokens = par - leftover
             if _extra_par_tokens:
                 score -= 0.18 * len(_extra_par_tokens)
+            # Parallel-NAME discipline: the specific design/pattern must match, not
+            # just the color. Penalize design words on one side but not the other so
+            # "Gold Wave" can't take "[Gold Refractor]" and "Tri-Color" can't take
+            # "[Cosmic]". Strong enough to drop a wrong-parallel match to proxy.
+            _design_diff = (leftover & _PARALLEL_DESIGN_WORDS) ^ (par & _PARALLEL_DESIGN_WORDS)
+            if _design_diff:
+                score -= 0.45 * len(_design_diff)
             if year and row["year"] and row["year"] != year:
                 continue                              # different year — never cross-year match
             if year and row["year"] == year:
@@ -560,7 +583,7 @@ def value_with_comps(title: str, *, min_score: float = 0.45, proxy: bool = True)
         _ser = re.search(r"/\s*(\d{1,4})", title)
         _low_serial = bool(_ser and int(_ser.group(1)) <= 25)
         _listing_colors = set(_tokens(title)) & set(_COLOR_TIER.keys())
-        _matched_par = set((row["parallel_norm"] or "").split()) if row is not None else set()
+        _matched_par = set(_tokens(row["parallel_norm"] or "")) if row is not None else set()
         # Fire when the listing names a rarity color the matched product lacks
         # ("Rose Gold" vs base "[Gold]" -> missing {rose} -> reject exact, use proxy).
         _rarity_mismatch = bool(_low_serial and (_listing_colors - _matched_par))
