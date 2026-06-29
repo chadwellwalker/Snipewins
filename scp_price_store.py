@@ -175,9 +175,18 @@ def rebuild_store(csv_dir: Optional[Path] = None) -> Dict[str, Any]:
         "VALUES (" + ",".join(["?"] * (11 + len(PRICE_COLS))) + ")"
     )
     n = 0
+    skipped_files = []
     for fp in files:
-        with open(fp, newline="", encoding="utf-8", errors="ignore") as fh:
-            for r in csv.DictReader(fh):
+        try:
+            # Read bytes, STRIP NUL bytes (a single corrupt download with a stray
+            # \x00 used to crash csv with "line contains NUL" and kill the WHOLE
+            # rebuild — leaving the store empty on Render's boot rebuild). Per-file
+            # try/except so one bad CSV can never take down the rest.
+            import io as _io
+            _raw = open(fp, "rb").read().replace(b"\x00", b"")
+            _text = _raw.decode("utf-8", errors="ignore")
+            _file_rows = 0
+            for r in csv.DictReader(_io.StringIO(_text)):
                 cn = r.get("console-name", "") or ""
                 pn = r.get("product-name", "") or ""
                 player, parallel, number = parse_product_name(pn)
@@ -191,6 +200,11 @@ def rebuild_store(csv_dir: Optional[Path] = None) -> Dict[str, Any]:
                      *price_vals],
                 )
                 n += 1
+                _file_rows += 1
+        except Exception as _ferr:
+            skipped_files.append(fp.name)
+            print(f"[scp_price_store] skipped {fp.name}: {type(_ferr).__name__}: {str(_ferr)[:120]}", flush=True)
+            continue
     cur.execute("CREATE INDEX idx_player ON products(player_norm)")
     cur.execute("CREATE INDEX idx_year ON products(year)")
     con.commit()
@@ -199,7 +213,7 @@ def rebuild_store(csv_dir: Optional[Path] = None) -> Dict[str, Any]:
     ).fetchone()[0]
     con.close()
     return {"files": [f.name for f in files], "rows": n, "distinct_players": players,
-            "db": str(DB_PATH)}
+            "skipped_files": skipped_files, "db": str(DB_PATH)}
 
 
 # Team / checklist "players" — SCP stores team cards with the team as the
@@ -411,6 +425,21 @@ def lookup(title: str, *, min_score: float = 0.45) -> Dict[str, Any]:
         }
     finally:
         con.close()
+
+
+def loaded_src_file_count() -> int:
+    """How many distinct CSV files are represented in the built store. Lets the
+    supervisor detect that new price lists were added (csv count > loaded count)
+    and trigger a rebuild — otherwise newly-downloaded sets never load."""
+    if not DB_PATH.exists():
+        return 0
+    try:
+        con = _conn()
+        n = con.execute("SELECT COUNT(DISTINCT src_file) FROM products").fetchone()[0]
+        con.close()
+        return int(n or 0)
+    except Exception:
+        return 0
 
 
 def store_stats() -> Dict[str, Any]:

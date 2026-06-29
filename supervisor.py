@@ -394,8 +394,18 @@ def main(argv: List[str]) -> int:
         _repo_csv = _scp.HERE / "scp_csv"
         _have_csv = _repo_csv.exists() and any(_repo_csv.glob("*.csv"))
         _st = _scp.store_stats()
-        if _have_csv and (not _st.get("built") or int(_st.get("rows") or 0) < 1000):
-            _supervisor("SCP store missing/empty — rebuilding from bundled CSVs...")
+        try:
+            _csv_count = len(list(_repo_csv.glob("*.csv")))
+            _loaded_count = _scp.loaded_src_file_count()
+        except Exception:
+            _csv_count, _loaded_count = 0, 0
+        _need_rebuild = (
+            not _st.get("built")
+            or int(_st.get("rows") or 0) < 1000
+            or (_csv_count > 0 and _loaded_count < _csv_count)  # new price lists added
+        )
+        if _have_csv and _need_rebuild:
+            _supervisor(f"SCP store rebuild needed (csv={_csv_count} loaded={_loaded_count}) — rebuilding...")
             _info = _scp.rebuild_store(csv_dir=_repo_csv)
             _supervisor(f"SCP store rebuilt: {_info.get('rows')} rows / {len(_info.get('files', []))} sets at {_info.get('db')}")
         else:
