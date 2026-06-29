@@ -871,6 +871,13 @@ _PREMIUM_LANE_DEFINITIONS_BY_PRODUCT: Dict[str, List[Dict[str, Any]]] = {
         {"parallel": "auto",           "type": "auto",             "tier": "strong",      "priority": 95, "query_contract_type": "auto"},
         {"parallel": "superfractor",   "type": "ssp_case_hit",     "tier": "elite",       "priority": 93, "query_contract_type": "ssp_case_hit"},
         {"parallel": "gold refractor", "type": "premium_parallel", "tier": "elite",       "priority": 88, "query_contract_type": "premium_parallel"},
+        # SP/SSP chase inserts (Chadwell 2026-06-29) — the short-prints, not just
+        # case hits. Apply across Topps Chrome MLB + NBA; self-limiting per sport.
+        {"subset": "helix",                "type": "premium_subset", "tier": "elite", "priority": 90, "query_contract_type": "player_subset_only"},
+        {"subset": "ultra violet",         "type": "premium_subset", "tier": "elite", "priority": 90, "query_contract_type": "player_subset_only"},
+        {"subset": "fanatical",            "type": "premium_subset", "tier": "elite", "priority": 90, "query_contract_type": "player_subset_only"},
+        {"subset": "home court advantage", "type": "premium_subset", "tier": "elite", "priority": 89, "query_contract_type": "player_subset_only"},
+        {"subset": "glass",                "type": "ssp_case_hit",   "tier": "elite", "priority": 89, "query_contract_type": "ssp_case_hit"},
         {"parallel": "refractor",      "type": "premium_parallel", "tier": "speculative", "priority": 72, "query_contract_type": "premium_parallel"},
         {"parallel": "numbered",       "type": "serial_parallel",  "tier": "speculative", "priority": 64, "query_contract_type": "serial_parallel"},
     ],
@@ -24482,7 +24489,35 @@ _PLAYER_MASTER: List[Dict[str, Any]] = [
     {"name": "Walter Payton",      "sport": "Football",   "tier": 1, "tier_label": "0",  "rookie_year": 1975},
     {"name": "Randy Moss",         "sport": "Football",   "tier": 1, "tier_label": "0",  "rookie_year": 1998},
     {"name": "Kevin Durant",       "sport": "Basketball", "tier": 1, "tier_label": "1B", "rookie_year": 2007},
+
+    # ── NBA additions 2026-06-29 (Chadwell) — vintage legends (modern cards) ──
+    {"name": "Magic Johnson",      "sport": "Basketball", "tier": 1, "tier_label": "0",  "rookie_year": 1980},
+    {"name": "Larry Bird",         "sport": "Basketball", "tier": 1, "tier_label": "0",  "rookie_year": 1979},
+    {"name": "Shaquille O'Neal",   "sport": "Basketball", "tier": 1, "tier_label": "0",  "rookie_year": 1992},
+    {"name": "Allen Iverson",      "sport": "Basketball", "tier": 1, "tier_label": "0",  "rookie_year": 1996},
+    {"name": "Tim Duncan",         "sport": "Basketball", "tier": 1, "tier_label": "0",  "rookie_year": 1997},
+    {"name": "Kevin Garnett",      "sport": "Basketball", "tier": 1, "tier_label": "0",  "rookie_year": 1995},
+    # ── NBA vet stars — PREMIUM-ONLY (base cards aren't snipeable; only autos/
+    # numbered/SP chase cards surface for these names) ───────────────────────
+    {"name": "Kyrie Irving",       "sport": "Basketball", "tier": 2, "tier_label": "2", "rookie_year": 2011, "premium_only": True},
+    {"name": "Jaylen Brown",       "sport": "Basketball", "tier": 2, "tier_label": "2", "rookie_year": 2016, "premium_only": True},
+    {"name": "Bam Adebayo",        "sport": "Basketball", "tier": 2, "tier_label": "2", "rookie_year": 2017, "premium_only": True},
+    {"name": "Kawhi Leonard",      "sport": "Basketball", "tier": 2, "tier_label": "2", "rookie_year": 2011, "premium_only": True},
+    {"name": "Jimmy Butler",       "sport": "Basketball", "tier": 2, "tier_label": "2", "rookie_year": 2011, "premium_only": True},
+    {"name": "De'Aaron Fox",       "sport": "Basketball", "tier": 2, "tier_label": "2", "rookie_year": 2017, "premium_only": True},
+    {"name": "Donovan Mitchell",   "sport": "Basketball", "tier": 2, "tier_label": "2", "rookie_year": 2017, "premium_only": True},
+    {"name": "Paul George",        "sport": "Basketball", "tier": 2, "tier_label": "2", "rookie_year": 2010, "premium_only": True},
+    {"name": "Domantas Sabonis",   "sport": "Basketball", "tier": 2, "tier_label": "2", "rookie_year": 2016, "premium_only": True},
+    {"name": "Alperen Sengun",     "sport": "Basketball", "tier": 2, "tier_label": "2", "rookie_year": 2021, "premium_only": True},
 ]
+
+# Premium-only players (vet stars): their BASE/common cards aren't worth sniping,
+# so they're excluded from broad/base intake and only surface premium chase lanes
+# (autos, numbered, SP/SSP). Set via "premium_only": True in _PLAYER_MASTER.
+_PREMIUM_ONLY_PLAYERS = frozenset(
+    str(_p.get("name") or "").strip().lower()
+    for _p in _PLAYER_MASTER if _p.get("premium_only")
+)
 
 _SPORT_DISPLAY = {"Football": "NFL", "Baseball": "MLB", "Basketball": "NBA"}
 
@@ -27763,6 +27798,10 @@ def _build_query_specs(sport_filter=None):
         )
         _broad_intake_specs: List[Dict[str, Any]] = []
         for _bplayer in _broad_players_ordered:
+            # Premium-only vet stars: skip broad/base intake — only their premium
+            # chase lanes (built elsewhere) should surface.
+            if str(_bplayer.get("player_name") or "").strip().lower() in _PREMIUM_ONLY_PLAYERS:
+                continue
             _bname = _sanitize_query_player_name(str(_bplayer["player_name"]))
             _bsport = str(_bplayer["sport"])
             _bpid   = str(_bplayer.get("player_id") or "")

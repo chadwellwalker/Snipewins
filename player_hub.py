@@ -299,6 +299,13 @@ DEFAULT_PRODUCT_TARGETS: Dict[str, Dict[str, Any]] = {
     "immaculate_nba":        _pt("immaculate_nba",        "Immaculate Collection NBA",  "NBA", "Panini", "Immaculate"),
     "contenders_nba":        _pt("contenders_nba",        "Panini Contenders NBA",      "NBA", "Panini", "Contenders"),
     "flux_nba":              _pt("flux_nba",              "Panini Flux NBA",            "NBA", "Panini", "Flux"),
+    "donruss_nba":           _pt("donruss_nba",           "Panini Donruss NBA",         "NBA", "Panini", "Donruss"),
+    # ── NBA Topps (Fanatics exclusive license, 2025-26 onward; monthly drops) ──
+    # Pre-2026 NBA = Panini above; 2026+ NBA = Topps below. Liquid core only.
+    "topps_chrome_nba":          _pt("topps_chrome_nba",          "Topps Chrome NBA",          "NBA", "Topps", "Chrome"),
+    "topps_chrome_sapphire_nba": _pt("topps_chrome_sapphire_nba", "Topps Chrome Sapphire NBA", "NBA", "Topps", "Chrome Sapphire"),
+    "topps_finest_nba":          _pt("topps_finest_nba",          "Topps Finest NBA",          "NBA", "Topps", "Finest"),
+    "topps_flagship_nba":        _pt("topps_flagship_nba",        "Topps Basketball NBA",      "NBA", "Topps", "Topps Basketball"),
 }
 
 # Each product linked to its sport's player group.
