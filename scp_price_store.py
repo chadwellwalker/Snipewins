@@ -280,6 +280,8 @@ def lookup(title: str, *, min_score: float = 0.45) -> Dict[str, Any]:
         rows = cur.execute("SELECT * FROM products WHERE player_norm=?", (player,)).fetchall()
         leftover = toks - set(player.split())
         listing_is_auto = bool(_AUTO_RE.search(title))
+        listing_is_relic = bool(_RELIC_RE.search(title))
+        listing_is_multi = bool(_MULTI_RE.search(title))
         # Color words that are part of a SET name ("Topps Chrome Black", "Chrome
         # Platinum", "Cosmic Chrome") are not parallels — strip them from parallel
         # matching so they don't false-match a "[Black Border]" parallel.
@@ -330,8 +332,16 @@ def lookup(title: str, *, min_score: float = 0.45) -> Dict[str, Any]:
                 score += 0.15
             # Auto must match auto: an autograph card is a different (pricier)
             # product than the base parallel. Don't let "Auto /499" match base "#88".
-            prod_is_auto = bool(_AUTO_RE.search((row["parallel_norm"] or "") + " " + (row["product_name"] or "")))
+            _prod_type_text = (row["parallel_norm"] or "") + " " + (row["product_name"] or "")
+            prod_is_auto = bool(_AUTO_RE.search(_prod_type_text))
             if listing_is_auto != prod_is_auto:
+                continue
+            # Relic/patch and multi-player are different cards — a patch RPA must not
+            # match a plain auto, a dual must not match a solo (the $13-comp-on-a-/10
+            # class). Require the product's card type to match the listing's.
+            if listing_is_relic != bool(_RELIC_RE.search(_prod_type_text)):
+                continue
+            if listing_is_multi != bool(_MULTI_RE.search(_prod_type_text)):
                 continue
             # Wrong parallel color: if the listing names a color the product lacks
             # ("Blue Refractor" vs base "[Black Border]"), demote it.
@@ -434,6 +444,11 @@ _GRADE_DISPLAY = {
     "bgs_10_price": "BGS 10", "condition_17_price": "CGC 10", "condition_18_price": "SGC 10",
 }
 _AUTO_RE = re.compile(r"\b(auto|autograph|signature|signed|sig)\b", re.IGNORECASE)
+# Relic/patch/memorabilia signal — these are physically different (and usually far
+# pricier) cards than a plain parallel; must not match a non-relic product.
+_RELIC_RE = re.compile(r"\b(patch|jersey|relic|memorabilia|swatch|laundry|button|rpa|materials?|game[ -]?used|prime)\b", re.IGNORECASE)
+# Multi-player signal (dual/combo/booklet) — a different card than a solo.
+_MULTI_RE = re.compile(r"\b(dual|triple|quad|combo|synced|duos?|tandem|booklet)\b", re.IGNORECASE)
 _PANINI_HINTS = ("panini", "prizm", "select", "optic", "mosaic", "donruss", "contenders",
                  "certified", "absolute", "obsidian", "illusions", "spectra", "phoenix",
                  "immaculate", "flawless", "national treasures", "chronicles", "zenith",
@@ -489,7 +504,8 @@ def _grade_ladder(row) -> List[Dict[str, Any]]:
 
 def _proxy(cur, player: str, grade_col: str, is_auto: bool, ultra: bool,
            listing_brand: str, listing_tier: Optional[int] = None,
-           listing_year: str = "", listing_bowman: bool = False) -> Dict[str, Any]:
+           listing_year: str = "", listing_bowman: bool = False,
+           is_relic: bool = False, is_multi: bool = False) -> Dict[str, Any]:
     rows = cur.execute("SELECT * FROM products WHERE player_norm=?", (player,)).fetchall()
     cands = []  # (price, row, cand_tier)
     for r in rows:
@@ -510,6 +526,10 @@ def _proxy(cur, player: str, grade_col: str, is_auto: bool, ultra: bool,
         if _SUPER_RE.search(par + " " + pname) and not ultra:
             continue
         if is_auto and not _AUTO_RE.search(par + " " + pname):
+            continue
+        if is_relic and not _RELIC_RE.search(par + " " + pname):
+            continue
+        if is_multi and not _MULTI_RE.search(par + " " + pname):
             continue
         cands.append((price, r, _tier_of(pname)))
     if not cands:
@@ -626,7 +646,8 @@ def value_with_comps(title: str, *, min_score: float = 0.45, proxy: bool = True)
                 listing_tier = _tier_of(title)
                 _ly = (_YEAR_RE.search(title).group(1) if _YEAR_RE.search(title) else "")
                 _lb = "bowman" in _norm(title)
-                est = _proxy(cur, pnorm, grade_col, is_auto, ultra, listing_brand, listing_tier, _ly, _lb)
+                est = _proxy(cur, pnorm, grade_col, is_auto, ultra, listing_brand, listing_tier, _ly, _lb,
+                             is_relic=bool(_RELIC_RE.search(title)), is_multi=bool(_MULTI_RE.search(title)))
                 if est.get("market_value"):
                     disp = pnorm.title()
                     return {"market_value": est["market_value"], "value_low": est["value_low"],
