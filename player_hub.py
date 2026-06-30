@@ -1410,12 +1410,33 @@ def build_tracked_scan_targets(
 
     if validation_mode.get("enabled"):
         _grouped: Dict[str, List[Dict[str, Any]]] = {}
+        _player_sport: Dict[str, str] = {}
         for _target in tracked:
-            _grouped.setdefault(str(_target.get("player_id") or _target.get("player_name") or ""), []).append(_target)
-        _player_keys = list(_grouped.keys())[: int(validation_mode.get("max_players") or 5)]
+            _pk = str(_target.get("player_id") or _target.get("player_name") or "")
+            _grouped.setdefault(_pk, []).append(_target)
+            _player_sport.setdefault(_pk, str(_target.get("sport") or "?").upper())
+        # Sport-fair selection: round-robin player keys across sports so a sport
+        # that happens to be built last (NBA) is never starved when the roster
+        # exceeds max_players. (The old code took the first N keys by insertion
+        # order, which silently truncated NBA to zero.)
+        _by_sport: Dict[str, List[str]] = {}
+        for _pk in _grouped.keys():
+            _by_sport.setdefault(_player_sport.get(_pk, "?"), []).append(_pk)
+        _max_players = int(validation_mode.get("max_players") or 120)
+        _max_per = int(validation_mode.get("max_targets_per_player") or 25)
+        _sport_cycle = list(_by_sport.keys())
+        _idx = {_s: 0 for _s in _sport_cycle}
+        _ordered_keys: List[str] = []
+        while len(_ordered_keys) < _max_players and any(_idx[_s] < len(_by_sport[_s]) for _s in _sport_cycle):
+            for _s in _sport_cycle:
+                if _idx[_s] < len(_by_sport[_s]):
+                    _ordered_keys.append(_by_sport[_s][_idx[_s]])
+                    _idx[_s] += 1
+                    if len(_ordered_keys) >= _max_players:
+                        break
         _limited: List[Dict[str, Any]] = []
-        for _pk in _player_keys:
-            _limited.extend((_grouped.get(_pk) or [])[: int(validation_mode.get("max_targets_per_player") or 5)])
+        for _pk in _ordered_keys:
+            _limited.extend((_grouped.get(_pk) or [])[: _max_per])
         tracked = _limited
 
     _nba_kept = sum(1 for t in tracked if str(t.get("sport") or "").upper() == "NBA")
@@ -2753,11 +2774,14 @@ def get_validation_mode_settings(state: Dict[str, Any]) -> Dict[str, Any]:
     _raw = ((state.get("buy_universe") or {}).get("validation_mode") or {})
     # Enforce a minimum floor so stale persisted state files don't choke the supply.
     # Old state files may have max_players=5 / max_targets_per_player=5 baked in.
-    _raw_players = int(_raw.get("max_players") or 120)
+    _raw_players = int(_raw.get("max_players") or 400)
     _raw_targets = int(_raw.get("max_targets_per_player") or 25)
     return {
         "enabled": bool(_raw.get("enabled", True)),
-        "max_players": max(60, min(500, _raw_players)),
+        # Floor raised to 400 so the full cross-sport roster (~180 players) always
+        # fits. The old 60/500 window let stale state files cap at 120, which
+        # truncated the player universe by build order and starved NBA (built last).
+        "max_players": max(400, min(1000, _raw_players)),
         "max_targets_per_player": max(17, min(100, _raw_targets)),
         "allowed_player_ids": [str(x).strip() for x in (_raw.get("allowed_player_ids") or []) if str(x).strip()],
         "allowed_target_ids": [str(x).strip() for x in (_raw.get("allowed_target_ids") or []) if str(x).strip()],

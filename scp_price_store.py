@@ -72,7 +72,7 @@ _PARALLEL_DESIGN_WORDS = {
     "vibrations", "etch", "mojo", "nebula", "pulsar", "atomic", "velocity", "fusion",
     "sparkle", "snakeskin", "lazer", "laser", "interstellar", "supernova", "eclipse",
     "toile", "speckle", "logofractor", "crackle", "voltage", "marble", "kaboom",
-    "downtown", "batting", "equinox", "fluorescent", "padparadscha", "scope", "disco",
+    "downtown", "equinox", "fluorescent", "padparadscha", "scope", "disco",
     "shock", "dragon", "zebra", "fireworks", "kaleidoscope", "stained", "glass",
     "tie", "dye", "fractal", "vinyl", "lunar", "nova", "stella", "meteoric", "careers",
     "voltaic", "breakaway", "concourse", "premier", "die", "cut", "deca", "honeycomb",
@@ -263,11 +263,19 @@ def _load_players(cur) -> List[Tuple[str, frozenset]]:
     return _PLAYER_CACHE
 
 
-def _detect_player(title_tokens: frozenset, cur) -> Optional[str]:
-    best, best_len = None, 0
+def _detect_player(title_tokens: frozenset, cur, title_norm: str = "") -> Optional[str]:
+    # Rank candidate players by (token-count, contiguity). Token-count keeps full
+    # names winning over short coincidences. Contiguity breaks ties: the real
+    # player's words appear as a contiguous phrase in the title, while a false
+    # 2-token match assembled from scattered words (e.g. "Anthony Edwards Prizm
+    # BLACK" spuriously matching player "Anthony Black") does not.
+    best, best_key = None, (0, 0)
     for pname, pset in _load_players(cur):
-        if pset and pset <= title_tokens and len(pset) > best_len:
-            best, best_len = pname, len(pset)
+        if pset and pset <= title_tokens:
+            contig = 1 if (title_norm and pname in title_norm) else 0
+            key = (len(pset), contig)
+            if key > best_key:
+                best, best_key = pname, key
     return best
 
 
@@ -286,7 +294,7 @@ def lookup(title: str, *, min_score: float = 0.45) -> Dict[str, Any]:
         numm = _NUM_RE.search(title)
         listing_num = _norm(numm.group(1)) if numm else ""
 
-        player = _detect_player(toks, cur)
+        player = _detect_player(toks, cur, _norm(title))
         if not player:
             return {"market_value": None, "matched": None, "reason": "no_player_match",
                     "grade_key": grade_key, "score": 0.0, "sales_volume": 0}
@@ -694,7 +702,7 @@ def value_with_comps(title: str, *, min_score: float = 0.45, proxy: bool = True)
         # Tier 3: same-player, same-brand comparable parallels
         if proxy:
             toks = frozenset(_tokens(title))
-            pnorm = _detect_player(toks, cur)
+            pnorm = _detect_player(toks, cur, _norm(title))
             if pnorm:
                 is_auto = bool(_AUTO_RE.search(title))
                 ultra = bool(re.search(r"/\s*([1-5])\b", title)) or bool(_SUPER_RE.search(title))
