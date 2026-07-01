@@ -8031,6 +8031,30 @@ if _active_page_id == "ending_soon":
         elif not _engine_active:
             st.session_state["es_watchdog_progress_sig"] = None
             st.session_state["es_watchdog_last_heartbeat_ts"] = 0.0
+        # HARD SAFETY: an "active" lock with no start time AND no heartbeat is an
+        # ORPHANED lock left by a scan that threw before it recorded progress. Its
+        # age computes to 0, so the age-based watchdog below never clears it and it
+        # pins the board empty indefinitely (this blanked the board for hours on
+        # 2026-07-01). Clear it immediately, and also clear any lock older than 10
+        # minutes regardless of heartbeat — no real scan runs that long. Then
+        # request a scan so the board repopulates in the same render pass.
+        _orphan_lock = bool(_engine_active and _scan_started_at <= 0.0 and _scan_last_heartbeat_ts <= 0.0)
+        _lock_age_hard = (time.time() - _scan_started_at) if _scan_started_at > 0 else 0.0
+        _stuck_lock = bool(_engine_active and _lock_age_hard > 600.0)
+        if _orphan_lock or _stuck_lock:
+            _ese.set_scan_failure(
+                f"Orphaned scan lock cleared by UI watchdog (orphan={int(_orphan_lock)} age_s={_lock_age_hard:.0f})"
+            )
+            _ss = _ese.get_scan_state()
+            _engine_active = bool(_ss.get("scan_active"))
+            st.session_state["es_is_scanning"] = False
+            st.session_state["es_watchdog_progress_sig"] = None
+            st.session_state["es_watchdog_last_heartbeat_ts"] = 0.0
+            st.session_state["es_scan_requested"] = True
+            _active = bool(st.session_state.get("es_is_scanning", False) or _engine_active)
+            _failed = bool(_ss.get("scan_failed"))
+            _phase = str(_ss.get("scan_phase") or "idle").upper()
+            print(f"[UI][ES_HANDOFF] orphan_lock_cleared=1 orphan={int(_orphan_lock)} age_s={_lock_age_hard:.0f}")
         if (
             _engine_active
             and _scan_started_at > 0
