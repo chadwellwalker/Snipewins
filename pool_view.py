@@ -1108,11 +1108,22 @@ def render_morning_briefing(streamlit, *, max_cards: int = 150) -> None:
         key="pool_view_filter",
         label_visibility="collapsed",
     )
+    # Sport chips are NFL/MLB/NBA, but rows can carry the raw seed label
+    # ("Basketball"/"Football"/"Baseball") from _PLAYER_MASTER, or only the
+    # engine's normalized_sport field. Consult normalized_sport first and
+    # alias-map raw labels so an NBA card tagged "Basketball" still matches the
+    # NBA chip (this is why Edwards cards showed in "All" but not "NBA").
+    _SPORT_ALIASES = {
+        "FOOTBALL": "NFL", "NFL": "NFL",
+        "BASKETBALL": "NBA", "NBA": "NBA",
+        "BASEBALL": "MLB", "MLB": "MLB",
+    }
     def _row_sport(r: Dict[str, Any]) -> str:
-        for k in ("sport", "_target_sport", "target_sport", "_row_sport"):
+        for k in ("normalized_sport", "sport", "_target_sport", "target_sport", "_row_sport"):
             v = (r or {}).get(k)
             if isinstance(v, str) and v.strip():
-                return v.strip().upper()
+                _u = v.strip().upper()
+                return _SPORT_ALIASES.get(_u, _u)
         return ""
     if _filter_label == "All":
         _window_filtered = [r for s, r in actionable_rows]
@@ -1659,20 +1670,4 @@ def render_morning_briefing(streamlit, *, max_cards: int = 150) -> None:
         )
 
         # Render card + interactive widgets inside a single container so
-        # Streamlit visually groups them. The button and expander stack
-        # below the card HTML.
-        item_id = str(
-            row.get("item_id")
-            or row.get("itemId")
-            or row.get("source_item_id")
-            or ""
-        )
-        with st.container():
-            st.markdown(card_html, unsafe_allow_html=True)
-            _render_card_actions(st, row, item_id)
-
-    if len(actionable_rows) > len(_filtered):
-        st.caption(
-            f"Showing top {len(_filtered)} of {len([r for s, r in actionable_rows if s <= _max_secs])}. "
-            f"Adjust filter above to see more."
-        )
+        # Streamlit visually g
