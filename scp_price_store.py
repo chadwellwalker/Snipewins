@@ -88,9 +88,22 @@ _PARALLEL_DESIGN_WORDS = {
 # #CFL-9 -> base #BDC-118" class). Only genuinely distinct inserts go here, never
 # ordinary parallels (x-fractor/refractor stay matchable).
 _INSERT_PHRASES = {
-    "all etch", "ben baller", "it came to the league", "night terrors",
-    "35th anniversary", "stained glass", "color blast",
+    # Stems chosen so punctuation-insensitive matching catches variants:
+    # "night terror" hits Terror/Terrors; "anniversary" hits 25th/30th/35th;
+    # "all etch" hits "All-Etch". Never list an ordinary parallel here, and
+    # never a phrase that collides with an NBA chase (no "ultra violet"/"glass").
+    "all etch", "ben baller", "it came to the league", "night terror",
+    "anniversary", "stained glass", "color blast", "power players",
+    "shadow etch", "transformative", "double headers", "gladiators",
+    "stars of mlb", "planetary pursuit", "extraterrestrial",
+    "astrologically aligned", "fortune 15", "iconic",
 }
+
+def _insert_norm(_text: str) -> str:
+    """Punctuation-insensitive, space-padded form for insert-phrase matching so
+    'All-Etch', 'Night Terror', 'CAE25 All Etch' all match their stems."""
+    _t = re.sub(r"[^a-z0-9]+", " ", str(_text or "").lower())
+    return " " + " ".join(_t.split()) + " "
 
 def _norm(s: str) -> str:
     s = unicodedata.normalize("NFKD", str(s or ""))
@@ -329,7 +342,8 @@ def lookup(title: str, *, min_score: float = 0.45) -> Dict[str, Any]:
             if _ph in _nt and _rawtoks.count(_w) <= 1:
                 leftover = leftover - {_w}
         listing_colors = leftover & set(_COLOR_TIER.keys())
-        _listing_inserts = {_ph for _ph in _INSERT_PHRASES if _ph in _nt}
+        _nt_ins = _insert_norm(title)
+        _listing_inserts = {_ph for _ph in _INSERT_PHRASES if (" "+_ph+" ") in _nt_ins}
         best, best_score = None, 0.0
         for row in rows:
             cset = set((row["console_norm"] or "").split()) - _SET_STOP
@@ -409,10 +423,12 @@ def lookup(title: str, *, min_score: float = 0.45) -> Dict[str, Any]:
             # Insert/edition discipline: if the listing names a distinct insert the
             # product doesn't carry, it's a different card — never an exact match.
             if _listing_inserts:
-                _prod_blob = ((row["console_norm"] or "") + " "
-                              + _norm(row["product_name"] or "") + " "
-                              + (row["parallel_norm"] or ""))
-                if any(_ph not in _prod_blob for _ph in _listing_inserts):
+                _prod_blob = _insert_norm(
+                    (row["console_norm"] or "") + " "
+                    + (row["product_name"] or "") + " "
+                    + (row["parallel_norm"] or "")
+                )
+                if any((" "+_ph+" ") not in _prod_blob for _ph in _listing_inserts):
                     continue
             if year and row["year"] and row["year"] != year:
                 continue                              # different year — never cross-year match
