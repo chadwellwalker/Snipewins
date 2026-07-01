@@ -18,6 +18,8 @@ from __future__ import annotations
 
 import json
 import os
+
+from ebay_affiliate import affiliate_url, build_customid, epn_enabled
 import re
 import time
 from datetime import datetime, timezone
@@ -345,6 +347,7 @@ def _row_ebay_url(row: Dict[str, Any]) -> Optional[str]:
     """Best-effort extraction of the eBay listing URL from a pool row.
     The engine stamps several variants depending on the source; check them
     in priority order. Returns None if nothing usable is found."""
+    _raw = None
     for k in (
         "url", "_board_url", "alert_listing_url",
         "listing_url", "item_web_url", "itemWebUrl",
@@ -352,22 +355,31 @@ def _row_ebay_url(row: Dict[str, Any]) -> Optional[str]:
     ):
         v = (row or {}).get(k)
         if isinstance(v, str) and v.startswith("http"):
-            return v
-    # Fall back to constructing one from the item_id.
-    item_id = str(
-        (row or {}).get("item_id")
-        or (row or {}).get("itemId")
-        or (row or {}).get("source_item_id")
-        or ""
-    )
-    if "|" in item_id:
-        # eBay legacy ID inside a v1| envelope: extract the numeric part.
-        parts = item_id.split("|")
-        if len(parts) >= 2 and parts[1].isdigit():
-            return f"https://www.ebay.com/itm/{parts[1]}"
-    elif item_id.isdigit():
-        return f"https://www.ebay.com/itm/{item_id}"
-    return None
+            _raw = v
+            break
+    if _raw is None:
+        # Fall back to constructing one from the item_id.
+        item_id = str(
+            (row or {}).get("item_id")
+            or (row or {}).get("itemId")
+            or (row or {}).get("source_item_id")
+            or ""
+        )
+        if "|" in item_id:
+            # eBay legacy ID inside a v1| envelope: extract the numeric part.
+            parts = item_id.split("|")
+            if len(parts) >= 2 and parts[1].isdigit():
+                _raw = f"https://www.ebay.com/itm/{parts[1]}"
+        elif item_id.isdigit():
+            _raw = f"https://www.ebay.com/itm/{item_id}"
+    if not _raw:
+        return None
+    # EPN: tag the outbound buy link so a resulting purchase earns commission.
+    return affiliate_url(_raw, customid=build_customid(
+        "pool",
+        str((row or {}).get("normalized_sport") or (row or {}).get("sport") or ""),
+        str((row or {}).get("player_name") or ""),
+    ))
 
 
 def _format_secs(secs: float) -> str:
@@ -597,6 +609,7 @@ def _render_comp_summary(streamlit, row: Dict[str, Any]) -> None:
                     f"https://www.ebay.com/sch/i.html?_nkw={_qp(_clean)}"
                     f"&LH_Sold=1&LH_Complete=1"
                 )
+                _audit_url = affiliate_url(_audit_url, customid="pool-audit")
                 st.markdown(
                     f"<div style='margin-top:14px;padding-top:10px;"
                     f"border-top:1px solid rgba(148,163,184,0.08);'>"
@@ -684,6 +697,7 @@ def _render_comp_summary(streamlit, row: Dict[str, Any]) -> None:
                 f"https://www.ebay.com/sch/i.html?_nkw={_qp(relax_query)}"
                 f"&LH_Sold=1&LH_Complete=1"
             )
+            _ebay_sold_url = affiliate_url(_ebay_sold_url, customid="pool-audit")
             rows.append(
                 f"_Searched eBay sold listings for:_ `{relax_query}` "
                 f"[(audit on eBay →)]({_ebay_sold_url})"
@@ -755,6 +769,7 @@ def _render_comp_summary(streamlit, row: Dict[str, Any]) -> None:
                 f"https://www.ebay.com/sch/i.html?_nkw={_qp(_clean)}"
                 f"&LH_Sold=1&LH_Complete=1"
             )
+            _audit_url = affiliate_url(_audit_url, customid="pool-audit")
             st.markdown(
                 f"<div style='margin-top:14px;padding-top:10px;"
                 f"border-top:1px solid rgba(148,163,184,0.08);'>"
@@ -1002,6 +1017,15 @@ def render_morning_briefing(streamlit, *, max_cards: int = 150) -> None:
             )
     except Exception:
         pass
+    # FTC + eBay Partner Network require disclosing the affiliate relationship
+    # wherever affiliate links appear. Only shown once EPN is actually enabled.
+    _epn_disclosure = ""
+    if epn_enabled():
+        _epn_disclosure = (
+            '<div style="margin-top:6px;font-size:10px;color:#6b7280;">'
+            'SnipeWins is an eBay Partner Network affiliate \u2014 links to eBay may earn a commission.'
+            '</div>'
+        )
 
     # TARGET-BID-FILTER-2026-05-17: pill becomes an <a> tag styled like the
     # original chip. Two visual states:
@@ -1041,6 +1065,7 @@ def render_morning_briefing(streamlit, *, max_cards: int = 150) -> None:
         f'<div style="font-size:42px;font-weight:700;color:#fff;line-height:1.1;letter-spacing:-0.02em;margin-bottom:2px;">{_hero_n}</div>'
         f'<div style="font-size:14px;color:#b0b0b0;">auctions ending in the next 24 hours</div>'
         f'{_curation_line}'
+        f'{_epn_disclosure}'
         f'</div>'
         f'<div style="text-align:right;">'
         f'<div style="font-size:11px;color:#888888;margin-bottom:6px;">Updated {age_str} ago</div>'

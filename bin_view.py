@@ -14,6 +14,8 @@ UX differences from Ending Soon:
 """
 from __future__ import annotations
 
+from ebay_affiliate import affiliate_url, build_customid
+
 import json
 import os
 import time
@@ -140,21 +142,31 @@ def _row_image_url(row: Dict[str, Any]) -> Optional[str]:
 
 
 def _row_ebay_url(row: Dict[str, Any]) -> Optional[str]:
+    _raw = None
     for k in ("url", "_board_url", "itemWebUrl", "listing_url"):
         v = (row or {}).get(k)
         if isinstance(v, str) and v.startswith("http"):
-            return v
-    item_id = str(
-        (row or {}).get("item_id")
-        or (row or {}).get("itemId")
-        or (row or {}).get("source_item_id")
-        or ""
-    )
-    if "|" in item_id:
-        parts = item_id.split("|")
-        if len(parts) >= 2 and parts[1].isdigit():
-            return f"https://www.ebay.com/itm/{parts[1]}"
-    return None
+            _raw = v
+            break
+    if _raw is None:
+        item_id = str(
+            (row or {}).get("item_id")
+            or (row or {}).get("itemId")
+            or (row or {}).get("source_item_id")
+            or ""
+        )
+        if "|" in item_id:
+            parts = item_id.split("|")
+            if len(parts) >= 2 and parts[1].isdigit():
+                _raw = f"https://www.ebay.com/itm/{parts[1]}"
+    if not _raw:
+        return None
+    # EPN: tag the outbound buy link so a resulting purchase earns commission.
+    return affiliate_url(_raw, customid=build_customid(
+        "steals",
+        str((row or {}).get("normalized_sport") or (row or {}).get("sport") or ""),
+        str((row or {}).get("player_name") or ""),
+    ))
 
 
 def _row_top_comp(row: Dict[str, Any]) -> Optional[Dict[str, Any]]:
@@ -422,6 +434,7 @@ def _render_comp_summary(streamlit, row: Dict[str, Any]) -> None:
                     f"https://www.ebay.com/sch/i.html?_nkw={_qp(_clean)}"
                     f"&LH_Sold=1&LH_Complete=1"
                 )
+                _audit_url = affiliate_url(_audit_url, customid="steals-audit")
                 st.markdown(
                     f"<div style='margin-top:14px;padding-top:10px;"
                     f"border-top:1px solid rgba(148,163,184,0.08);'>"
@@ -487,6 +500,7 @@ def _render_comp_summary(streamlit, row: Dict[str, Any]) -> None:
                 f"https://www.ebay.com/sch/i.html?_nkw={_qp(relax_query)}"
                 f"&LH_Sold=1&LH_Complete=1"
             )
+            _ebay_sold_url = affiliate_url(_ebay_sold_url, customid="steals-audit")
             rows.append(
                 f"_Searched eBay sold listings for:_ `{relax_query}` "
                 f"[(audit on eBay →)]({_ebay_sold_url})"
@@ -564,6 +578,7 @@ def _render_comp_summary(streamlit, row: Dict[str, Any]) -> None:
                 f"https://www.ebay.com/sch/i.html?_nkw={_qp(_clean)}"
                 f"&LH_Sold=1&LH_Complete=1"
             )
+            _audit_url = affiliate_url(_audit_url, customid="steals-audit")
             st.markdown(
                 f"<div style='margin-top:14px;padding-top:10px;"
                 f"border-top:1px solid rgba(148,163,184,0.08);'>"

@@ -33,6 +33,8 @@ import urllib.error
 import urllib.request
 from typing import Any, Dict, Optional
 
+from ebay_affiliate import affiliate_url
+
 
 # ── Configuration ──────────────────────────────────────────────────────────
 
@@ -210,6 +212,7 @@ def _fmt_money(v: Any) -> str:
 def _build_ending_soon_html(snipe: Dict[str, Any]) -> str:
     _title  = str(snipe.get("title") or "your card")
     _url    = str(snipe.get("ebay_url") or "https://www.ebay.com")
+    _url    = affiliate_url(_url, customid="email")
     _cur    = _fmt_money(snipe.get("current_bid"))
     _mv     = _fmt_money(snipe.get("market_value"))
     _target = _fmt_money(snipe.get("target_bid"))
@@ -249,6 +252,7 @@ def _build_ending_soon_html(snipe: Dict[str, Any]) -> str:
 def _build_ending_soon_text(snipe: Dict[str, Any]) -> str:
     _title  = str(snipe.get("title") or "your card")
     _url    = str(snipe.get("ebay_url") or "https://www.ebay.com")
+    _url    = affiliate_url(_url, customid="email")
     _cur    = _fmt_money(snipe.get("current_bid"))
     _mv     = _fmt_money(snipe.get("market_value"))
     _target = _fmt_money(snipe.get("target_bid"))
