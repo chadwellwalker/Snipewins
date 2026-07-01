@@ -8087,6 +8087,28 @@ if _active_page_id == "ending_soon":
                 time.time() - _scan_started_at
             ))
 
+        # ── AUTO-LOAD: populate an empty board ─────────────────────────────────────
+        # The board renders from st.session_state["es_rows"], which is ONLY written
+        # by the scan-commit block below (gated on es_scan_requested). The manual
+        # trigger that used to set that flag was removed in a May-2026 refactor, so a
+        # fresh browser session had no way to populate the board and rendered blank
+        # (this is why the ES board showed 0 cards while the pool held 120 auctions).
+        # If the board is empty and nothing is scanning, request a load. The scan
+        # reads the persisted pool the background worker keeps fresh, so this just
+        # binds the worker's rows into the UI session. A 60s cooldown stops a
+        # genuinely-empty pool from looping.
+        _es_rows_now = st.session_state.get("es_rows") or []
+        _last_autoload_ts = float(st.session_state.get("es_autoload_ts") or 0.0)
+        if (
+            not _es_rows_now
+            and not _engine_active
+            and not st.session_state.get("es_is_scanning")
+            and (time.time() - _last_autoload_ts) > 60.0
+        ):
+            st.session_state["es_scan_requested"] = True
+            st.session_state["es_autoload_ts"] = time.time()
+            print("[UI][ES_AUTOLOAD] board_empty=1 requesting_scan=1")
+
         # ── Safe commit: run pending scan BEFORE KPI render ────────────────────────────
         # Running here means _deal_ct is authoritative in the same render pass.
         # Widget values are read from session state (persisted across reruns).
