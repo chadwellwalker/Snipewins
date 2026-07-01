@@ -31767,6 +31767,69 @@ def _build_es_scan_cohort(
         f"total_cohort={len(_selected)} cooled_skipped={_cooled_skip_count}"
     )
 
+    # -- Cross-sport floor: guarantee each sport a minimum cohort share ----------
+    # The selection above is yield-HISTORY driven, which starves any sport that
+    # was recently unblocked: NBA had zero scan history after the target-gen cap
+    # fix, so it could never accumulate the history the selector rewards -> a
+    # cold-start freeze-out. cross_sport was documented to reserve per-sport
+    # quotas but was never actually implemented. Enforce it here: a stable CORE
+    # of each sport's hottest players (by heat tier) always scans, plus a
+    # ROTATING slice that advances by cycle so the full roster surfaces over time.
+    if cross_sport:
+        _core_by_sport = {
+            "NFL": _ES_CROSS_SPORT_NFL_CORE, "MLB": _ES_CROSS_SPORT_MLB_CORE,
+            "NBA": _ES_CROSS_SPORT_NBA_CORE,
+        }
+        _rot_by_sport = {
+            "NFL": _ES_CROSS_SPORT_NFL_ROT, "MLB": _ES_CROSS_SPORT_MLB_ROT,
+            "NBA": _ES_CROSS_SPORT_NBA_ROT,
+        }
+        def _cs_sport(_s):
+            _s = _s or {}
+            return str(_s.get("sport") or (_s.get("tracked_target") or {}).get("sport") or "").upper()
+        def _cs_player(_s):
+            _s = _s or {}
+            return str(_s.get("player_name") or (_s.get("tracked_target") or {}).get("player_name") or "")
+        _sel_keys = {str(_lane_metric_key(_s)) for _s in _selected}
+        _sel_by_sport: Dict[str, int] = {}
+        for _s in _selected:
+            _k = _cs_sport(_s)
+            _sel_by_sport[_k] = _sel_by_sport.get(_k, 0) + 1
+        _cand_by_sport: Dict[str, List[Dict[str, Any]]] = {}
+        for _prof in _sorted_bucket(list(_profiles_all or [])):
+            _sp2 = _cs_sport(_prof.get("spec") or _prof)
+            if _sp2 in _core_by_sport:
+                _cand_by_sport.setdefault(_sp2, []).append(_prof)
+        for _sp2 in _core_by_sport:
+            _cands = [
+                _p for _p in _cand_by_sport.get(_sp2, [])
+                if str(_lane_metric_key(_p.get("spec") or _p)) not in _sel_keys
+            ]
+            _cands.sort(key=lambda _p: _player_heat_tier(_cs_player(_p.get("spec") or _p)))
+            _core_n = int(_core_by_sport[_sp2])
+            _core = _cands[:_core_n]
+            _rest = _cands[_core_n:]
+            if _rest:
+                _off = cycle_id % len(_rest)
+                _rest = _rest[_off:] + _rest[:_off]
+            _floor_total = _core_n + int(_rot_by_sport[_sp2])
+            _need = max(0, _floor_total - int(_sel_by_sport.get(_sp2, 0)))
+            for _prof in (_core + _rest):
+                if _need <= 0 or len(_selected) >= _max_total:
+                    break
+                _cspec = _prof.get("spec") or _prof
+                _ck = str(_lane_metric_key(_cspec))
+                if _ck in _sel_keys:
+                    continue
+                _selected.append(_cspec)
+                _sel_keys.add(_ck)
+                _need -= 1
+        _dbg_floor: Dict[str, int] = {}
+        for _s in _selected:
+            _kk = _cs_sport(_s)
+            _dbg_floor[_kk] = _dbg_floor.get(_kk, 0) + 1
+        print(f"[CROSS_SPORT_FLOOR] core={_core_by_sport} rot={_rot_by_sport} after={_dbg_floor}")
+
     cohort = _selected[:_max_total]
     _sport_mix: Dict[str, int] = {}
     _diag_by_sport: Dict[str, Any] = {}

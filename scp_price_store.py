@@ -79,6 +79,19 @@ _PARALLEL_DESIGN_WORDS = {
     "tiger", "leopard", "giraffe", "elephant", "butterfly", "flash", "lazer",
 }
 
+# Distinct inserts / special editions that share set words ("Topps Chrome",
+# "Bowman Chrome") with the base and therefore match the base parallel on
+# set-overlap alone, inventing a value. A listing naming one of these is a
+# DIFFERENT card from the base — hard-skip any product that doesn't itself name
+# the insert, so the card falls to a labeled proxy / NO COMPS instead of a false
+# scp_exact (the $15K "All Etch -> base Orange #1" and "It Came to the League
+# #CFL-9 -> base #BDC-118" class). Only genuinely distinct inserts go here, never
+# ordinary parallels (x-fractor/refractor stay matchable).
+_INSERT_PHRASES = {
+    "all etch", "ben baller", "it came to the league", "night terrors",
+    "35th anniversary", "stained glass", "color blast",
+}
+
 def _norm(s: str) -> str:
     s = unicodedata.normalize("NFKD", str(s or ""))
     s = s.encode("ascii", "ignore").decode("ascii").lower()
@@ -316,6 +329,7 @@ def lookup(title: str, *, min_score: float = 0.45) -> Dict[str, Any]:
             if _ph in _nt and _rawtoks.count(_w) <= 1:
                 leftover = leftover - {_w}
         listing_colors = leftover & set(_COLOR_TIER.keys())
+        _listing_inserts = {_ph for _ph in _INSERT_PHRASES if _ph in _nt}
         best, best_score = None, 0.0
         for row in rows:
             cset = set((row["console_norm"] or "").split()) - _SET_STOP
@@ -392,6 +406,14 @@ def lookup(title: str, *, min_score: float = 0.45) -> Dict[str, Any]:
             _design_diff = (leftover & _PARALLEL_DESIGN_WORDS) ^ (par & _PARALLEL_DESIGN_WORDS)
             if _design_diff:
                 score -= 0.45 * len(_design_diff)
+            # Insert/edition discipline: if the listing names a distinct insert the
+            # product doesn't carry, it's a different card — never an exact match.
+            if _listing_inserts:
+                _prod_blob = ((row["console_norm"] or "") + " "
+                              + _norm(row["product_name"] or "") + " "
+                              + (row["parallel_norm"] or ""))
+                if any(_ph not in _prod_blob for _ph in _listing_inserts):
+                    continue
             if year and row["year"] and row["year"] != year:
                 continue                              # different year — never cross-year match
             if year and row["year"] == year:
