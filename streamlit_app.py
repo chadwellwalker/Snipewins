@@ -8101,13 +8101,30 @@ if _active_page_id == "ending_soon":
         _last_autoload_ts = float(st.session_state.get("es_autoload_ts") or 0.0)
         if (
             not _es_rows_now
-            and not _engine_active
             and not st.session_state.get("es_is_scanning")
-            and (time.time() - _last_autoload_ts) > 60.0
+            and (time.time() - _last_autoload_ts) > 45.0
         ):
-            st.session_state["es_scan_requested"] = True
-            st.session_state["es_autoload_ts"] = time.time()
-            print("[UI][ES_AUTOLOAD] board_empty=1 requesting_scan=1")
+            # Streamlit serves every browser session from ONE process, and the
+            # engine scan lock (_SCAN_ACTIVE) is a global in it. If a prior scan
+            # left it stuck True, every session is blocked and the board stays
+            # blank. The board has now stayed empty past the cooldown while the
+            # engine claims a scan is active — a real scan would have filled
+            # es_rows by now — so treat the lock as stale and clear it. The
+            # es_is_scanning guard above prevents clobbering a genuine in-flight
+            # UI scan.
+            _forced_clear = 0
+            if _engine_active:
+                try:
+                    _ese.set_scan_failure("Board empty past cooldown; clearing stale scan lock for autoload")
+                except Exception:
+                    pass
+                _ss = _ese.get_scan_state()
+                _engine_active = bool(_ss.get("scan_active"))
+                _forced_clear = 1
+            if not _engine_active:
+                st.session_state["es_scan_requested"] = True
+                st.session_state["es_autoload_ts"] = time.time()
+                print(f"[UI][ES_AUTOLOAD] board_empty=1 forced_clear={_forced_clear} requesting_scan=1")
 
         # ── Safe commit: run pending scan BEFORE KPI render ────────────────────────────
         # Running here means _deal_ct is authoritative in the same render pass.
