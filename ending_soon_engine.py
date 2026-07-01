@@ -33646,6 +33646,11 @@ def _compute_execution_decision(row: Dict[str, Any]) -> Dict[str, Any]:
     _watch_salvage = _is_watchlist_salvage_candidate(_r)
     _endgame_gate = _endgame_sniper_gate(_r)
     _confidence_gate = _premium_confidence_gate(_r)
+    # Sibling gate dropped in a refactor: _compute_execution_decision references
+    # _review_contract at the WATCH/PASS branches below but never computed it,
+    # raising NameError('_review_contract') on every row -> the whole scan failed
+    # and the board rendered 0 rows. Compute it here alongside the other gates.
+    _review_contract = _premium_review_execution_contract(_r)
     _mv_truth_decision = str(_confidence_gate.get("mv_truth_decision") or "visible")
     try:
         _edge_dollars = float(
