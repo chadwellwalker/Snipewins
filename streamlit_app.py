@@ -8054,7 +8054,6 @@ if _active_page_id == "ending_soon":
             st.session_state["es_is_scanning"] = False
             st.session_state["es_watchdog_progress_sig"] = None
             st.session_state["es_watchdog_last_heartbeat_ts"] = 0.0
-            st.session_state["es_scan_requested"] = True
             _active = bool(st.session_state.get("es_is_scanning", False) or _engine_active)
             _failed = bool(_ss.get("scan_failed"))
             _phase = str(_ss.get("scan_phase") or "idle").upper()
@@ -8125,10 +8124,14 @@ if _active_page_id == "ending_soon":
                 _ss = _ese.get_scan_state()
                 _engine_active = bool(_ss.get("scan_active"))
                 _forced_clear = 1
-            if not _engine_active:
-                st.session_state["es_scan_requested"] = True
-                st.session_state["es_autoload_ts"] = time.time()
-                print(f"[UI][ES_AUTOLOAD] board_empty=1 forced_clear={_forced_clear} requesting_scan=1")
+            # Do NOT auto-trigger a synchronous UI scan. The green board
+            # (pool_view.render_morning_briefing) already renders instantly from
+            # the background worker's daily_pool.json. The old fetch-on-load ran
+            # an 88-lane scan that hung the page for minutes. Keep the stale-lock
+            # clear above (state hygiene); never request a blocking scan.
+            st.session_state["es_autoload_ts"] = time.time()
+            if _forced_clear:
+                print("[UI][ES_AUTOLOAD] cleared_stale_lock=1 no_sync_scan=1")
 
         # ── Safe commit: run pending scan BEFORE KPI render ────────────────────────────
         # Running here means _deal_ct is authoritative in the same render pass.
