@@ -8157,7 +8157,11 @@ if _active_page_id == "ending_soon":
                     sport_filter=_es_sport_arg,
                     time_window_hours=_es_tw_val,
                     min_edge_pct=_es_edge_val,
-                    force_refresh=True,
+                    # Cache-preferring: the auto-load just wants to POPULATE the
+                    # board, so reuse the shared-process cache (5-min TTL) instead
+                    # of rebuilding all lanes on every visit. Only a deliberate
+                    # hard-refresh (es_force_refresh) forces a full rescan.
+                    force_refresh=bool(st.session_state.pop("es_force_refresh", False)),
                     diversity_memory=_diversity_memory,
                 )
             except Exception as _scan_exc:
