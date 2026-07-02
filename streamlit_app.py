@@ -8442,6 +8442,16 @@ if _active_page_id == "ending_soon":
                 _q_sel = st.selectbox("Quality", _quality_opts, key="es_q_filter",
                                       label_visibility="collapsed")
 
+            # Board sport filter. Referenced below but never defined after a
+            # refactor -> NameError('_sport_sel') crashed the board render even
+            # though the scan now succeeds. Mirror the scan's sport key, fall
+            # back to the pool briefing radio, then "All".
+            _sport_sel = str(
+                st.session_state.get("es_sport_filter")
+                or st.session_state.get("pool_view_filter")
+                or "All"
+            )
+
             _main_visible_rows = list((_meta.get("main_visible_rows") or [])) if isinstance(_meta, dict) else []
             _recovery_rows_hidden = list((_meta.get("recovery_rows_hidden") or [])) if isinstance(_meta, dict) else []
             if not _main_visible_rows:
