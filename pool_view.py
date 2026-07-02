@@ -1224,6 +1224,8 @@ def render_morning_briefing(streamlit, *, max_cards: int = 150) -> None:
             _capped_overflow.append(_r)
     # Primary list first (diverse top), then overflow (any extras within cap)
     _filtered = (_capped_primary + _capped_overflow)[:max_cards]
+    print(f"[POOL_VIEW_DBG] actionable={len(actionable_rows)} window={len(_window_filtered)} "
+          f"filtered={len(_filtered)} target_only={_target_only} search={bool(_search_norm)} label={_filter_label!r}")
 
     if not _filtered:
         # TARGET-BID-FILTER-2026-05-17: if the filter is active and there's
