@@ -7969,7 +7969,11 @@ if _active_page_id == "ending_soon":
             import pool_view as _pool_view
             _pool_view.render_morning_briefing(st)
         except Exception as _briefing_err:
-            print(f"[UI_BRIEFING_ERROR] {type(_briefing_err).__name__}: {str(_briefing_err)[:160]}")
+            import traceback as _briefing_tb
+            print(f"[UI_BRIEFING_ERROR] {type(_briefing_err).__name__}: {str(_briefing_err)[:200]}")
+            # Full traceback on one line so the exact pool_view line that kills the
+            # green wallet-card render is visible in Render logs.
+            print("[UI_BRIEFING_TRACEBACK] " + _briefing_tb.format_exc().replace(chr(10), " || "))
 
         def _ui_board_debug(stage, rows):
             try:
