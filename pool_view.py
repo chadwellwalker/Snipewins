@@ -1697,4 +1697,20 @@ def render_morning_briefing(streamlit, *, max_cards: int = 150) -> None:
         )
 
         # Render card + interactive widgets inside a single container so
-        # Streamlit visually g
+        # Streamlit visually groups them. The button and expander stack
+        # below the card HTML.
+        item_id = str(
+            row.get("item_id")
+            or row.get("itemId")
+            or row.get("source_item_id")
+            or ""
+        )
+        with st.container():
+            st.markdown(card_html, unsafe_allow_html=True)
+            _render_card_actions(st, row, item_id)
+
+    if len(actionable_rows) > len(_filtered):
+        st.caption(
+            f"Showing top {len(_filtered)} of {len(actionable_rows)}. "
+            f"Adjust filter above to see more."
+        )
