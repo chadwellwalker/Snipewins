@@ -57,7 +57,7 @@ DAILY_BUDGET = int(os.environ.get("SNIPEWINS_DAILY_CALL_BUDGET") or DEFAULT_DAIL
 # Steals/BIN scanner gets a HARD slice of the daily budget so it can never
 # starve the time-sensitive auction (Ending Soon) discovery. The rest of the
 # budget is reserved for auctions.
-DEFAULT_BIN_DAILY_CAP = 1200
+DEFAULT_BIN_DAILY_CAP = 900  # 2026-07-08: trimmed 1200->900 to give Ending Soon more headroom
 BIN_DAILY_CAP = int(os.environ.get("SNIPEWINS_BIN_DAILY_CALL_CAP") or DEFAULT_BIN_DAILY_CAP)
 
 

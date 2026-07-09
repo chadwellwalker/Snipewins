@@ -795,19 +795,29 @@ def fetch_and_update(window_hours: float = DEFAULT_WINDOW_HOURS) -> Dict[str, An
         flush=True,
     )
 
-    # DAILY-BUDGET-2026-05-15: report this cycle's eBay-call count to the
-    # shared daily counter. The auction engine uses urllib directly (not
-    # ebay_search.fetch_completed_listings, which now auto-records each
-    # call) so we still flat-estimate engine calls here.
-    #
-    # ACCURATE-CALL-COUNTING-2026-05-17: bumped 40 → 60 because _ES_MAX_COHORT_SIZE
-    # is 50 specs/scan and we were observed running into 429s with the
-    # daily_budget showing only ~2000/4500 used — meaning the on-disk
-    # counter was systematically undercounting actual eBay usage. 60 is
-    # 50 search calls + auth/probe overhead.
+    # ACTUAL-CALL-ACCOUNTING-2026-07-08: record the engine's REAL per-cycle
+    # eBay call count (meta["calls_spent_this_cycle"], i.e. queries_done)
+    # instead of the old flat 130 estimate. The flat estimate guaranteed
+    # daily exhaustion by early afternoon (24×130 auction + 1200 BIN +
+    # near_end > 4500) even when actual usage was far lower — the July 8
+    # volume audit caught 4 consecutive skipped cycles ("DAILY BUDGET
+    # REACHED 4540/4500") while cycles were clearing only ~15 lanes.
+    # +10 covers auth/probe overhead; flat 130 remains ONLY as a fallback
+    # when the engine meta is missing the counter (fail-safe, not cheap).
     try:
         import daily_budget
-        daily_budget.record_calls(130, lane="auction")
+        _actual_calls = 0
+        try:
+            _actual_calls = int((meta or {}).get("calls_spent_this_cycle") or 0)
+        except Exception:
+            _actual_calls = 0
+        _record_n = (_actual_calls + 10) if _actual_calls > 0 else 130
+        daily_budget.record_calls(_record_n, lane="auction")
+        print(
+            f"[BUDGET_ACTUAL] engine_calls={_actual_calls} recorded={_record_n} "
+            f"(flat_estimate_was=130 fallback_used={_actual_calls <= 0})",
+            flush=True,
+        )
     except Exception as _bud_err:
         print(f"[daily_pool] daily_budget record failure (non-fatal): {_bud_err}")
 
@@ -821,7 +831,8 @@ def fetch_and_update(window_hours: float = DEFAULT_WINDOW_HOURS) -> Dict[str, An
         print(
             f"[BUDGET_PULSE] source=daily_pool "
             f"calls={_bs['calls_today']}/{_bs['daily_budget']} "
-            f"pct={_bs['pct_used']}% remaining={_bs['remaining']}",
+            f"pct={_bs['pct_used']}% remaining={_bs['remaining']} "
+            f"by_lane={_bs.get('by_lane') or {}}",
             flush=True,
         )
     except Exception:
