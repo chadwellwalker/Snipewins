@@ -93,6 +93,7 @@ _INSERT_PHRASES = {
     # "all etch" hits "All-Etch". Never list an ordinary parallel here, and
     # never a phrase that collides with an NBA chase (no "ultra violet"/"glass").
     "all etch", "ben baller", "it came to the league", "night terror",
+    "future stars", "electric sluggers", "power chords", "transcendent",
     "anniversary", "stained glass", "color blast", "power players",
     "shadow etch", "transformative", "double headers", "gladiators",
     "stars of mlb", "planetary pursuit", "extraterrestrial",
@@ -104,6 +105,15 @@ def _insert_norm(_text: str) -> str:
     'All-Etch', 'Night Terror', 'CAE25 All Etch' all match their stems."""
     _t = re.sub(r"[^a-z0-9]+", " ", str(_text or "").lower())
     return " " + " ".join(_t.split()) + " "
+
+def _phrase_hit(blob_norm: str, ph: str) -> bool:
+    """True when the insert phrase appears in the _insert_norm'd blob,
+    tolerating a plural 's' ("night terror" hits "Night Terrors").
+    PLURAL-FIX-2026-07-08: the old exact ' phrase ' substring check silently
+    missed plural forms — 'night terror ' is not a substring of
+    ' night terrors ' — so Night Terrors bypassed the insert guard."""
+    return re.search(r" " + re.escape(ph) + r"s? ", blob_norm) is not None
+
 
 def _norm(s: str) -> str:
     s = unicodedata.normalize("NFKD", str(s or ""))
@@ -328,7 +338,7 @@ def lookup(title: str, *, min_score: float = 0.45) -> Dict[str, Any]:
         rows = cur.execute("SELECT * FROM products WHERE player_norm=?", (player,)).fetchall()
         leftover = toks - set(player.split())
         listing_is_auto = bool(_AUTO_RE.search(title))
-        listing_is_relic = bool(_RELIC_RE.search(title))
+        listing_is_relic = _listing_relic(title)
         listing_is_multi = bool(_MULTI_RE.search(title))
         # Color words that are part of a SET name ("Topps Chrome Black", "Chrome
         # Platinum", "Cosmic Chrome") are not parallels — strip them from parallel
@@ -343,7 +353,7 @@ def lookup(title: str, *, min_score: float = 0.45) -> Dict[str, Any]:
                 leftover = leftover - {_w}
         listing_colors = leftover & set(_COLOR_TIER.keys())
         _nt_ins = _insert_norm(title)
-        _listing_inserts = {_ph for _ph in _INSERT_PHRASES if (" "+_ph+" ") in _nt_ins}
+        _listing_inserts = {_ph for _ph in _INSERT_PHRASES if _phrase_hit(_nt_ins, _ph)}
         best, best_score = None, 0.0
         for row in rows:
             cset = set((row["console_norm"] or "").split()) - _SET_STOP
@@ -428,7 +438,7 @@ def lookup(title: str, *, min_score: float = 0.45) -> Dict[str, Any]:
                     + (row["product_name"] or "") + " "
                     + (row["parallel_norm"] or "")
                 )
-                if any((" "+_ph+" ") not in _prod_blob for _ph in _listing_inserts):
+                if any(not _phrase_hit(_prod_blob, _ph) for _ph in _listing_inserts):
                     continue
             if year and row["year"] and row["year"] != year:
                 continue                              # different year — never cross-year match
@@ -544,6 +554,27 @@ def _product_group(text: str) -> str:
 # Relic/patch/memorabilia signal — these are physically different (and usually far
 # pricier) cards than a plain parallel; must not match a non-relic product.
 _RELIC_RE = re.compile(r"\b(patch\w*|jersey|relic|memorabilia|swatch|laundry|button|rpa|materials?|game[ -]?used|dual\s+patch|combo\s+patch)\b", re.IGNORECASE)
+# JERSEY-VARIATION-2026-07-08: on LISTING titles, bare "jersey" preceded by a
+# uniform-color/venue word ("White Jersey", "Home Jersey") is an IMAGE
+# VARIATION, not a relic. The old bare-jersey relic gate skipped every
+# non-relic product for the 2018 Ohtani #150 "White Jersey" PSA10 ($1,275
+# card shown as NO COMPS). Strong relic words still always count. Product
+# names (SCP side) keep using _RELIC_RE unchanged — SCP names relics
+# explicitly and doesn't use variation phrasing.
+_RELIC_STRONG_RE = re.compile(r"\b(patch\w*|relic|memorabilia|swatch|laundry|button|rpa|materials?|game[ -]?(used|worn)|jsy|jersey\s+(card|relic|patch|swatch|auto))\b", re.IGNORECASE)
+_JERSEY_VARIATION_RE = re.compile(r"\b(white|home|away|road|gray|grey|red|blue|navy|green|black|cream|light|dark|alt(?:ernate)?|city|throwback|pinstripe[sd]?)\s+jersey\b", re.IGNORECASE)
+
+def _listing_relic(title: str) -> bool:
+    """Relic detection for eBay LISTING titles (variation-aware)."""
+    t = str(title or "")
+    if _RELIC_STRONG_RE.search(t):
+        return True
+    if re.search(r"\bjersey\b", t, re.IGNORECASE):
+        # bare "jersey": relic unless every occurrence is variation phrasing
+        _bare = len(re.findall(r"\bjersey\b", t, re.IGNORECASE))
+        _var = len(_JERSEY_VARIATION_RE.findall(t))
+        return _bare > _var
+    return False
 # Multi-player signal (dual/combo/booklet) — a different card than a solo.
 _MULTI_RE = re.compile(r"\b(dual|triple|quad|combo|synced|duos?|tandem|booklet)\b", re.IGNORECASE)
 _PANINI_HINTS = ("panini", "prizm", "select", "optic", "mosaic", "donruss", "contenders",
@@ -603,10 +634,31 @@ def _proxy(cur, player: str, grade_col: str, is_auto: bool, ultra: bool,
            listing_brand: str, listing_tier: Optional[int] = None,
            listing_year: str = "", listing_bowman: bool = False,
            is_relic: bool = False, is_multi: bool = False,
-           listing_group: str = "") -> Dict[str, Any]:
+           listing_group: str = "",
+           listing_inserts: Optional[set] = None,
+           listing_design: Optional[frozenset] = None) -> Dict[str, Any]:
     rows = cur.execute("SELECT * FROM products WHERE player_norm=?", (player,)).fetchall()
     cands = []  # (price, row, cand_tier)
+    # PROXY-IDENTITY-2026-07-08 (July 8 comp audit): the proxy had NO parallel
+    # identity discipline — every guard that correctly rejected a bad exact
+    # match dropped the card into a fallback that median-priced unrelated
+    # parallels (Night Terrors insert -> $12 vs real $2.48; Ben Baller ->
+    # $101 vs $33; errors ran 0.2x-4.8x in BOTH directions). Rules, mirroring
+    # the exact tier: (1) a listing naming a distinct insert/edition only
+    # comps against products carrying that insert; (2) candidates must carry
+    # every parallel DESIGN word the listing names (a "Mojo" or "Mini" or
+    # "Sapphire" listing never comps to a plain refractor). A wrong value is
+    # worse than NO COMPS — gaps route to NO COMPS until the SCP list loads.
+    _l_ins = set(listing_inserts or set())
+    _l_design = set(listing_design or set())
     for r in rows:
+        _blob_norm = _insert_norm((r["console_name"] or "") + " " + (r["product_name"] or "") + " " + (r["parallel_norm"] or ""))
+        if _l_ins and any(not _phrase_hit(_blob_norm, _ph) for _ph in _l_ins):
+            continue
+        if _l_design:
+            _cand_toks = set(_tokens((r["console_name"] or "") + " " + (r["product_name"] or "") + " " + (r["parallel_norm"] or "")))
+            if _l_design - _cand_toks:
+                continue
         rb = _brand_family(r["console_name"])
         if listing_brand and rb and rb != listing_brand:
             continue
@@ -645,14 +697,15 @@ def _proxy(cur, player: str, grade_col: str, is_auto: bool, ultra: bool,
     # Year guard: prefer same-year comps; otherwise allow within 1 year; beyond
     # that, refuse (a 2013 card must not be valued off 2025 parallels — this also
     # blocks same-name different-era players, e.g. Cam Ward hockey vs football).
+    # PROXY-YEAR-2026-07-08: strict SAME-YEAR only. The old ±1-year fallback
+    # produced cross-year comps flagged in the July 8 audit (2017 Bowman
+    # Chrome Mini priced off 2018 Bowman Chrome; 2025 product priced off
+    # 2026). Card markets move year to year — a dated listing either comps
+    # against its own year or goes NO COMPS.
     if listing_year and listing_year.isdigit():
-        _ly = int(listing_year)
         sy = [c for c in cands if (c[1]["year"] or "") == listing_year]
-        near = [c for c in cands if c[1]["year"] and abs(int(c[1]["year"]) - _ly) <= 1]
         if sy:
             cands = sy
-        elif near:
-            cands = near
         else:
             return {}
     prices = sorted(p for p, _, _ in cands)
@@ -749,8 +802,10 @@ def value_with_comps(title: str, *, min_score: float = 0.45, proxy: bool = True)
                 _ly = (_YEAR_RE.search(title).group(1) if _YEAR_RE.search(title) else "")
                 _lb = "bowman" in _norm(title)
                 est = _proxy(cur, pnorm, grade_col, is_auto, ultra, listing_brand, listing_tier, _ly, _lb,
-                             is_relic=bool(_RELIC_RE.search(title)), is_multi=bool(_MULTI_RE.search(title)),
-                             listing_group=_product_group(title))
+                             is_relic=_listing_relic(title), is_multi=bool(_MULTI_RE.search(title)),
+                             listing_group=_product_group(title),
+                             listing_inserts={_ph for _ph in _INSERT_PHRASES if _phrase_hit(_insert_norm(title), _ph)},
+                             listing_design=(frozenset(_tokens(title)) & (_PARALLEL_DESIGN_WORDS | {"sapphire"})))
                 if est.get("market_value"):
                     disp = pnorm.title()
                     return {"market_value": est["market_value"], "value_low": est["value_low"],
