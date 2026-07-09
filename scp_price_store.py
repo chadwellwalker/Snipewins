@@ -636,7 +636,8 @@ def _proxy(cur, player: str, grade_col: str, is_auto: bool, ultra: bool,
            is_relic: bool = False, is_multi: bool = False,
            listing_group: str = "",
            listing_inserts: Optional[set] = None,
-           listing_design: Optional[frozenset] = None) -> Dict[str, Any]:
+           listing_design: Optional[frozenset] = None,
+           listing_toks: Optional[frozenset] = None) -> Dict[str, Any]:
     rows = cur.execute("SELECT * FROM products WHERE player_norm=?", (player,)).fetchall()
     cands = []  # (price, row, cand_tier)
     # PROXY-IDENTITY-2026-07-08 (July 8 comp audit): the proxy had NO parallel
@@ -651,7 +652,28 @@ def _proxy(cur, player: str, grade_col: str, is_auto: bool, ultra: bool,
     # worse than NO COMPS — gaps route to NO COMPS until the SCP list loads.
     _l_ins = set(listing_inserts or set())
     _l_design = set(listing_design or set())
+    _l_toks = set(listing_toks or set())
     for r in rows:
+        # PROXY-PRODUCT-LINE-2026-07-09 (round 2, July 9 verification audit):
+        # same brand family + same group was NOT enough — Select listings
+        # comped off Optic autos, Chrome Black off Cosmic Chrome, Transcendent
+        # off Chrome Platinum. Rule: every distinguishing word of the
+        # candidate's SET (console minus sport/brand/year stopwords) must
+        # appear in the listing title. A "Select" listing can only comp
+        # against Select; "Chrome Black" only against Chrome Black.
+        if _l_toks:
+            _cset = set((r["console_norm"] or "").split()) - _SET_STOP - {"topps", "panini", "bowman"}
+            if r["year"]:
+                _cset.discard(r["year"])
+            if _cset - _l_toks:
+                continue
+        # Symmetric design-word discipline: the candidate's parallel must not
+        # carry a DESIGN word the listing lacks — a plain listing never comps
+        # against [Gold Wave] or [Purple Nebula]. (The listing->candidate
+        # direction is enforced below via listing_design.)
+        _cand_design = set(_tokens(r["parallel_norm"] or "")) & (_PARALLEL_DESIGN_WORDS | {"sapphire"})
+        if _cand_design - _l_toks:
+            continue
         _blob_norm = _insert_norm((r["console_name"] or "") + " " + (r["product_name"] or "") + " " + (r["parallel_norm"] or ""))
         if _l_ins and any(not _phrase_hit(_blob_norm, _ph) for _ph in _l_ins):
             continue
@@ -805,7 +827,8 @@ def value_with_comps(title: str, *, min_score: float = 0.45, proxy: bool = True)
                              is_relic=_listing_relic(title), is_multi=bool(_MULTI_RE.search(title)),
                              listing_group=_product_group(title),
                              listing_inserts={_ph for _ph in _INSERT_PHRASES if _phrase_hit(_insert_norm(title), _ph)},
-                             listing_design=(frozenset(_tokens(title)) & (_PARALLEL_DESIGN_WORDS | {"sapphire"})))
+                             listing_design=(frozenset(_tokens(title)) & (_PARALLEL_DESIGN_WORDS | {"sapphire"})),
+                             listing_toks=toks)
                 if est.get("market_value"):
                     disp = pnorm.title()
                     return {"market_value": est["market_value"], "value_low": est["value_low"],
