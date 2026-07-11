@@ -130,15 +130,20 @@ def _team_color_strip(title_norm: str, colors: set) -> set:
     for _ph, _cw in _TEAM_COLOR_PHRASES:
         if _cw in out and _ph in title_norm and title_norm.count(_cw) <= _ph.count(_cw):
             out.discard(_cw)
-    # JERSEY-PHRASE-COLOR-2026-07-10: "White Jersey"/"Orange Jersey" describes
-    # the PHOTO (image variation), not a parallel color — if the color word
-    # only ever appears immediately before "jersey", it must not hard-gate
-    # the color match (broke the verified $1,275 Ohtani #150 White Jersey).
-    for _cw in list(out):
+    return out
+
+
+def _jersey_phrase_colors(title_norm: str, colors: set) -> set:
+    """Colors that ONLY appear as '<color> jersey' (photo/image-variation
+    phrasing, e.g. 'White Jersey', 'Orange Jersey'). These describe the
+    photo, not a parallel — they soft-match instead of hard-gating, and
+    catalogs may carry them as [SP]/[Red Jersey]-style variation products."""
+    out = set()
+    for _cw in colors:
         _n_total = len(re.findall(r"\b" + _cw + r"\b", title_norm))
         _n_jersey = len(re.findall(r"\b" + _cw + r"\s+jersey\b", title_norm))
         if _n_total and _n_total == _n_jersey:
-            out.discard(_cw)
+            out.add(_cw)
     return out
 
 
@@ -389,9 +394,19 @@ def lookup(title: str, *, min_score: float = 0.45) -> Dict[str, Any]:
             if _ph in _nt and _rawtoks.count(_w) <= 1:
                 leftover = leftover - {_w}
         listing_colors = _team_color_strip(_norm(_title_c), leftover & set(_COLOR_TIER.keys()))
-        # Stripped colors (team names, jersey phrases) must not feed the
-        # parallel-match bonus either — "Blue Jays" must not boost [Blue].
+        # Team-name colors must not feed the parallel-match bonus either —
+        # "Blue Jays" must not boost [Blue].
         leftover = leftover - ((leftover & set(_COLOR_TIER.keys())) - listing_colors)
+        # JERSEY-VARIATION-MATCH-2026-07-10: "<color> Jersey" listings are
+        # photo variations. Their color must not HARD-gate products (the base
+        # photo IS a white/red jersey — Ohtani #150 "White Jersey" = base
+        # $1,275), but catalogs often carry the variant as [SP]/[SP Variation]
+        # or [Red Jersey] — inject sp/variation tokens so those products win
+        # when they exist (Alvarez "Orange Jersey" -> [SP] #200, not base).
+        _jersey_cols = _jersey_phrase_colors(_norm(_title_c), listing_colors)
+        _hard_colors = listing_colors - _jersey_cols
+        if _JERSEY_VARIATION_RE.search(_title_c):
+            leftover = leftover | {"sp", "variation"}
         _nt_ins = _insert_norm(title)
         _listing_inserts = {_ph for _ph in _INSERT_PHRASES if _phrase_hit(_nt_ins, _ph)}
         best, best_score = None, 0.0
@@ -443,13 +458,15 @@ def lookup(title: str, *, min_score: float = 0.45) -> Dict[str, Any]:
             # Relic/patch and multi-player are different cards — a patch RPA must not
             # match a plain auto, a dual must not match a solo (the $13-comp-on-a-/10
             # class). Require the product's card type to match the listing's.
-            if listing_is_relic != bool(_RELIC_RE.search(_prod_type_text)):
+            # Product side is variation-aware too: SCP names photo variants
+            # like "[Red Jersey]" — bare color+jersey is not a relic product.
+            if listing_is_relic != _listing_relic(_prod_type_text):
                 continue
             if listing_is_multi != bool(_MULTI_RE.search(_prod_type_text)):
                 continue
             # Wrong parallel color: if the listing names a color the product lacks
             # ("Blue Refractor" vs base "[Black Border]"), demote it.
-            _missing = listing_colors - par
+            _missing = _hard_colors - par
             if _missing:
                 # COLOR-HARD-GATE-2026-07-10: was a -0.3 soft penalty, which
                 # let "Purple Refractor /250" exact-match the plain base row
@@ -779,7 +796,7 @@ def _proxy(cur, player: str, grade_col: str, is_auto: bool, ultra: bool,
             continue
         if is_auto != bool(_AUTO_RE.search(_type_text)):
             continue
-        if is_relic and not _RELIC_RE.search(_type_text):
+        if is_relic != _listing_relic(_type_text):
             continue
         if is_multi and not _MULTI_RE.search(_type_text):
             continue
@@ -906,7 +923,9 @@ def value_with_comps(title: str, *, min_score: float = 0.45, proxy: bool = True)
                              listing_design=(frozenset(_tokens(title)) & (_PARALLEL_DESIGN_WORDS | {"sapphire"})),
                              listing_toks=toks,
                              listing_num=(_norm(_NUM_RE.search(title).group(1)) if _NUM_RE.search(title) else ""),
-                             listing_colors=_team_color_strip(_norm(_strip_grade_noise(title)), set(_tokens(title)) & set(_COLOR_TIER.keys())))
+                             listing_colors=(lambda _tc, _cs: _cs - _jersey_phrase_colors(_tc, _cs))(
+                                 _norm(_strip_grade_noise(title)),
+                                 _team_color_strip(_norm(_strip_grade_noise(title)), set(_tokens(title)) & set(_COLOR_TIER.keys()))))
                 if est.get("market_value"):
                     disp = pnorm.title()
                     return {"market_value": est["market_value"], "value_low": est["value_low"],
