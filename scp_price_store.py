@@ -106,6 +106,42 @@ def _insert_norm(_text: str) -> str:
     _t = re.sub(r"[^a-z0-9]+", " ", str(_text or "").lower())
     return " " + " ".join(_t.split()) + " "
 
+# GRADE-NOISE-2026-07-10: grade descriptors that collide with SET names.
+# "BGS 10 PRISTINE" made the hard-set gate reject every non-Pristine product
+# (a base 2018 Soto scored 0.0 and proxied to $2,500). Strip "pristine"/"gem
+# mint" ONLY when adjacent to a grade so real Topps Pristine listings keep it.
+_GRADE_NOISE_RE = re.compile(
+    r"(\b(?:psa|bgs|sgc|cgc)\s*(?:10|9(?:\.5)?)\s*(?:black\s*label\s*)?)(?:pristine|gem\s*mint|gem\s*mt|gem)\b"
+    r"|\bpristine\s*(?=10\b)",
+    re.IGNORECASE,
+)
+
+def _strip_grade_noise(title: str) -> str:
+    return _GRADE_NOISE_RE.sub(lambda m: m.group(1) or " ", str(title or ""))
+
+
+# TEAM-COLOR-2026-07-10: team names contain color words ("Blue Jays",
+# "Red Sox", "White Sox") that are NOT the card's parallel color. Strip the
+# color token when it only appears as part of the team phrase.
+_TEAM_COLOR_PHRASES = (("blue jays", "blue"), ("red sox", "red"), ("white sox", "white"))
+
+def _team_color_strip(title_norm: str, colors: set) -> set:
+    out = set(colors)
+    for _ph, _cw in _TEAM_COLOR_PHRASES:
+        if _cw in out and _ph in title_norm and title_norm.count(_cw) <= _ph.count(_cw):
+            out.discard(_cw)
+    # JERSEY-PHRASE-COLOR-2026-07-10: "White Jersey"/"Orange Jersey" describes
+    # the PHOTO (image variation), not a parallel color — if the color word
+    # only ever appears immediately before "jersey", it must not hard-gate
+    # the color match (broke the verified $1,275 Ohtani #150 White Jersey).
+    for _cw in list(out):
+        _n_total = len(re.findall(r"\b" + _cw + r"\b", title_norm))
+        _n_jersey = len(re.findall(r"\b" + _cw + r"\s+jersey\b", title_norm))
+        if _n_total and _n_total == _n_jersey:
+            out.discard(_cw)
+    return out
+
+
 def _phrase_hit(blob_norm: str, ph: str) -> bool:
     """True when the insert phrase appears in the _insert_norm'd blob,
     tolerating a plural 's' ("night terror" hits "Night Terrors").
@@ -324,7 +360,8 @@ def lookup(title: str, *, min_score: float = 0.45) -> Dict[str, Any]:
     cur = con.cursor()
     try:
         grade_col = GRADE_COLUMN[grade_key]
-        toks = frozenset(_tokens(title))
+        _title_c = _strip_grade_noise(title)
+        toks = frozenset(_tokens(_title_c))
         ym = _YEAR_RE.search(title)
         year = ym.group(1) if ym else ""
         numm = _NUM_RE.search(title)
@@ -351,7 +388,10 @@ def lookup(title: str, *, min_score: float = 0.45) -> Dict[str, Any]:
             # and must be kept so the [Black] parallel can match.
             if _ph in _nt and _rawtoks.count(_w) <= 1:
                 leftover = leftover - {_w}
-        listing_colors = leftover & set(_COLOR_TIER.keys())
+        listing_colors = _team_color_strip(_norm(_title_c), leftover & set(_COLOR_TIER.keys()))
+        # Stripped colors (team names, jersey phrases) must not feed the
+        # parallel-match bonus either — "Blue Jays" must not boost [Blue].
+        leftover = leftover - ((leftover & set(_COLOR_TIER.keys())) - listing_colors)
         _nt_ins = _insert_norm(title)
         _listing_inserts = {_ph for _ph in _INSERT_PHRASES if _phrase_hit(_nt_ins, _ph)}
         best, best_score = None, 0.0
@@ -411,7 +451,13 @@ def lookup(title: str, *, min_score: float = 0.45) -> Dict[str, Any]:
             # ("Blue Refractor" vs base "[Black Border]"), demote it.
             _missing = listing_colors - par
             if _missing:
-                score -= 0.3 * len(_missing)
+                # COLOR-HARD-GATE-2026-07-10: was a -0.3 soft penalty, which
+                # let "Purple Refractor /250" exact-match the plain base row
+                # ($3 shown for a $15 card). A listing that names a rarity
+                # color the product lacks is a DIFFERENT card — never an
+                # exact match. Team-name colors (Blue Jays/Red Sox/White Sox)
+                # are already stripped from listing_colors above.
+                continue
             # Symmetric guard: penalize when the PRODUCT names a rarity color the
             # listing does NOT — a base "#1" must not match a rarer "[Blue Refractor]
             # #1" (that's the $15K Ohtani inflation), and a "Green Refractor" must
@@ -566,7 +612,7 @@ _RELIC_RE = re.compile(r"\b(patch\w*|jersey|relic|memorabilia|swatch|laundry|but
 # names (SCP side) keep using _RELIC_RE unchanged — SCP names relics
 # explicitly and doesn't use variation phrasing.
 _RELIC_STRONG_RE = re.compile(r"\b(patch\w*|relic|memorabilia|swatch|laundry|button|rpa|materials?|game[ -]?(used|worn)|jsy|jersey\s+(card|relic|patch|swatch|auto))\b", re.IGNORECASE)
-_JERSEY_VARIATION_RE = re.compile(r"\b(white|home|away|road|gray|grey|red|blue|navy|green|black|cream|light|dark|alt(?:ernate)?|city|throwback|pinstripe[sd]?)\s+jersey\b", re.IGNORECASE)
+_JERSEY_VARIATION_RE = re.compile(r"\b(white|home|away|road|gray|grey|red|blue|navy|green|black|cream|orange|yellow|purple|pink|teal|aqua|gold|silver|light|dark|alt(?:ernate)?|city|throwback|pinstripe[sd]?)\s+jersey\b", re.IGNORECASE)
 
 def _listing_relic(title: str) -> bool:
     """Relic detection for eBay LISTING titles (variation-aware)."""
@@ -641,7 +687,9 @@ def _proxy(cur, player: str, grade_col: str, is_auto: bool, ultra: bool,
            listing_group: str = "",
            listing_inserts: Optional[set] = None,
            listing_design: Optional[frozenset] = None,
-           listing_toks: Optional[frozenset] = None) -> Dict[str, Any]:
+           listing_toks: Optional[frozenset] = None,
+           listing_num: str = "",
+           listing_colors: Optional[set] = None) -> Dict[str, Any]:
     rows = cur.execute("SELECT * FROM products WHERE player_norm=?", (player,)).fetchall()
     cands = []  # (price, row, cand_tier)
     # PROXY-IDENTITY-2026-07-08 (July 8 comp audit): the proxy had NO parallel
@@ -657,7 +705,30 @@ def _proxy(cur, player: str, grade_col: str, is_auto: bool, ultra: bool,
     _l_ins = set(listing_inserts or set())
     _l_design = set(listing_design or set())
     _l_toks = set(listing_toks or set())
+    _l_colors = set(listing_colors or set())
+    _l_num = str(listing_num or "").replace("-", "").replace(" ", "")
     for r in rows:
+        # PROXY-ROUND3-2026-07-10 (day-3 audit): three more identity gates.
+        # (a) Card-number equality when both sides have one — Helix #HX-8 must
+        #     never comp against base #132, 50/50 #81 never against #31.
+        if _l_num:
+            _rn3 = _norm(r["card_number"] or "").replace("-", "").replace(" ", "")
+            if _rn3 and _rn3 != _l_num:
+                continue
+        # (b) The candidate's parallel must not be MORE specific than the
+        #     listing: every parallel token must appear in the title (a base-
+        #     titled listing never comps against [Refractor]; estimates come
+        #     from equal-or-plainer parallels — under-estimating is the safe
+        #     direction for a bidding tool).
+        _par3 = set(_tokens(r["parallel_norm"] or "")) - {"topps", "bowman", "panini"}
+        if _par3 - _l_toks:
+            continue
+        # (c) Listing rarity colors must appear in the candidate — a Purple
+        #     Refractor /250 never comps against the plain base row.
+        if _l_colors:
+            _cand3 = set(_tokens((r["parallel_norm"] or "") + " " + (r["product_name"] or "")))
+            if _l_colors - _cand3:
+                continue
         # PROXY-PRODUCT-LINE-2026-07-09 (round 2, July 9 verification audit):
         # same brand family + same group was NOT enough — Select listings
         # comped off Optic autos, Chrome Black off Cosmic Chrome, Transcendent
@@ -819,7 +890,7 @@ def value_with_comps(title: str, *, min_score: float = 0.45, proxy: bool = True)
 
         # Tier 3: same-player, same-brand comparable parallels
         if proxy:
-            toks = frozenset(_tokens(title))
+            toks = frozenset(_tokens(_strip_grade_noise(title)))
             pnorm = _detect_player(toks, cur, _norm(title))
             if pnorm:
                 is_auto = bool(_AUTO_RE.search(title))
@@ -833,7 +904,9 @@ def value_with_comps(title: str, *, min_score: float = 0.45, proxy: bool = True)
                              listing_group=_product_group(title),
                              listing_inserts={_ph for _ph in _INSERT_PHRASES if _phrase_hit(_insert_norm(title), _ph)},
                              listing_design=(frozenset(_tokens(title)) & (_PARALLEL_DESIGN_WORDS | {"sapphire"})),
-                             listing_toks=toks)
+                             listing_toks=toks,
+                             listing_num=(_norm(_NUM_RE.search(title).group(1)) if _NUM_RE.search(title) else ""),
+                             listing_colors=_team_color_strip(_norm(_strip_grade_noise(title)), set(_tokens(title)) & set(_COLOR_TIER.keys())))
                 if est.get("market_value"):
                     disp = pnorm.title()
                     return {"market_value": est["market_value"], "value_low": est["value_low"],
