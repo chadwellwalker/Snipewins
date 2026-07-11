@@ -392,7 +392,11 @@ def lookup(title: str, *, min_score: float = 0.45) -> Dict[str, Any]:
                 score += 0.15
             # Auto must match auto: an autograph card is a different (pricier)
             # product than the base parallel. Don't let "Auto /499" match base "#88".
-            _prod_type_text = (row["parallel_norm"] or "") + " " + (row["product_name"] or "")
+            # CONSOLE-AUTO-2026-07-10: sets like "2024 Topps Cosmic Chrome
+            # Autograph" carry their auto-ness in the CONSOLE name, not the
+            # product/parallel — without this, every product in an autograph
+            # set failed the auto gate and $400+ autos showed NO COMPS.
+            _prod_type_text = (row["parallel_norm"] or "") + " " + (row["product_name"] or "") + " " + (row["console_norm"] or "")
             prod_is_auto = bool(_AUTO_RE.search(_prod_type_text))
             if listing_is_auto != prod_is_auto:
                 continue
@@ -699,13 +703,14 @@ def _proxy(cur, player: str, grade_col: str, is_auto: bool, ultra: bool,
             continue
         par = (r["parallel_norm"] or "")
         pname = (r["product_name"] or "")
+        _type_text = par + " " + pname + " " + (r["console_norm"] or "")  # console carries auto-ness for Autograph sets
         if _SUPER_RE.search(par + " " + pname) and not ultra:
             continue
-        if is_auto and not _AUTO_RE.search(par + " " + pname):
+        if is_auto != bool(_AUTO_RE.search(_type_text)):
             continue
-        if is_relic and not _RELIC_RE.search(par + " " + pname):
+        if is_relic and not _RELIC_RE.search(_type_text):
             continue
-        if is_multi and not _MULTI_RE.search(par + " " + pname):
+        if is_multi and not _MULTI_RE.search(_type_text):
             continue
         cands.append((price, r, _tier_of(pname)))
     if not cands:
