@@ -439,7 +439,14 @@ def lookup(title: str, *, min_score: float = 0.45) -> Dict[str, Any]:
                 # Brand/set words ("topps", "bowman", "panini") appear in every
                 # listing and must NOT count as a parallel match — otherwise a base
                 # "[Topps Logo]" parallel spuriously matches any Topps card.
+                # SET-LINE-WORD-2026-07-12: same for product-line words when they
+                # appear ONCE (pure set name): "Panini Prizm Luka #280" must not
+                # let [Hyper Prizm] beat the base on the set's own "prizm". A
+                # doubled word ("...Silver Prizm") is also the parallel — keep it.
                 _par_left = leftover - {"topps", "bowman", "panini"}
+                for _slw in ("prizm", "mosaic", "select", "optic", "chrome", "finest", "hoops", "wnba", "nba"):
+                    if _slw in _par_left and _rawtoks.count(_slw) <= 1:
+                        _par_left = _par_left - {_slw}
                 inter = len(par & _par_left)
                 score += 0.6 * (inter / len(par))
                 score += 0.05 * inter
