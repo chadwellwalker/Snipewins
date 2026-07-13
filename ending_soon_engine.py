@@ -24436,7 +24436,6 @@ _PLAYER_MASTER: List[Dict[str, Any]] = [
     # 2026). Earlier audit incorrectly grouped them with 2026 Draft entrants.
     # Cam Ward / Shedeur / Travis Hunter / Ashton Jeanty moved to higher tiers
     # below based on rookie-year performance + active hobby market signals.
-    {"name": "Anthony Richardson", "sport": "Football",   "tier": 3, "tier_label": "3", "rookie_year": 2023},  # demoted: benched 2024
     {"name": "Bryce Young",        "sport": "Football",   "tier": 3, "tier_label": "3", "rookie_year": 2023},
     {"name": "Michael Penix Jr.",  "sport": "Football",   "tier": 3, "tier_label": "3", "rookie_year": 2024},
     {"name": "Rashee Rice",        "sport": "Football",   "tier": 3, "tier_label": "3", "rookie_year": 2023},
@@ -24827,7 +24826,7 @@ _CURATED_ROOKIE_SENSITIVE_NAMES: frozenset[str] = frozenset({
     "ashton jeanty", "cam ward", "travis hunter", "cooper flagg",
     "dalton knecht", "isaiah collier", "wyatt langford", "keyonte george",
     "kon knueppel", "paul skenes", "pete crow armstrong", "roki sasaki",
-    "yoshinobu yamamoto", "anthony richardson", "cj stroud",
+    "yoshinobu yamamoto", "cj stroud",
     "caleb williams", "jayden daniels", "drake maye",
     "bo nix", "brian thomas jr", "malik nabers", "brock bowers",
     "jackson holliday", "james wood", "jackson chourio", "junior caminero",

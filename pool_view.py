@@ -1143,12 +1143,32 @@ def render_morning_briefing(streamlit, *, max_cards: int = 150) -> None:
         "BASKETBALL": "NBA", "NBA": "NBA",
         "BASEBALL": "MLB", "MLB": "MLB",
     }
+    # SPORT-FALLBACK-2026-07-13: 37 of 104 board rows carried NO sport field
+    # at all (pre-valuation merge rows), so they matched no chip — visible in
+    # "All" (104) but MLB+NBA+NFL summed to 67. When tags are missing, infer
+    # the sport from the tracked-player roster via the listing title.
+    _PLAYER_SPORT_MAP: Dict[str, str] = {}
+    try:
+        import player_hub_seed as _phs
+        for _sp in getattr(_phs, "SEED_PLAYERS", []):
+            _s_lab = _SPORT_ALIASES.get(str(_sp.get("sport") or "").strip().upper(), "")
+            for _tok in (_sp.get("match_tokens") or []):
+                if _s_lab and _tok:
+                    _PLAYER_SPORT_MAP[str(_tok).lower()] = _s_lab
+    except Exception:
+        pass
+
     def _row_sport(r: Dict[str, Any]) -> str:
         for k in ("normalized_sport", "sport", "_target_sport", "target_sport", "_row_sport"):
             v = (r or {}).get(k)
             if isinstance(v, str) and v.strip():
                 _u = v.strip().upper()
                 return _SPORT_ALIASES.get(_u, _u)
+        _title = str((r or {}).get("title") or (r or {}).get("source_title") or "").lower()
+        if _title and _PLAYER_SPORT_MAP:
+            for _tok, _s_lab in _PLAYER_SPORT_MAP.items():
+                if _tok in _title:
+                    return _s_lab
         return ""
     if _filter_label == "All":
         _window_filtered = [r for s, r in actionable_rows]

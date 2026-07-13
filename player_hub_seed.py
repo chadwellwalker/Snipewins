@@ -407,18 +407,6 @@ _NFL_PLAYERS = [
         "search_query_hint": "Jordan Love",
     },
     {
-        "player_id": "anthony_richardson",
-        "player_name": "Anthony Richardson",
-        "sport": "Football",
-        "position": "QB",
-        "team": "IND",
-        "rookie_year": 2023,
-        "whatnot_tier": 2,
-        "category_tags": ["nfl_qb", "whatnot_t2", "rookie_2023"],
-        "match_tokens": ["anthony richardson"],
-        "search_query_hint": "Anthony Richardson rookie",
-    },
-    {
         "player_id": "tua_tagovailoa",
         "player_name": "Tua Tagovailoa",
         "sport": "Football",

@@ -335,9 +335,27 @@ def _load_players(cur) -> List[Tuple[str, frozenset]]:
         rows = cur.execute(
             "SELECT DISTINCT player_norm FROM products WHERE player_norm!=''"
         ).fetchall()
-        _PLAYER_CACHE = [(r[0], frozenset(r[0].split())) for r in rows
-                         if r[0] and r[0] not in _TEAM_NAMES]
+        # HYPHEN-PLAYER-2026-07-13: player_norm keeps hyphens ("pete
+        # crow-armstrong", "shai gilgeous-alexander") but title tokens split
+        # on '-', so hyphenated players NEVER matched (no_player_match on a
+        # loaded 105-row card). Tokenize names the same way as titles, and
+        # keep a hyphen-flattened contiguous form for the tiebreak.
+        _PLAYER_CACHE = [
+            (r[0], frozenset(_tokens(r[0])), " ".join(_tokens(r[0])))
+            for r in rows if r[0] and r[0] not in _TEAM_NAMES
+        ]
     return _PLAYER_CACHE
+
+
+def _player_alias_rows(cur, pname: str):
+    """All product rows for every player_norm spelling sharing pname's tokens.
+    ALIAS-2026-07-13: different CSVs store the same player with and without
+    hyphens ("shai gilgeous-alexander" vs "shai gilgeous alexander"); querying
+    only the detected spelling missed whole sets."""
+    target = frozenset(_tokens(pname))
+    names = [p for p, pset, _pc in _load_players(cur) if pset == target] or [pname]
+    _ph = ",".join("?" * len(names))
+    return cur.execute(f"SELECT * FROM products WHERE player_norm IN ({_ph})", names).fetchall()
 
 
 def _detect_player(title_tokens: frozenset, cur, title_norm: str = "") -> Optional[str]:
@@ -347,9 +365,10 @@ def _detect_player(title_tokens: frozenset, cur, title_norm: str = "") -> Option
     # 2-token match assembled from scattered words (e.g. "Anthony Edwards Prizm
     # BLACK" spuriously matching player "Anthony Black") does not.
     best, best_key = None, (0, 0)
-    for pname, pset in _load_players(cur):
+    _tn_flat = " " + " ".join(_tokens(title_norm)) + " " if title_norm else ""
+    for pname, pset, pcontig in _load_players(cur):
         if pset and pset <= title_tokens:
-            contig = 1 if (title_norm and pname in title_norm) else 0
+            contig = 1 if (_tn_flat and (" " + pcontig + " ") in _tn_flat) else 0
             key = (len(pset), contig)
             if key > best_key:
                 best, best_key = pname, key
@@ -377,8 +396,8 @@ def lookup(title: str, *, min_score: float = 0.45) -> Dict[str, Any]:
             return {"market_value": None, "matched": None, "reason": "no_player_match",
                     "grade_key": grade_key, "score": 0.0, "sales_volume": 0}
 
-        rows = cur.execute("SELECT * FROM products WHERE player_norm=?", (player,)).fetchall()
-        leftover = toks - set(player.split())
+        rows = _player_alias_rows(cur, player)
+        leftover = toks - set(_tokens(player))
         listing_is_auto = bool(_AUTO_RE.search(title))
         listing_is_relic = _listing_relic(title)
         listing_is_multi = bool(_MULTI_RE.search(title))
@@ -714,7 +733,7 @@ def _proxy(cur, player: str, grade_col: str, is_auto: bool, ultra: bool,
            listing_toks: Optional[frozenset] = None,
            listing_num: str = "",
            listing_colors: Optional[set] = None) -> Dict[str, Any]:
-    rows = cur.execute("SELECT * FROM products WHERE player_norm=?", (player,)).fetchall()
+    rows = _player_alias_rows(cur, player)
     cands = []  # (price, row, cand_tier)
     # PROXY-IDENTITY-2026-07-08 (July 8 comp audit): the proxy had NO parallel
     # identity discipline — every guard that correctly rejected a bad exact
