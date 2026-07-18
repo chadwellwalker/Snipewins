@@ -69,9 +69,13 @@ _COLLECTOR_HEAT_QUERY_CASE_HIT_TERMS: Tuple[str, ...] = (
     # immediately, unlike kaboom/downtown which wait on their SCP consoles.
     "cracked ice", "no huddle", "white sparkle",
     # 2026-07-16 owner call: Topps case hits too, not just the Panini big
-    # four. (Fortune 15 / Stars of MLB / Wave of the Future are COMMON
-    # inserts per owner — they get price data but no heat-lane slots.)
-    "home field advantage", "heavy lumber",
+    # four. (Fortune 15 / Stars of MLB / Wave of the Future / Night Terrors /
+    # Chrome Expose are COMMON inserts per owner — price data only, no lanes.)
+    "home field advantage", "heavy lumber", "radiating rookies",
+    # Prizm SSP family (owner-approved chases)
+    "prizmania", "groovy", "sublime",
+    # Topps NBA SSP case-hit tier (owner-approved, all six)
+    "ultra violet", "helix", "glass canvas", "advisory", "paradox", "patented",
 )
 _COLLECTOR_HEAT_QUERY_GRADE_TERMS: Tuple[str, ...] = ("PSA 10", "BGS 10", "SGC 10")
 _COLLECTOR_HEAT_QUERY_ROOKIE_TERMS: Tuple[str, ...] = ("rookie", "RC", "1st bowman", "1st chrome")

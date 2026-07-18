@@ -94,6 +94,15 @@ _INSERT_PHRASES = {
     # never a phrase that collides with an NBA chase (no "ultra violet"/"glass").
     "all etch", "ben baller", "it came to the league", "night terror",
     "future stars", "electric sluggers", "power chords", "transcendent",
+    # CHASE-PHRASES-2026-07-16 (owner-approved chase research): each of these
+    # is a distinct insert/case hit — must never comp to a base parallel.
+    # Until its SCP console is loaded, honest NO-COMPS beats a wrong price.
+    # (Supersedes the old "never list an NBA chase" note: that predated
+    # having NBA chase price data on the download list.)
+    "kaboom", "downtown", "manga", "prizmania", "groovy", "sublime",
+    "home field advantage", "heavy lumber", "radiating rookies",
+    "chrome expose", "ultra violet", "glass canvas", "advisory",
+    "paradox", "patented", "helix", "wave of the future",
     "anniversary", "stained glass", "color blast", "power players",
     "shadow etch", "transformative", "double headers", "gladiators",
     "stars of mlb", "planetary pursuit", "extraterrestrial",
