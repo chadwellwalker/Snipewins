@@ -1153,8 +1153,12 @@ def render_morning_briefing(streamlit, *, max_cards: int = 150) -> None:
         for _sp in getattr(_phs, "SEED_PLAYERS", []):
             _s_lab = _SPORT_ALIASES.get(str(_sp.get("sport") or "").strip().upper(), "")
             for _tok in (_sp.get("match_tokens") or []):
-                if _s_lab and _tok:
-                    _PLAYER_SPORT_MAP[str(_tok).lower()] = _s_lab
+                # TOKEN-HYGIENE-2026-07-16: normalize punctuation ("Jr." vs
+                # "Jr") and drop tiny/generic tokens ("jr.") that would
+                # mis-tag unrelated cards.
+                _tk = " ".join(str(_tok).lower().replace(".", " ").replace("'", " ").split())
+                if _s_lab and len(_tk) >= 6:
+                    _PLAYER_SPORT_MAP[_tk] = _s_lab
     except Exception:
         pass
 
@@ -1164,7 +1168,8 @@ def render_morning_briefing(streamlit, *, max_cards: int = 150) -> None:
             if isinstance(v, str) and v.strip():
                 _u = v.strip().upper()
                 return _SPORT_ALIASES.get(_u, _u)
-        _title = str((r or {}).get("title") or (r or {}).get("source_title") or "").lower()
+        _title_raw = str((r or {}).get("title") or (r or {}).get("source_title") or "").lower()
+        _title = " ".join(_title_raw.replace(".", " ").replace("'", " ").split())
         if _title and _PLAYER_SPORT_MAP:
             for _tok, _s_lab in _PLAYER_SPORT_MAP.items():
                 if _tok in _title:

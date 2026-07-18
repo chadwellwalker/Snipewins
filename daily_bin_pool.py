@@ -377,12 +377,28 @@ def fetch_and_update() -> Dict[str, Any]:
         return 3
 
     specs.sort(key=_spec_tier)
-    if len(specs) > MAX_SPECS_PER_CYCLE:
-        specs = specs[:MAX_SPECS_PER_CYCLE]
+    # BIN-SPREAD-2026-07-16: at 80 specs/cycle the 900-call daily lane cap
+    # burned out by mid-morning UTC, then "DAILY BUDGET REACHED" spammed every
+    # 30 min while Steals went stale for the rest of the day. Spread the
+    # remaining lane budget over the cycles left before UTC rollover so BIN
+    # scans all day (floor 12 keeps tier-1 coverage even late).
+    _cycle_cap = MAX_SPECS_PER_CYCLE
+    try:
+        import daily_budget as _dbud
+        from datetime import datetime as _dt, timezone as _tz
+        _rem = max(0, int(_dbud.BIN_DAILY_CAP) - int(_dbud.lane_calls_today("bin")))
+        _now = _dt.now(_tz.utc)
+        _secs_left = 86400 - (_now.hour * 3600 + _now.minute * 60 + _now.second)
+        _cycles_left = max(1, _secs_left // max(1, int(DEFAULT_LOOP_INTERVAL_SECS)))
+        _cycle_cap = max(12, min(MAX_SPECS_PER_CYCLE, _rem // _cycles_left))
+    except Exception:
+        pass
+    if len(specs) > _cycle_cap:
+        specs = specs[:_cycle_cap]
 
     print(
         f"[daily_bin_pool] built {_specs_built} BIN query specs, "
-        f"scanning top {len(specs)} (tier-sorted, cap={MAX_SPECS_PER_CYCLE})",
+        f"scanning top {len(specs)} (tier-sorted, cycle_cap={_cycle_cap} max={MAX_SPECS_PER_CYCLE})",
         flush=True,
     )
 

@@ -1841,7 +1841,7 @@ _EXTRA_SEED_PLAYERS = [
         "rookie_year": 2019,
         "whatnot_tier": 1,
         "category_tags": ["baseball", "whatnot_t1"],
-        "match_tokens": ["fernando tatis jr.", "jr."],
+        "match_tokens": ["fernando tatis", "tatis jr"],
         "search_query_hint": "Fernando Tatis Jr.",
     },
     {
