@@ -48,7 +48,11 @@ DL_URL = BASE + "/price-guide/download-custom?t={token}&console-uids={uids}"
 CHUNK = 20           # consoles per download request
 PAGE_DELAY = 0.6     # seconds between console-page fetches (uid discovery)
 DL_DELAY = 2.0       # seconds between chunk downloads
-UID_RE = re.compile(r"console-uids=(G\d+)")
+# Console uid appears two ways: the logged-in "Download Price List" link uses
+# console-uids=G####; the PUBLIC page's "Compare vs." link uses uids=C####.
+# Both prefixes are accepted by download-custom (same id namespace). Prefer
+# the download link when present, fall back to the compare link.
+UID_RES = (re.compile(r"console-uids=([CG]\d+)"), re.compile(r"[?&]uids=([CG]\d+)"))
 
 
 def _open(url: str, timeout: int = 600):
@@ -75,7 +79,11 @@ def _discover_uids(slugs, uid_map, verbose=True) -> tuple[dict, list]:
         try:
             with _open(url, timeout=60) as resp:
                 html = resp.read(400_000).decode("utf-8", "replace")
-            m = UID_RE.search(html)
+            m = None
+            for _rx in UID_RES:
+                m = _rx.search(html)
+                if m:
+                    break
             if m:
                 uid_map[slug] = m.group(1)
                 if verbose:
