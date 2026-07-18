@@ -40,7 +40,15 @@ from pathlib import Path
 HERE = Path(__file__).parent
 CSV_DIR = HERE / "scp_csv"
 TOKEN_ENV = "SNIPEWINS_SCP_TOKEN"
-GUIDE_URL = "https://www.sportscardspro.com/download-price-guide/{token}"
+# URL candidates, tried in order. download-custom without console-uids is the
+# most likely full-guide endpoint (the per-console links use the same route
+# with console-uids=G#### and are confirmed to serve CSV). The path-based
+# /download-price-guide/<token> renders an HTML landing page — when we get
+# HTML, we scan it for the real CSV link and follow it.
+GUIDE_URL_CANDIDATES = [
+    "https://www.sportscardspro.com/price-guide/download-custom?t={token}",
+    "https://www.sportscardspro.com/download-price-guide/{token}",
+]
 
 
 def _slug(s: str) -> str:
@@ -96,9 +104,56 @@ def main() -> int:
         return 2
     print(f"Tracked consoles: {len(tracked)}")
 
-    url = args.url or GUIDE_URL.format(token=token)
-    print("Downloading full price guide (single request; SCP regenerates it every 24h)...")
-    req = urllib.request.Request(url, headers={"User-Agent": "SnipeWins-refresh/1.0"})
+    def _open(u):
+        rq = urllib.request.Request(u, headers={"User-Agent": "SnipeWins-refresh/1.0"})
+        return urllib.request.urlopen(rq, timeout=600)
+
+    def _probe(candidates):
+        """Return an open response that looks like CSV, following one level of
+        HTML landing page if needed. Prints what it tried."""
+        import re as _re
+        for u in candidates:
+            _redacted = u.replace(token, "<token>") if token else u
+            try:
+                resp = _open(u)
+            except Exception as exc:
+                print(f"  probe {_redacted}: {type(exc).__name__}: {exc}")
+                continue
+            head = resp.peek(512) if hasattr(resp, "peek") else b""
+            if b"<!DOCTYPE" not in head[:64] and b"<html" not in head[:64].lower():
+                print(f"  using {_redacted}")
+                return resp
+            print(f"  probe {_redacted}: HTML page — scanning it for the CSV link...")
+            html = head + resp.read(500_000)
+            resp.close()
+            hrefs = _re.findall(r'href=["\']([^"\']+)["\']', html.decode("utf-8", "replace"))
+            cands = []
+            for h in hrefs:
+                hl = h.lower()
+                if ("download" in hl or ".csv" in hl) and ("price" in hl or "guide" in hl or ".csv" in hl):
+                    if h.startswith("/"):
+                        h = "https://www.sportscardspro.com" + h
+                    if h.startswith("http"):
+                        cands.append(h)
+            if not cands:
+                print("    no download-looking links found on that page.")
+                continue
+            for h in dict.fromkeys(cands[:5]):
+                _rh = h.replace(token, "<token>") if token else h
+                try:
+                    r2 = _open(h)
+                    h2 = r2.peek(512) if hasattr(r2, "peek") else b""
+                    if b"<!DOCTYPE" not in h2[:64] and b"<html" not in h2[:64].lower():
+                        print(f"    following link -> CSV: {_rh}")
+                        return r2
+                    r2.close()
+                    print(f"    link {_rh}: also HTML, skipping")
+                except Exception as exc:
+                    print(f"    link {_rh}: {type(exc).__name__}")
+        return None
+
+    candidates = [args.url] if args.url else [u.format(token=token) for u in GUIDE_URL_CANDIDATES]
+    print("Downloading full price guide (probing known URL shapes)...")
     t0 = time.time()
 
     writers = {}   # console-name -> (file handle, csv.writer)
@@ -108,11 +163,13 @@ def main() -> int:
     total_rows = 0
 
     try:
-        with urllib.request.urlopen(req, timeout=600) as resp:
-            ctype = resp.headers.get("Content-Type", "")
-            if "csv" not in ctype and "text" not in ctype and "octet" not in ctype:
-                print(f"ERROR: unexpected Content-Type {ctype!r} — token invalid or endpoint changed.")
-                return 3
+        resp = _probe(candidates)
+        if resp is None:
+            print("ERROR: no candidate URL served CSV. Open the Download/API link in your browser,")
+            print("copy the URL of the button/link that actually starts a .csv download, and rerun with:")
+            print("  python scp_refresh.py --dry-run --url \"<that url>\"")
+            return 3
+        with resp:
             text = io.TextIOWrapper(resp, encoding="utf-8", errors="replace", newline="")
             rd = csv.reader(text)
             header_out = next(rd, None)
