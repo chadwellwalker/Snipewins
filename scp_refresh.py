@@ -59,12 +59,22 @@ def main() -> int:
     ap = argparse.ArgumentParser(description="Refresh all loaded SCP price lists")
     ap.add_argument("--dry-run", action="store_true", help="download + report, write nothing")
     ap.add_argument("--url", default="", help="override guide URL (testing)")
+    ap.add_argument("--token", default="", help="SCP token (alternative to the env var)")
     args = ap.parse_args()
 
-    token = os.environ.get(TOKEN_ENV, "").strip()
+    token = (args.token or os.environ.get(TOKEN_ENV, "")).strip().strip('"').strip("'")
     if not token and not args.url:
-        print(f"ERROR: set {TOKEN_ENV} (SCP: My Account -> Subscriptions -> Download/API link).")
+        print(f"ERROR: no token. Either run with --token <40-char-token> or set {TOKEN_ENV}.")
+        print("Token location: sportscardspro.com -> My Account -> Subscriptions -> Download/API link (last part of that URL).")
         return 2
+    if token and not args.url:
+        _bad = (" " in token or "<" in token or len(token) < 20)
+        _shown = (token[:4] + "..." + token[-4:]) if len(token) > 10 else repr(token)
+        print(f"Token read: {_shown} (length {len(token)})")
+        if _bad:
+            print("ERROR: that doesn't look like a real token (placeholder text, spaces, or too short).")
+            print(f"Fix: rerun with --token <the real 40-char string>, or re-set {TOKEN_ENV} and open a NEW PowerShell window.")
+            return 2
 
     tracked = {}  # console-name (as it appears in existing CSVs) -> file path
     for fp in sorted(CSV_DIR.glob("*.csv")):
