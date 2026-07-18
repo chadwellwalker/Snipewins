@@ -101,11 +101,87 @@ def _discover_uids(slugs, uid_map, verbose=True) -> tuple[dict, list]:
     return uid_map, failed
 
 
+def _find_console_slugs(term: str) -> set:
+    """Scrape SCP search pages for console slugs matching a term (e.g.
+    'kaboom' -> football-cards-2024-panini-absolute-kaboom-vertical, ...).
+    Sports scope: baseball/basketball/football; EuroLeague excluded (owner)."""
+    import urllib.parse
+    t_slug = "-".join(re.sub(r"[^a-z0-9 ]", " ", term.lower()).split())
+    slugs = set()
+    queries = [term] + [f"{term} {y}" for y in range(2018, 2027)]
+    for q in queries:
+        url = BASE + "/search-products?type=prices&q=" + urllib.parse.quote(q)
+        try:
+            with _open(url, timeout=60) as resp:
+                html = resp.read(900_000).decode("utf-8", "replace")
+        except Exception as exc:
+            print(f"    search {q!r}: {type(exc).__name__}")
+            continue
+        for m in re.finditer(r"/console/((?:baseball|basketball|football)-cards-[a-z0-9\-]+)", html):
+            slug = m.group(1)
+            if t_slug in slug and "euroleague" not in slug:
+                slugs.add(slug)
+        time.sleep(PAGE_DELAY)
+    return slugs
+
+
+def _add_new_consoles(terms: list, token: str, dry_run: bool) -> int:
+    """Find + download consoles for chase terms that we don't hold yet."""
+    have = {f.stem for f in CSV_DIR.glob("*.csv")}
+    all_new = {}
+    for term in terms:
+        found = _find_console_slugs(term)
+        new = sorted(found - have)
+        already = len(found & have)
+        print(f"[{term}] consoles found: {len(found)} (new: {len(new)}, already tracked: {already})")
+        for sl in new:
+            all_new[sl] = term
+    if not all_new:
+        print("Nothing new to add.")
+        return 0
+    print(f"\n{len(all_new)} new consoles to download{' (dry run — skipping)' if dry_run else ''}:")
+    for sl in sorted(all_new):
+        print(f"   {sl}")
+    if dry_run:
+        return 0
+    uid_map = _load_uid_map()
+    uid_map, failed = _discover_uids(sorted(all_new), uid_map)
+    ok = 0
+    for sl in sorted(all_new):
+        uid = uid_map.get(sl)
+        if not uid:
+            continue
+        url = DL_URL.format(token=token, uids=uid)
+        waits = [0, 8, 20, 45, 90]
+        got = False
+        for att, w in enumerate(waits, 1):
+            if w:
+                print(f"    {sl}: retry in {w}s ({att}/{len(waits)})"); time.sleep(w)
+            try:
+                with _open(url) as resp:
+                    data = resp.read()
+                if data[:15].lstrip().startswith(b"<"):
+                    print(f"    {sl}: HTML response — skipped"); break
+                (CSV_DIR / f"{sl}.csv").write_bytes(data)
+                rows = data.count(b"\n") - 1
+                print(f"  + {sl}.csv ({rows:,} rows)")
+                ok += 1; got = True
+                break
+            except Exception as exc:
+                if "503" not in str(exc):
+                    print(f"    {sl}: {type(exc).__name__}: {exc}"); break
+        time.sleep(DL_DELAY)
+    print(f"\nAdded {ok}/{len(all_new)} new console CSVs.")
+    print('Next: git add scp_csv scp_console_uids.json && git commit -m "Add chase consoles" && git push origin main')
+    return 0
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description="Refresh all loaded SCP price lists")
     ap.add_argument("--dry-run", action="store_true", help="download + report, write nothing")
     ap.add_argument("--token", default="", help="SCP token (alternative to the env var)")
     ap.add_argument("--only", default="", help="comma-separated slugs to refresh (testing)")
+    ap.add_argument("--add-terms", default="", help="comma-separated search terms; finds + downloads NEW consoles for them")
     args = ap.parse_args()
 
     token = (args.token or os.environ.get(TOKEN_ENV, "")).strip().strip('"').strip("'")
@@ -118,6 +194,10 @@ def main() -> int:
     if " " in token or "<" in token or len(token) < 20:
         print("ERROR: that doesn't look like a real token.")
         return 2
+
+    if args.add_terms:
+        terms = [t.strip() for t in args.add_terms.split(",") if t.strip()]
+        return _add_new_consoles(terms, token, args.dry_run)
 
     files = sorted(CSV_DIR.glob("*.csv"))
     if args.only:
