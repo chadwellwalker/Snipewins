@@ -146,7 +146,10 @@ def _collector_heat_product_candidates(player_specs: List[Dict[str, Any]], sport
         )
     for _product in _default_product_families_for_sport(str(sport or "").strip().upper()):
         _add_product(_product)
-    return _products[:4]
+    # 2026-07-16: 4 -> 6 so late-list chase-host products (Absolute, Crown
+    # Royale, Topps Chrome NBA) actually surface; per-player query count is
+    # still capped by _COLLECTOR_HEAT_QUERY_MAX_PER_PLAYER.
+    return _products[:6]
 
 
 def _build_collector_heat_query_lane(
@@ -666,6 +669,8 @@ _PRODUCT_PARALLEL_COMPATIBILITY: Dict[str, frozenset] = {
         "gold", "silver", "tiger", "zebra", "black finite", "black",
         "red", "blue", "green", "orange", "purple", "pink",
         "white sparkle", "hyper", "ice", "mojo", "snakeskin",
+        # 2026-07-16: Prizm SSP case hits
+        "color blast", "manga", "prizmania", "groovy", "sublime",
     }),
     "select": frozenset({
         "silver", "gold", "tie-dye", "tie dye", "zebra",
@@ -681,7 +686,7 @@ _PRODUCT_PARALLEL_COMPATIBILITY: Dict[str, frozenset] = {
         "blue", "red", "purple", "gold", "auto",
     }),
     "absolute": frozenset({
-        "kaboom", "downtown", "rookie patch auto", "rpa", "auto",
+        "kaboom", "rookie patch auto", "rpa", "auto",
         "blue", "red", "green", "purple", "gold", "spectrum",
     }),
     "national treasures": frozenset({
@@ -702,6 +707,10 @@ _PRODUCT_PARALLEL_COMPATIBILITY: Dict[str, frozenset] = {
         "refractor", "x-fractor", "xfractor", "atomic", "negative",
         "blue", "green", "purple", "pink", "sepia",
         "/50", "/25", "/10", "/5", "1/1",
+        # 2026-07-16: Topps chases (MLB + NBA SSP tier)
+        "home field advantage", "heavy lumber", "radiating rookies",
+        "ultra violet", "helix", "glass canvas", "advisory",
+        "paradox", "patented",
     }),
     "bowman chrome": frozenset({
         "superfractor", "gold", "red", "orange", "auto",
@@ -728,14 +737,27 @@ _PRODUCT_PARALLEL_COMPATIBILITY: Dict[str, frozenset] = {
 # the lane is killed.
 _PARALLEL_PRODUCT_EXCLUSIVE: Dict[str, frozenset] = {
     "superfractor":   frozenset({"topps chrome", "bowman chrome", "chrome"}),
-    "downtown":       frozenset({"optic", "donruss optic", "donruss", "absolute"}),
-    "kaboom":         frozenset({"absolute"}),
+    "downtown":       frozenset({"optic", "donruss optic", "donruss"}),
+    "kaboom":         frozenset({"absolute", "crown royale", "revolution"}),
     "genesis":        frozenset({"mosaic"}),
     "honeycomb":      frozenset({"mosaic"}),
     "peacock":        frozenset({"mosaic"}),
     "stained glass":  frozenset({"mosaic"}),
-    "manga":          frozenset({"mosaic"}),
-    "color blast":    frozenset({"mosaic", "absolute", "spectra"}),
+    "manga":          frozenset({"prizm", "mosaic"}),
+    "color blast":    frozenset({"prizm", "mosaic", "spectra", "chronicles"}),
+    # 2026-07-16 chase research (owner-approved)
+    "prizmania":      frozenset({"prizm"}),
+    "groovy":         frozenset({"prizm"}),
+    "sublime":        frozenset({"prizm"}),
+    "home field advantage": frozenset({"topps"}),
+    "heavy lumber":   frozenset({"topps"}),
+    "radiating rookies": frozenset({"topps chrome"}),
+    "ultra violet":   frozenset({"topps chrome"}),
+    "glass canvas":   frozenset({"topps chrome"}),
+    "advisory":       frozenset({"topps chrome"}),
+    "paradox":        frozenset({"topps chrome"}),
+    "patented":       frozenset({"topps chrome"}),
+    "helix":          frozenset({"topps chrome"}),
     "zebra":          frozenset({"prizm", "select"}),
     "tiger":          frozenset({"prizm"}),
     "elephant":       frozenset({"prizm"}),
@@ -24730,6 +24752,8 @@ def _endgame_product_families_by_sport(sport: str) -> list[str]:
             "Prizm",
             "Select",
             "Donruss Optic",
+            "Absolute",        # Kaboom's NFL home (2026-07-16 chase research)
+            "Mosaic",          # Stained Glass
             "Spectra",
             "National Treasures",
             "Immaculate",
@@ -24742,16 +24766,19 @@ def _endgame_product_families_by_sport(sport: str) -> list[str]:
             "Prizm",
             "Select",
             "Donruss Optic",
+            "Topps Chrome",    # Topps NBA SSP tier: Ultra Violet/Helix/Glass Canvas/... (2026-07-16)
+            "Crown Royale",    # NBA Kaboom home
+            "Revolution",      # NBA Kaboom home
+            "Mosaic",          # Stained Glass
             "Spectra",
             "National Treasures",
             "Immaculate",
             "Flawless",
-            "Contenders Optic",
-            "Contenders",
         ]
     if _sport == "MLB":
         return [
             "Topps Chrome",
+            "Topps",           # flagship: Home Field Advantage / Heavy Lumber live here too
             "Bowman Chrome",
             "Topps Finest",
             "Topps Chrome Black",
