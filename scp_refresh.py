@@ -157,48 +157,84 @@ def main() -> int:
         except Exception:
             pass
 
+    def _open_with_retry(url, label):
+        """SCP's CSV generator 503s routinely and succeeds on retry (observed
+        across every browser session too). Retry with growing waits."""
+        waits = [0, 8, 20, 45, 90]
+        last = None
+        for att, w in enumerate(waits, 1):
+            if w:
+                print(f"    {label}: retrying in {w}s (attempt {att}/{len(waits)})...")
+                time.sleep(w)
+            try:
+                return _open(url)
+            except Exception as exc:
+                last = exc
+                if "503" not in str(exc):
+                    raise
+        raise last
+
+    def _stream_into(resp):
+        nonlocal total_rows
+        got = 0
+        with resp:
+            text = io.TextIOWrapper(resp, encoding="utf-8", errors="replace", newline="")
+            rd = csv.reader(text)
+            header_out = next(rd, None)
+            if not header_out or "console-name" not in [h.strip().lower() for h in header_out]:
+                return -1
+            cn_i = [h.strip().lower() for h in header_out].index("console-name")
+            for row in rd:
+                total_rows += 1
+                if len(row) <= cn_i:
+                    continue
+                cn = row[cn_i].strip()
+                slug = name_to_slug.get(cn)
+                if slug is None:
+                    unmatched_names.add(cn)
+                    continue
+                counts[cn] = counts.get(cn, 0) + 1
+                got += 1
+                if not args.dry_run:
+                    if cn not in writers:
+                        fp = slug_to_file[slug]
+                        tmp = fp.with_suffix(".csv.refresh_tmp")
+                        fh = open(tmp, "w", encoding="utf-8", newline="")
+                        wr = csv.writer(fh)
+                        wr.writerow(header_out)
+                        writers[cn] = (fh, wr)
+                        tmp_files[cn] = (tmp, fp)
+                    writers[cn][1].writerow(row)
+        return got
+
     try:
         for ci in range(0, len(have), CHUNK):
             chunk = have[ci:ci + CHUNK]
             uids = ",".join(uid_map[s] for s in chunk)
             url = DL_URL.format(token=token, uids=uids)
+            _label = f"chunk {ci//CHUNK+1}/{(len(have)+CHUNK-1)//CHUNK}"
             try:
-                with _open(url) as resp:
-                    text = io.TextIOWrapper(resp, encoding="utf-8", errors="replace", newline="")
-                    rd = csv.reader(text)
-                    header_out = next(rd, None)
-                    if not header_out or "console-name" not in [h.strip().lower() for h in header_out]:
-                        print(f"  chunk {ci//CHUNK+1}: unexpected response (not CSV) — skipped")
-                        continue
-                    cn_i = [h.strip().lower() for h in header_out].index("console-name")
-                    for row in rd:
-                        total_rows += 1
-                        if len(row) <= cn_i:
-                            continue
-                        cn = row[cn_i].strip()
-                        slug = name_to_slug.get(cn)
-                        if slug is None:
-                            unmatched_names.add(cn)
-                            continue
-                        counts[cn] = counts.get(cn, 0) + 1
-                        if not args.dry_run:
-                            if cn not in writers:
-                                fp = slug_to_file[slug]
-                                tmp = fp.with_suffix(".csv.refresh_tmp")
-                                fh = open(tmp, "w", encoding="utf-8", newline="")
-                                wr = csv.writer(fh)
-                                wr.writerow(header_out)
-                                writers[cn] = (fh, wr)
-                                tmp_files[cn] = (tmp, fp)
-                            writers[cn][1].writerow(row)
-                print(f"  chunk {ci//CHUNK+1}/{(len(have)+CHUNK-1)//CHUNK}: ok ({len(chunk)} consoles)")
+                got = _stream_into(_open_with_retry(url, _label))
+                if got >= 0:
+                    print(f"  {_label}: ok ({len(chunk)} consoles, {got:,} rows)")
+                    time.sleep(DL_DELAY)
+                    continue
+                print(f"  {_label}: response was not CSV — falling back to per-console")
             except Exception as exc:
-                print(f"  chunk {ci//CHUNK+1}: {type(exc).__name__}: {exc} — consoles kept as-is")
+                print(f"  {_label}: {type(exc).__name__}: {exc} — falling back to per-console")
+            # Per-console fallback (the shape every successful browser download used)
+            for slug2 in chunk:
+                u2 = DL_URL.format(token=token, uids=uid_map[slug2])
+                try:
+                    got2 = _stream_into(_open_with_retry(u2, slug2))
+                    print(f"    {slug2}: {'ok' if got2 >= 0 else 'NOT CSV'} ({max(got2,0):,} rows)")
+                except Exception as exc2:
+                    print(f"    {slug2}: {type(exc2).__name__} — kept old file")
+                time.sleep(DL_DELAY)
             time.sleep(DL_DELAY)
     finally:
         for cn, (fh, _wr) in writers.items():
             fh.close()
-
     print(f"\nStreamed {total_rows:,} rows in {round(time.time()-t0,1)}s; "
           f"{len(counts)} consoles matched.")
     if unmatched_names:
