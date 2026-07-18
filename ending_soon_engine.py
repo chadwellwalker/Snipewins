@@ -64,6 +64,10 @@ _COLLECTOR_HEAT_QUERY_CASE_HIT_TERMS: Tuple[str, ...] = (
     "downtown", "kaboom", "color blast", "stained glass", "manga",
     "genesis", "honeycomb", "zebra", "tiger", "elephant", "peacock",
     "superfractor",
+    # 2026-07-16: terms whose price data is ALREADY loaded (cracked ice
+    # 5.5K rows, no huddle 6.8K, white sparkle 10.8K) — these can price
+    # immediately, unlike kaboom/downtown which wait on their SCP consoles.
+    "cracked ice", "no huddle", "white sparkle",
 )
 _COLLECTOR_HEAT_QUERY_GRADE_TERMS: Tuple[str, ...] = ("PSA 10", "BGS 10", "SGC 10")
 _COLLECTOR_HEAT_QUERY_ROOKIE_TERMS: Tuple[str, ...] = ("rookie", "RC", "1st bowman", "1st chrome")
@@ -820,8 +824,10 @@ _ES_CROSS_SPORT_NFL_CORE = 18
 _ES_CROSS_SPORT_NFL_ROT  = 12
 _ES_CROSS_SPORT_MLB_CORE = 16
 _ES_CROSS_SPORT_MLB_ROT  = 10
-_ES_CROSS_SPORT_NBA_CORE = 11
-_ES_CROSS_SPORT_NBA_ROT  =  8
+# 2026-07-16 owner call: board is baseball-heavy — grow the NBA share by
+# GROWING the cohort (75->84), never by shrinking MLB/NFL slots.
+_ES_CROSS_SPORT_NBA_CORE = 16
+_ES_CROSS_SPORT_NBA_ROT  = 12
 _ES_DIVERSITY_STABLE_CORE_SIZE = 12
 _ES_DIVERSITY_RECENT_PLAYER_PENALTY = 18.0
 _ES_DIVERSITY_RECENT_PRODUCT_PENALTY = 10.0
