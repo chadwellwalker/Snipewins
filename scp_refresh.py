@@ -170,7 +170,8 @@ def _download_slugs(slugs: list, uid_map: dict, token: str) -> int:
                 if data[:15].lstrip().startswith(b"<"):
                     print(f"    {sl}: HTML response — skipped"); break
                 (CSV_DIR / f"{sl}.csv").write_bytes(data)
-                print(f"  + [{n}/{len(todo)}] {sl}.csv ({max(0, data.count(b'\n') - 1):,} rows)")
+                _nrows = max(0, data.count(b"\n") - 1)
+                print(f"  + [{n}/{len(todo)}] {sl}.csv ({_nrows:,} rows)")
                 ok += 1
                 consec_429 = 0
                 break
