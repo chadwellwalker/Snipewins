@@ -146,33 +146,55 @@ def _add_new_consoles(terms: list, token: str, dry_run: bool) -> int:
         return 0
     uid_map = _load_uid_map()
     uid_map, failed = _discover_uids(sorted(all_new), uid_map)
+    return _download_slugs(sorted(all_new), uid_map, token)
+
+
+def _download_slugs(slugs: list, uid_map: dict, token: str) -> int:
+    """Download per-console CSVs with 429/503-aware backoff. RESUMABLE:
+    slugs whose CSV already exists are skipped, so rerunning after a rate
+    limit continues where it left off (uids are cached)."""
+    todo = [sl for sl in slugs if uid_map.get(sl) and not (CSV_DIR / f"{sl}.csv").exists()]
+    skipped = len(slugs) - len(todo)
+    print(f"Downloading {len(todo)} consoles ({skipped} already on disk / no uid)...")
     ok = 0
-    for sl in sorted(all_new):
-        uid = uid_map.get(sl)
-        if not uid:
-            continue
-        url = DL_URL.format(token=token, uids=uid)
-        waits = [0, 8, 20, 45, 90]
-        got = False
+    consec_429 = 0
+    for n, sl in enumerate(todo, 1):
+        url = DL_URL.format(token=token, uids=uid_map[sl])
+        waits = [0, 30, 90, 180, 300]   # 429 = rate limit: needs LONG cooling
         for att, w in enumerate(waits, 1):
             if w:
-                print(f"    {sl}: retry in {w}s ({att}/{len(waits)})"); time.sleep(w)
+                print(f"    {sl}: cooling {w}s (attempt {att}/{len(waits)})"); time.sleep(w)
             try:
                 with _open(url) as resp:
                     data = resp.read()
                 if data[:15].lstrip().startswith(b"<"):
                     print(f"    {sl}: HTML response — skipped"); break
                 (CSV_DIR / f"{sl}.csv").write_bytes(data)
-                rows = data.count(b"\n") - 1
-                print(f"  + {sl}.csv ({rows:,} rows)")
-                ok += 1; got = True
+                print(f"  + [{n}/{len(todo)}] {sl}.csv ({max(0, data.count(b'\n') - 1):,} rows)")
+                ok += 1
+                consec_429 = 0
                 break
             except Exception as exc:
-                if "503" not in str(exc):
-                    print(f"    {sl}: {type(exc).__name__}: {exc}"); break
-        time.sleep(DL_DELAY)
-    print(f"\nAdded {ok}/{len(all_new)} new console CSVs.")
-    print('Next: git add scp_csv scp_console_uids.json && git commit -m "Add chase consoles" && git push origin main')
+                _msg = str(exc)
+                if "429" in _msg:
+                    consec_429 += 1
+                    continue          # retry with next (longer) wait
+                if "503" in _msg:
+                    continue
+                print(f"    {sl}: {type(exc).__name__}: {exc}"); break
+        else:
+            print(f"    {sl}: still rate-limited — rerun later with --download-missing")
+        if consec_429 >= 3:
+            print("  Sustained rate limiting — pausing 10 minutes before continuing...")
+            time.sleep(600)
+            consec_429 = 0
+        time.sleep(6.0)  # gentle steady pace between downloads
+    print(f"\nAdded {ok}/{len(todo)} console CSVs this run.")
+    remaining = [sl for sl in slugs if uid_map.get(sl) and not (CSV_DIR / f"{sl}.csv").exists()]
+    if remaining:
+        print(f"{len(remaining)} still missing — rerun later with:  python scp_refresh.py --download-missing --token <token>")
+    else:
+        print('All done. Next: git add scp_csv scp_console_uids.json && git commit -m "Add chase consoles" && git push origin main')
     return 0
 
 
@@ -182,6 +204,7 @@ def main() -> int:
     ap.add_argument("--token", default="", help="SCP token (alternative to the env var)")
     ap.add_argument("--only", default="", help="comma-separated slugs to refresh (testing)")
     ap.add_argument("--add-terms", default="", help="comma-separated search terms; finds + downloads NEW consoles for them")
+    ap.add_argument("--download-missing", action="store_true", help="download any console in the uid cache that has no CSV yet (resume after rate limit)")
     args = ap.parse_args()
 
     token = (args.token or os.environ.get(TOKEN_ENV, "")).strip().strip('"').strip("'")
@@ -198,6 +221,10 @@ def main() -> int:
     if args.add_terms:
         terms = [t.strip() for t in args.add_terms.split(",") if t.strip()]
         return _add_new_consoles(terms, token, args.dry_run)
+
+    if args.download_missing:
+        uid_map = _load_uid_map()
+        return _download_slugs(sorted(uid_map), uid_map, token)
 
     files = sorted(CSV_DIR.glob("*.csv"))
     if args.only:
