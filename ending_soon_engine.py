@@ -68,6 +68,9 @@ _COLLECTOR_HEAT_QUERY_CASE_HIT_TERMS: Tuple[str, ...] = (
     # 5.5K rows, no huddle 6.8K, white sparkle 10.8K) — these can price
     # immediately, unlike kaboom/downtown which wait on their SCP consoles.
     "cracked ice", "no huddle", "white sparkle",
+    # 2026-07-16 owner call: Topps case hits too, not just the Panini big
+    # four. Price data pending the case-hit SCP download round.
+    "home field advantage", "heavy lumber", "wave of the future", "fortune 15",
 )
 _COLLECTOR_HEAT_QUERY_GRADE_TERMS: Tuple[str, ...] = ("PSA 10", "BGS 10", "SGC 10")
 _COLLECTOR_HEAT_QUERY_ROOKIE_TERMS: Tuple[str, ...] = ("rookie", "RC", "1st bowman", "1st chrome")
