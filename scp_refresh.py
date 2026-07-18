@@ -208,6 +208,12 @@ def main() -> int:
         print(f"WARN: {len(missing)} tracked consoles NOT in the guide (kept old files):")
         for m in missing[:20]:
             print(f"   {m}")
+    if skipped_consoles and len(counts) < len(tracked) // 2:
+        # DIAG: when few/no tracked consoles match, the guide's console-name
+        # format probably differs from ours — show what the guide calls them.
+        print(f"DIAG: sample of the guide's console names ({len(skipped_consoles)} distinct):")
+        for cn in sorted(skipped_consoles)[:30]:
+            print(f"   {cn!r}")
 
     if args.dry_run:
         print("Dry run — nothing written. Per-console fresh counts:")
