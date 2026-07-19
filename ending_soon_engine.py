@@ -315,6 +315,17 @@ def _append_collector_heat_query_lanes(specs: List[Dict[str, Any]]) -> Tuple[Lis
         _rotation_seed = sum(ord(_ch) for _ch in f"{_sport}:{_player_name}".lower())
         _start = (_cycle + _rotation_seed) % len(_candidates)
         _rotated = _candidates[_start:] + _candidates[:_start]
+        # CASE-HIT-SLOT-2026-07-19 (feed audit): with ~200 product x term
+        # combos and only 3 picks per cycle, a specific pair like
+        # "Purdy x Downtown" surfaced ~once every 3 days — eBay had live
+        # Purdy Downtown / SGA Downtown / Kaboom auctions the board missed.
+        # Reserve the FIRST slot for a case-hit candidate (own rotation),
+        # so every elite player gets a case-hit query EVERY cycle.
+        _case_cands = [c for c in _candidates if c[1] == "case_hit"]
+        if _case_cands:
+            _cstart = (_cycle + _rotation_seed) % len(_case_cands)
+            _lead = _case_cands[_cstart]
+            _rotated = [_lead] + [c for c in _rotated if c != _lead]
         _added_for_player = 0
         for _product, _reason, _term in _rotated:
             if _added_for_player >= _COLLECTOR_HEAT_QUERY_MAX_PER_PLAYER:

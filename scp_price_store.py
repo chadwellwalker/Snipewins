@@ -495,6 +495,12 @@ def lookup(title: str, *, min_score: float = 0.45) -> Dict[str, Any]:
                 for _slw in ("prizm", "mosaic", "select", "optic", "chrome", "finest", "hoops", "wnba", "nba"):
                     if _slw in _par_left and _rawtoks.count(_slw) <= 1:
                         _par_left = _par_left - {_slw}
+                # OPTIC-PREVIEW-2026-07-19 (feed audit, Bo Nix $330-vs-$92):
+                # a DONRUSS-console card whose title says "optic" is the
+                # Optic Preview insert. Runs AFTER the set-line strip so the
+                # restored signal survives; only for non-Optic Donruss rows.
+                if "optic" in _rawtoks and "donruss" in (row["console_norm"] or "") and "optic" not in (row["console_norm"] or ""):
+                    _par_left = _par_left | {"optic", "preview"}
                 inter = len(par & _par_left)
                 score += 0.6 * (inter / len(par))
                 score += 0.05 * inter
