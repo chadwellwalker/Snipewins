@@ -100,6 +100,7 @@ _INSERT_PHRASES = {
     # (Supersedes the old "never list an NBA chase" note: that predated
     # having NBA chase price data on the download list.)
     "kaboom", "downtown", "manga", "prizmania", "groovy", "sublime",
+    "in technicolor", "hidden potential",
     "home field advantage", "heavy lumber", "radiating rookies",
     "chrome expose", "ultra violet", "glass canvas", "advisory",
     "paradox", "patented", "helix", "wave of the future",
@@ -365,6 +366,25 @@ def _player_alias_rows(cur, pname: str):
     names = [p for p, pset, _pc in _load_players(cur) if pset == target] or [pname]
     _ph = ",".join("?" * len(names))
     return cur.execute(f"SELECT * FROM products WHERE player_norm IN ({_ph})", names).fetchall()
+
+
+_CONSOLE_TOKENSETS_CACHE: Optional[List[frozenset]] = None
+
+def _console_token_sets(cur) -> List[frozenset]:
+    """Distinct console distinguishing-word sets (stopwords/brands/years
+    removed), used by the proxy's most-specific-console rule."""
+    global _CONSOLE_TOKENSETS_CACHE
+    if _CONSOLE_TOKENSETS_CACHE is None:
+        _sets = set()
+        try:
+            for (_cn, _yr) in cur.execute("SELECT DISTINCT console_norm, year FROM products").fetchall():
+                _ts = frozenset(set((_cn or "").split()) - _SET_STOP - {"topps", "panini", "bowman"} - {_yr or ""})
+                if _ts:
+                    _sets.add(_ts)
+        except Exception:
+            pass
+        _CONSOLE_TOKENSETS_CACHE = sorted(_sets, key=len, reverse=True)
+    return _CONSOLE_TOKENSETS_CACHE
 
 
 def _detect_player(title_tokens: frozenset, cur, title_norm: str = "") -> Optional[str]:
@@ -780,6 +800,21 @@ def _proxy(cur, player: str, grade_col: str, is_auto: bool, ultra: bool,
         if _l_colors:
             _cand3 = set(_tokens((r["parallel_norm"] or "") + " " + (r["product_name"] or "")))
             if _l_colors - _cand3:
+                continue
+        # MOST-SPECIFIC-CONSOLE-2026-07-18 (comp-parity audit): a listing
+        # saying "Topps Chrome Platinum" must never proxy from plain "Topps
+        # Chrome" — if ANOTHER loaded console's distinguishing words are all
+        # in the title AND are a strict superset of this candidate's, the
+        # listing belongs to the more specific product line; reject the
+        # generic candidate (Witt Platinum Orange was $300 off base Chrome).
+        if _l_toks:
+            _cand_cs = frozenset(set((r["console_norm"] or "").split()) - _SET_STOP - {"topps", "panini", "bowman"} - {r["year"] or ""})
+            for _other in _console_token_sets(cur):
+                if _other > _cand_cs and _other <= _l_toks:
+                    break
+            else:
+                _other = None
+            if _other is not None:
                 continue
         # PROXY-PRODUCT-LINE-2026-07-09 (round 2, July 9 verification audit):
         # same brand family + same group was NOT enough — Select listings
