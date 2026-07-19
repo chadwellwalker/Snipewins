@@ -150,54 +150,78 @@ def _add_new_consoles(terms: list, token: str, dry_run: bool) -> int:
 
 
 def _download_slugs(slugs: list, uid_map: dict, token: str) -> int:
-    """Download per-console CSVs with 429/503-aware backoff. RESUMABLE:
-    slugs whose CSV already exists are skipped, so rerunning after a rate
-    limit continues where it left off (uids are cached)."""
+    """CHUNKED downloader for new consoles: 20 uids per request (~12 requests
+    for 220 consoles instead of 220). Splits each response by console-name
+    into per-slug CSVs. RESUMABLE (existing files skipped). 429 rate limits:
+    waits 11 minutes and retries the SAME chunk, up to 8 tries — leave it
+    running and it grinds through; Ctrl+C and rerun any time."""
+    def _slugify(cn: str) -> str:
+        out = "".join(ch.lower() if ch.isalnum() else "-" for ch in str(cn or ""))
+        while "--" in out:
+            out = out.replace("--", "-")
+        return out.strip("-")
+
     todo = [sl for sl in slugs if uid_map.get(sl) and not (CSV_DIR / f"{sl}.csv").exists()]
     skipped = len(slugs) - len(todo)
-    print(f"Downloading {len(todo)} consoles ({skipped} already on disk / no uid)...")
+    print(f"Downloading {len(todo)} consoles in chunks of {CHUNK} ({skipped} already on disk / no uid)...")
     ok = 0
-    consec_429 = 0
-    for n, sl in enumerate(todo, 1):
-        url = DL_URL.format(token=token, uids=uid_map[sl])
-        waits = [0, 30, 90, 180, 300]   # 429 = rate limit: needs LONG cooling
-        for att, w in enumerate(waits, 1):
-            if w:
-                print(f"    {sl}: cooling {w}s (attempt {att}/{len(waits)})"); time.sleep(w)
+    for ci in range(0, len(todo), CHUNK):
+        chunk = todo[ci:ci + CHUNK]
+        url = DL_URL.format(token=token, uids=",".join(uid_map[sl] for sl in chunk))
+        label = f"chunk {ci // CHUNK + 1}/{(len(todo) + CHUNK - 1) // CHUNK}"
+        data = None
+        for att in range(1, 9):
             try:
                 with _open(url) as resp:
                     data = resp.read()
                 if data[:15].lstrip().startswith(b"<"):
-                    print(f"    {sl}: HTML response — skipped"); break
-                (CSV_DIR / f"{sl}.csv").write_bytes(data)
-                _nrows = max(0, data.count(b"\n") - 1)
-                print(f"  + [{n}/{len(todo)}] {sl}.csv ({_nrows:,} rows)")
-                ok += 1
-                consec_429 = 0
+                    print(f"  {label}: HTML response — skipped"); data = None
                 break
             except Exception as exc:
-                _msg = str(exc)
-                if "429" in _msg:
-                    consec_429 += 1
-                    continue          # retry with next (longer) wait
-                if "503" in _msg:
+                msg = str(exc)
+                if "429" in msg:
+                    print(f"  {label}: rate limited — waiting 11 minutes (attempt {att}/8, it's fine to leave this running)...")
+                    time.sleep(660)
                     continue
-                print(f"    {sl}: {type(exc).__name__}: {exc}"); break
-        else:
-            print(f"    {sl}: still rate-limited — rerun later with --download-missing")
-        if consec_429 >= 3:
-            print("  Sustained rate limiting — pausing 10 minutes before continuing...")
-            time.sleep(600)
-            consec_429 = 0
-        time.sleep(6.0)  # gentle steady pace between downloads
-    print(f"\nAdded {ok}/{len(todo)} console CSVs this run.")
+                if "503" in msg and att < 8:
+                    print(f"  {label}: 503 — retrying in 30s..."); time.sleep(30); continue
+                print(f"  {label}: {type(exc).__name__}: {exc}")
+                break
+        if data is None:
+            print(f"  {label}: giving up on this chunk for now (rerun --download-missing later)")
+            continue
+        text = data.decode("utf-8", "replace").splitlines()
+        rd = csv.reader(text)
+        header = next(rd, None)
+        if not header or "console-name" not in [h.strip().lower() for h in header]:
+            print(f"  {label}: unexpected CSV shape — skipped")
+            continue
+        cn_i = [h.strip().lower() for h in header].index("console-name")
+        groups: dict = {}
+        for row in rd:
+            if len(row) > cn_i:
+                groups.setdefault(_slugify(row[cn_i].strip()), []).append(row)
+        wrote = 0
+        for sl in chunk:
+            rows = groups.get(sl)
+            if not rows:
+                print(f"    {sl}: no rows in response — not written")
+                continue
+            with open(CSV_DIR / f"{sl}.csv", "w", encoding="utf-8", newline="") as fh:
+                wr = csv.writer(fh)
+                wr.writerow(header)
+                wr.writerows(rows)
+            wrote += 1
+            ok += 1
+        print(f"  {label}: wrote {wrote}/{len(chunk)} consoles")
+        time.sleep(30)
     remaining = [sl for sl in slugs if uid_map.get(sl) and not (CSV_DIR / f"{sl}.csv").exists()]
+    print(f"\nAdded {ok} console CSVs; {len(remaining)} still missing.")
     if remaining:
-        print(f"{len(remaining)} still missing — rerun later with:  python scp_refresh.py --download-missing --token <token>")
+        print("Rerun later:  python scp_refresh.py --download-missing --token <token>")
     else:
         print('All done. Next: git add scp_csv scp_console_uids.json && git commit -m "Add chase consoles" && git push origin main')
     return 0
-
 
 def main() -> int:
     ap = argparse.ArgumentParser(description="Refresh all loaded SCP price lists")
