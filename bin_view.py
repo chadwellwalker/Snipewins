@@ -202,7 +202,9 @@ def _row_has_real_mv(row: Dict[str, Any]) -> bool:
     if mv is None:
         return False
     try:
-        if float(mv) <= 0:
+        # MV-FLOOR-2026-07-19 (conversion audit): sub-$1 "market values"
+        # ($0 Metcalf class) read as broken to visitors — treat as pending.
+        if float(mv) < 1.0:
             return False
     except Exception:
         return False
@@ -648,7 +650,10 @@ def render_bin_radar(streamlit, *, max_cards: int = 30) -> None:
         if not isinstance(row, dict):
             continue
         bin_price = _row_current_price(row)
-        mv = row.get("true_mv") or row.get("market_value") if _row_has_real_mv(row) else None
+        # PRECEDENCE-FIX-2026-07-19: the old expression parsed as
+        # `true_mv or (market_value if has_real else None)` — true_mv
+        # bypassed the real-MV gate entirely.
+        mv = (row.get("true_mv") or row.get("market_value")) if _row_has_real_mv(row) else None
         target = _row_target_bid(row) if _row_has_real_mv(row) else None
         # Sort key — discount-to-MV descending. Rows with no MV go to bottom.
         discount = _discount_to_mv(bin_price, mv) if mv else None
@@ -714,6 +719,13 @@ def render_bin_radar(streamlit, *, max_cards: int = 30) -> None:
         f'</div>'
     )
     st.markdown(_headline_html, unsafe_allow_html=True)
+    # LEGEND-2026-07-19 (conversion audit): first-time visitors don't know
+    # the status vocabulary — one quiet line fixes that.
+    st.caption(
+        "STRIKE = buy-now price at or below our target (70% of market) \u00b7 "
+        "CLOSE = near target \u00b7 OFFER = above target but seller accepts offers \u00b7 "
+        "Market values sourced from SportsCardsPro's price guide."
+    )
 
     # TITLE-SEARCH-2026-05-17: free-text search box, same UX as pool_view.
     # Multi-word queries are AND'd against title + source_title, so typing

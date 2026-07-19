@@ -471,6 +471,13 @@ def lookup(title: str, *, min_score: float = 0.45) -> Dict[str, Any]:
             # insert got valued off a $406 Topps Chrome parallel.
             if ("bowman" in toks) != ("bowman" in (row["console_norm"] or "")):
                 continue
+            # CHROME-GATE-2026-07-19 (Steals audit): Chrome and non-Chrome are
+            # different product lines with wildly different prices — a base
+            # "2013 Bowman Draft Picks" listing matched the CHROME Draft
+            # console and showed a fake 71% steal ($1,187 comp vs the real
+            # $311 base). Same symmetric hard gate as the bowman rule.
+            if ("chrome" in toks) != ("chrome" in (row["console_norm"] or "")):
+                continue
             # Reject when the listing names an unambiguous set this product isn't
             # (e.g. "Stadium Club"/"Heritage" listing vs flagship Topps product).
             if (toks & _HARD_SETS) - (cset & _HARD_SETS):

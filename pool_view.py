@@ -170,7 +170,8 @@ def _row_has_confident_mv(row: Dict[str, Any]) -> bool:
         return False
     try:
         mv = (row or {}).get("true_mv") or (row or {}).get("market_value")
-        return mv is not None and float(mv) > 0.0
+        # MV-FLOOR-2026-07-19: sub-$1 values ($0 Metcalf) display as broken.
+        return mv is not None and float(mv) >= 1.0
     except Exception:
         return False
 
@@ -1085,6 +1086,12 @@ def render_morning_briefing(streamlit, *, max_cards: int = 150) -> None:
         f'</div>'
     )
     st.markdown(_headline_html, unsafe_allow_html=True)
+    # LEGEND-2026-07-19 (conversion audit): explain Target + statuses once.
+    st.caption(
+        "Market = SportsCardsPro guide value for the exact card and grade \u00b7 "
+        "Target = our max-bid suggestion (70% of market, room to profit) \u00b7 "
+        "STRIKE = current bid at or below target."
+    )
 
     if not actionable_rows:
         st.caption("No auctions ending in the next 24 hours match your tracked players.")

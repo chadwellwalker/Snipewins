@@ -377,6 +377,20 @@ def fetch_and_update() -> Dict[str, Any]:
         return 3
 
     specs.sort(key=_spec_tier)
+    # BIN-DIVERSITY-2026-07-19 (Steals audit): tier-sort + a small per-cycle
+    # cap meant the SAME top specs scanned every cycle — 86 priced rows were
+    # almost all one player while 75% of the pool sat "Pending MV". Rotate
+    # WITHIN each tier by cycle so coverage sweeps the whole roster daily.
+    _rot = int(time.time() // max(1, int(DEFAULT_LOOP_INTERVAL_SECS)))
+    _tiers: Dict[int, List[Dict[str, Any]]] = {}
+    for _sp in specs:
+        _tiers.setdefault(_spec_tier(_sp), []).append(_sp)
+    _respecs: List[Dict[str, Any]] = []
+    for _t in sorted(_tiers):
+        _grp = _tiers[_t]
+        _off = _rot % max(1, len(_grp))
+        _respecs.extend(_grp[_off:] + _grp[:_off])
+    specs = _respecs
     # BIN-SPREAD-2026-07-16: at 80 specs/cycle the 900-call daily lane cap
     # burned out by mid-morning UTC, then "DAILY BUDGET REACHED" spammed every
     # 30 min while Steals went stale for the rest of the day. Spread the

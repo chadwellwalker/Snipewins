@@ -730,7 +730,7 @@ PAGE_REGISTRY: Dict[str, Dict[str, Any]] = {
     "ending_soon": {
         "label": "Ending Soon",
         "icon": "ES",
-        "subtitle": "Live auction scan, sniper-ready filters, and execution feed.",
+        "subtitle": "We track 200+ star players and flag live eBay auctions bidding below real market value \u2014 before they close.",
         "enabled": True,
     },
     # NAV-ORDER-2026-05-12: Steals promoted to slot 2 so the user sees the
