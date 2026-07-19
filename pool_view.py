@@ -1256,6 +1256,32 @@ def render_morning_briefing(streamlit, *, max_cards: int = 150) -> None:
             _capped_overflow.append(_r)
     # Primary list first (diverse top), then overflow (any extras within cap)
     _filtered = (_capped_primary + _capped_overflow)[:max_cards]
+    # HERO-PIN-2026-07-19 (funnel audit): the first card a trial visitor sees
+    # was whatever ends soonest — sometimes a WAIT with bid above market.
+    # Pin the single best live STRIKE (confident MV, bid at/below target,
+    # biggest dollar spread) to the top so the first glance is our best case.
+    try:
+        def _hero_score(_r):
+            if not _row_has_confident_mv(_r):
+                return -1.0
+            _mv = float(_r.get("true_mv") or _r.get("market_value") or 0)
+            _bid = 0.0
+            for _k in ("current_price", "current_bid", "_authoritative_current_price"):
+                try:
+                    _v = _r.get(_k)
+                    if _v is not None and float(_v) > _bid:
+                        _bid = float(_v)
+                except Exception:
+                    pass
+            _tgt = _row_target_bid(_r)
+            if _mv >= 40 and _bid > 0 and _tgt and _bid <= float(_tgt):
+                return _mv - _bid
+            return -1.0
+        _hero = max(_filtered, key=_hero_score, default=None)
+        if _hero is not None and _hero_score(_hero) > 0:
+            _filtered = [_hero] + [_r for _r in _filtered if _r is not _hero]
+    except Exception:
+        pass
     print(f"[POOL_VIEW_DBG] actionable={len(actionable_rows)} window={len(_window_filtered)} "
           f"filtered={len(_filtered)} target_only={_target_only} search={bool(_search_norm)} label={_filter_label!r}")
 

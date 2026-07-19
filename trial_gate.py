@@ -417,6 +417,16 @@ def _handle_stripe_return(st, trial_accounts, session_id: str) -> None:
     st.rerun()
 
 
+def _dash_href(st) -> str:
+    """Dashboard link that PRESERVES the durable session token (?s=) so a
+    full-page navigation restores login instead of hitting the signup wall."""
+    try:
+        _tok = str(st.query_params.get("s", "") or "")
+    except Exception:
+        _tok = ""
+    return f"?s={_tok}" if _tok else "?"
+
+
 def _render_account_page(st, trial_accounts, email: str) -> None:
     """STRIPE-AUTOFLIP-2026-05-15: the Account page. Reachable via
     ?account=1. Shows current plan + a Manage Subscription button that
@@ -522,17 +532,20 @@ def _render_account_page(st, trial_accounts, email: str) -> None:
         elif status == trial_accounts.STATUS_TRIAL_EXPIRED:
             # Send them back to where the paywall renders.
             st.markdown(
-                "<a href='?' style='display:block;text-align:center;padding:12px 18px;"
+                f"<a href='{_dash_href(st)}' style='display:block;text-align:center;padding:12px 18px;"
                 "background:linear-gradient(135deg,#4ade80 0%,#22c55e 100%);color:#0a0a0a;"
                 "font-weight:700;font-size:15px;border-radius:10px;text-decoration:none;'>"
                 "See subscription options →</a>",
                 unsafe_allow_html=True,
             )
         # Back-to-dashboard link below the action area.
+        # SESSION-HREF-FIX-2026-07-19 (funnel audit): the bare href='?'
+        # dropped the ?s= session token — a signed-in user landed back on
+        # the signup wall. Carry the token like the Account link does.
         st.markdown(
-            "<div style='margin-top:18px;text-align:center;'>"
-            "<a href='?' style='color:#60a5fa;font-size:13px;text-decoration:none;'>"
-            "← Back to dashboard</a></div>",
+            f"<div style='margin-top:18px;text-align:center;'>"
+            f"<a href='{_dash_href(st)}' style='color:#60a5fa;font-size:13px;text-decoration:none;'>"
+            f"← Back to dashboard</a></div>",
             unsafe_allow_html=True,
         )
 
@@ -629,7 +642,9 @@ def _render_set_new_password_after_magic(st) -> None:
         try:
             _existing_optin = trial_accounts.get_marketing_optin(email)
         except Exception:
-            _existing_optin = True
+            # OPTIN-DEFAULT-2026-07-19 (funnel audit): pre-checked consent
+            # reads as a dark pattern to first-time visitors — default off.
+            _existing_optin = False
         optin_value = st.checkbox(
             "Receive daily eBay briefings and SnipeWins alerts with target bids for each auction",
             value=_existing_optin,
