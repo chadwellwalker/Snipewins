@@ -163,58 +163,50 @@ def _download_slugs(slugs: list, uid_map: dict, token: str) -> int:
 
     todo = [sl for sl in slugs if uid_map.get(sl) and not (CSV_DIR / f"{sl}.csv").exists()]
     skipped = len(slugs) - len(todo)
-    print(f"Downloading {len(todo)} consoles in chunks of {CHUNK} ({skipped} already on disk / no uid)...")
+    print(f"Downloading {len(todo)} consoles ONE per request ({skipped} already on disk / no uid).")
+    print("NOTE: multi-console requests 503 on SCP's side; singles are the proven shape.")
+    print("Pacing is gentle (90s between downloads) to protect the account's standing.")
     ok = 0
-    for ci in range(0, len(todo), CHUNK):
-        chunk = todo[ci:ci + CHUNK]
-        url = DL_URL.format(token=token, uids=",".join(uid_map[sl] for sl in chunk))
-        label = f"chunk {ci // CHUNK + 1}/{(len(todo) + CHUNK - 1) // CHUNK}"
+    hard_fails = 0
+    for n, sl in enumerate(todo, 1):
+        url = DL_URL.format(token=token, uids=uid_map[sl])
         data = None
-        for att in range(1, 9):
+        for att in range(1, 4):
             try:
                 with _open(url) as resp:
                     data = resp.read()
                 if data[:15].lstrip().startswith(b"<"):
-                    print(f"  {label}: HTML response — skipped"); data = None
+                    data = None
                 break
             except Exception as exc:
                 msg = str(exc)
-                if "429" in msg:
-                    print(f"  {label}: rate limited — waiting 11 minutes (attempt {att}/8, it's fine to leave this running)...")
-                    time.sleep(660)
-                    continue
-                if "503" in msg and att < 8:
-                    print(f"  {label}: 503 — retrying in 30s..."); time.sleep(30); continue
-                print(f"  {label}: {type(exc).__name__}: {exc}")
+                if "429" in msg or "503" in msg:
+                    if att < 3:
+                        time.sleep(120 * att)
+                        continue
                 break
-        if data is None:
-            print(f"  {label}: giving up on this chunk for now (rerun --download-missing later)")
+        if data is None or data.count(b"\n") < 2:
+            hard_fails += 1
+            print(f"  [{n}/{len(todo)}] {sl}: unavailable ({hard_fails} consecutive failures)")
+            if hard_fails >= 3:
+                print("\nSCP is refusing downloads right now — STOPPING to protect the account.")
+                print("Try again tomorrow with the same command; progress is saved.")
+                print("Recommended: email SCP support about bulk price-list access for your")
+                print("Legendary token (you are a paying customer using a paid feature).")
+                break
+            time.sleep(90)
             continue
-        text = data.decode("utf-8", "replace").splitlines()
-        rd = csv.reader(text)
-        header = next(rd, None)
-        if not header or "console-name" not in [h.strip().lower() for h in header]:
-            print(f"  {label}: unexpected CSV shape — skipped")
+        hard_fails = 0
+        header_ok = data.split(b"\n", 1)[0].lower().find(b"console-name") >= 0
+        if not header_ok:
+            print(f"  [{n}/{len(todo)}] {sl}: unexpected content — skipped")
+            time.sleep(90)
             continue
-        cn_i = [h.strip().lower() for h in header].index("console-name")
-        groups: dict = {}
-        for row in rd:
-            if len(row) > cn_i:
-                groups.setdefault(_slugify(row[cn_i].strip()), []).append(row)
-        wrote = 0
-        for sl in chunk:
-            rows = groups.get(sl)
-            if not rows:
-                print(f"    {sl}: no rows in response — not written")
-                continue
-            with open(CSV_DIR / f"{sl}.csv", "w", encoding="utf-8", newline="") as fh:
-                wr = csv.writer(fh)
-                wr.writerow(header)
-                wr.writerows(rows)
-            wrote += 1
-            ok += 1
-        print(f"  {label}: wrote {wrote}/{len(chunk)} consoles")
-        time.sleep(30)
+        (CSV_DIR / f"{sl}.csv").write_bytes(data)
+        _nrows = data.count(b"\n") - 1
+        print(f"  + [{n}/{len(todo)}] {sl}.csv ({_nrows:,} rows)")
+        ok += 1
+        time.sleep(90)
     remaining = [sl for sl in slugs if uid_map.get(sl) and not (CSV_DIR / f"{sl}.csv").exists()]
     print(f"\nAdded {ok} console CSVs; {len(remaining)} still missing.")
     if remaining:
