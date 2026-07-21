@@ -84,6 +84,9 @@ _COLLECTOR_HEAT_QUERY_AUTO_TERMS: Tuple[str, ...] = ("auto", "autograph")
 _COLLECTOR_HEAT_QUERY_MAX_PER_PLAYER = 3
 
 
+_COMBO_VALID_MEMO: Dict[Tuple[str, str], bool] = {}
+
+
 def _collector_heat_query_catalog() -> List[Tuple[str, str]]:
     _catalog: List[Tuple[str, str]] = []
     _max_len = max(
@@ -296,15 +299,19 @@ def _append_collector_heat_query_lanes(specs: List[Dict[str, Any]]) -> Tuple[Lis
         _candidates: List[Tuple[str, str, str]] = []
         _before_count = len(_candidates_raw)
         for _product, _reason, _term in _candidates_raw:
-            # Only validate parallel-style terms (case_hit / serial); leave
-            # generic recall terms (rookie, psa10, auto) to pass through —
-            # the universal-term whitelist inside the validator covers them.
-            if not _is_valid_product_parallel_combo(_product, _term):
+            # LOG-FLOOD-FIX-2026-07-21: the per-line INVALID_LANE_KILLED print
+            # fired hundreds of times per player per cycle after the product
+            # lists grew (~260 candidates x ~100 players) — enough I/O to
+            # choke cycles (the July 21 volume collapse). Validity is now
+            # memoized per (product, term) and kills are logged as ONE
+            # aggregate count in HEAT_QUERY_SUMMARY.
+            _ck = (_product.lower(), _term)
+            _ok = _COMBO_VALID_MEMO.get(_ck)
+            if _ok is None:
+                _ok = _is_valid_product_parallel_combo(_product, _term)
+                _COMBO_VALID_MEMO[_ck] = _ok
+            if not _ok:
                 _global_kill_count += 1
-                print(
-                    f"[INVALID_LANE_KILLED] product={_product} parallel={_term} "
-                    f"player={_player_name} reason=invalid_product_parallel_combo"
-                )
                 continue
             _candidates.append((_product, _reason, _term))
         _after_count = len(_candidates)
@@ -353,6 +360,7 @@ def _append_collector_heat_query_lanes(specs: List[Dict[str, Any]]) -> Tuple[Lis
 
     print(
         f"[HEAT_QUERY_SUMMARY] players={_summary['players']} "
+        f"lanes_killed={_global_kill_count} "
         f"queries_added={_summary['queries_added']} "
         f"case_hit={_summary['case_hit']} "
         f"psa10={_summary['psa10']} "
@@ -424,7 +432,7 @@ _PRIMARY_LANE_SCAN_TARGET = 50
 _SECONDARY_LANE_SCAN_TARGET = 30
 _PRIMARY_PASS_MIN_CANDIDATES = 12
 _DAILY_BROWSE_BUDGET_TOTAL = 5000
-_ENDING_SOON_DAILY_BUDGET = 2600  # 2026-07-08: 2200->2600 so late-day cycles keep full 50-lane coverage
+_ENDING_SOON_DAILY_BUDGET = 3200  # 2026-07-21: 2600->3200 — heat lanes (case-hit slots) eat more; post_budget_total was starving to 14 specs
 _BUYING_RADAR_DAILY_BUDGET = 1800
 _VALUATION_DAILY_BUDGET = 700
 _RESERVE_DAILY_BUDGET = 300

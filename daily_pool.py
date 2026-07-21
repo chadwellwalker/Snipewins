@@ -989,7 +989,30 @@ def main(argv: List[str]) -> int:
                         flush=True,
                     )
                 else:
-                    fetch_and_update(window_hours=args.window)
+                    # WATCHDOG-2026-07-21: the worker went silent for 8.5h
+                    # overnight (July 20-21) with no exception, no budget
+                    # message, no restart — a cycle simply never returned.
+                    # Run each cycle in a worker thread with a hard 45-min
+                    # wall clock; if it hangs, log loudly and keep looping
+                    # (the stuck thread is abandoned — ugly but alive).
+                    import threading as _thr
+                    _err: list = []
+                    def _cycle():
+                        try:
+                            fetch_and_update(window_hours=args.window)
+                        except Exception as _e:
+                            _err.append(_e)
+                    _t = _thr.Thread(target=_cycle, daemon=True)
+                    _t.start()
+                    _t.join(timeout=2700)
+                    if _t.is_alive():
+                        print(
+                            "[daily_pool] WATCHDOG: cycle exceeded 45 minutes and "
+                            "never returned — abandoning it and continuing the loop",
+                            flush=True,
+                        )
+                    elif _err:
+                        raise _err[0]
             except KeyboardInterrupt:
                 print("[daily_pool] interrupted, exiting")
                 return 130
