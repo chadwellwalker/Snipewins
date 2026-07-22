@@ -37029,6 +37029,177 @@ def _fetch_auctions_for_spec(
     return out, False, pre_filter_count
 
 
+# ── CASE-HIT TERM SWEEP (2026-07-22) ─────────────────────────────────────────
+# Board-diff audit: ~175 tracked case-hit auctions existed on eBay inside 24h,
+# ~0% reached the board. Root cause: discovery was 100% player-anchored — a
+# case-hit term only got searched when some player's rotation slot landed on
+# it (kaiju/crystalized: never issued in 4h of logs). This sweep searches the
+# TERMS themselves (player-less, endingSoonest, scoped window) and keeps rows
+# whose title matches a tracked player. ~12 calls/cycle; full rotation of all
+# terms roughly every 3 cycles.
+_CASE_HIT_SWEEP_TERMS_PER_CYCLE = 12
+_case_hit_sweep_cursor = 0
+_SWEEP_TOKEN_MAP_CACHE: Optional[List[Tuple[str, str, str, int, str]]] = None
+
+_SWEEP_SPORT_MAP = {"Football": "NFL", "Baseball": "MLB", "Basketball": "NBA"}
+
+
+def _sweep_seed_token_map() -> List[Tuple[str, str, str, int, str]]:
+    """[(token, player_name, sport, tier, player_id)] from the seed catalog.
+    Full-name tokens always; single-word tokens only when len >= 6 (avoids
+    'clark'/'brady'-style surname collisions)."""
+    global _SWEEP_TOKEN_MAP_CACHE
+    if _SWEEP_TOKEN_MAP_CACHE is not None:
+        return _SWEEP_TOKEN_MAP_CACHE
+    _out: List[Tuple[str, str, str, int, str]] = []
+    try:
+        import player_hub_seed as _phs
+        for _pid, _p in (_phs.players_by_id() or {}).items():
+            _name = str(_p.get("player_name") or "")
+            _sport = _SWEEP_SPORT_MAP.get(str(_p.get("sport") or ""), str(_p.get("sport") or ""))
+            _tier = int(_p.get("whatnot_tier") or 3)
+            for _tok in (_p.get("match_tokens") or []):
+                _t = " ".join(str(_tok or "").lower().replace("'", "").split())
+                if not _t:
+                    continue
+                if " " in _t or len(_t) >= 6:
+                    _out.append((_t, _name, _sport, _tier, str(_pid)))
+    except Exception as _exc:
+        print(f"[CASE_HIT_SWEEP] token_map_error={type(_exc).__name__}")
+    _out.sort(key=lambda _e: -len(_e[0]))  # longest first: full names beat surnames
+    _SWEEP_TOKEN_MAP_CACHE = _out
+    return _out
+
+
+def _fetch_case_hit_sweep_rows(time_window_hours: float) -> Tuple[List[Dict[str, Any]], int, bool]:
+    """Player-less term-first sweep. Returns (rows, calls_made, rate_limited)."""
+    global _case_hit_sweep_cursor
+    _terms_all = list(_COLLECTOR_HEAT_QUERY_CASE_HIT_TERMS)
+    if not _terms_all:
+        return [], 0, False
+    _n = max(1, int(_CASE_HIT_SWEEP_TERMS_PER_CYCLE))
+    _start = _case_hit_sweep_cursor % len(_terms_all)
+    _terms = [_terms_all[(_start + _i) % len(_terms_all)] for _i in range(min(_n, len(_terms_all)))]
+    _case_hit_sweep_cursor = (_start + len(_terms)) % len(_terms_all)
+    _tok_map = _sweep_seed_token_map()
+    _now = datetime.now(tz=timezone.utc)
+    _win_end = _now + timedelta(hours=float(time_window_hours or 24.0))
+    _rows: List[Dict[str, Any]] = []
+    _calls = 0
+    _rl = False
+    for _term in _terms:
+        _term_q = " ".join(str(_term or "").lower().split())
+        if not _term_q:
+            continue
+        _api_throttle()
+        try:
+            _headers = _ebay_auth_headers()
+        except Exception:
+            break
+        _params = _build_auction_fetch_params(
+            {"query": _term_q, "variant_name": "case_hit_sweep"},
+            window_start=_now, window_end=_win_end, scoped=True,
+        )
+        _calls += 1
+        try:
+            _resp = requests.get(
+                "https://api.ebay.com/buy/browse/v1/item_summary/search",
+                headers=_headers, params=_params, timeout=20,
+            )
+        except requests.RequestException:
+            continue
+        if _resp.status_code == 429:
+            _rl = True
+            print(f"[CASE_HIT_SWEEP] term={_term_q} rate_limited=1 — stopping sweep")
+            break
+        if _resp.status_code != 200:
+            print(f"[CASE_HIT_SWEEP] term={_term_q} http={_resp.status_code}")
+            continue
+        try:
+            _raw_items = _resp.json().get("itemSummaries", []) or []
+        except Exception:
+            continue
+        _auc_rows, _ = _extract_browse_auction_rows(_raw_items)
+        _kept = 0
+        _tracked_hits = 0
+        for _it in _auc_rows:
+            _end_dt = _parse_end_dt(str(_it.get("itemEndDate") or ""))
+            if _end_dt is None or _end_dt <= _now or _end_dt > _win_end:
+                continue
+            _title = str(_it.get("title") or "")
+            _norm = " " + " ".join(
+                "".join(_ch.lower() if _ch.isalnum() else " " for _ch in _title.replace("'", "")).split()
+            ) + " "
+            if (f" {_term_q} " not in _norm) and (f" {_term_q}s " not in _norm):
+                continue
+            _match = None
+            for _tok, _pname, _psport, _ptier, _pid in _tok_map:
+                if f" {_tok} " in _norm:
+                    _match = (_pname, _psport, _ptier, _pid)
+                    break
+            if _match is None:
+                continue
+            _tracked_hits += 1
+            _pname, _psport, _ptier, _pid = _match
+            if not _passes_grade_filter(_title):
+                continue
+            if not _passes_card_type_filter(_title, _ptier):
+                continue
+            _bid = _parse_auction_current_price(_it)
+            _rows.append({
+                "item_id":        str(_it.get("itemId") or ""),
+                "title":          _title,
+                "current_price":  _bid,
+                "current_bid":    _bid,
+                "buy_now_price":  _parse_buy_now_price(_it),
+                "end_dt":         _end_dt,
+                "end_iso":        str(_it.get("itemEndDate") or ""),
+                "url":            str(_it.get("itemWebUrl") or ""),
+                "thumbnail":      (_it.get("image") or {}).get("imageUrl") or "",
+                "player_name":    _pname,
+                "player_id":      _pid,
+                "sport":          _psport,
+                "whatnot_tier":   _ptier,
+                "listing_type":   "AUCTION",
+                "_query_variant": "case_hit_sweep",
+                "target_id":      "",
+                "target_label":   _pname,
+                "target_meta":    {"subset_name": _term_q},
+                "target_entity_id": _pid,
+                "exact_entity_match": True,
+                "entity_match_status": "EXACT_MATCH",
+                "entity_match_score": 1.0,
+                "alias_soft_match": False,
+                "subset_name":    _term_q,
+                "subset_product_family": "",
+                "subset_binding_override": False,
+                "entity_gate_reason": "case_hit_sweep_token_match",
+                "lane_approved":  True,
+                "route_stage":    "tracked_exact",
+                "route_reason":   "Case-hit sweep: term-first discovery, tracked-player title match",
+                "query_kind":     "case_hit_sweep",
+                "_intake_type":   "sweep",
+                "query_recall_stage": "sweep",
+                "lane_tier":      "sweep",
+                "lane_priority":  1.0,
+                "target_lane_type": "case_hit",
+                "lane_subset":    _term_q,
+                "lane_parallel":  _term_q,
+                "lane_product":   "",
+                "spec_premium_lane": True,
+                "spec_lane_class": "case_hit_sweep",
+                "lane_key":       f"sweep::{_term_q}",
+                "target_match_status": "exact_valid",
+                "remaining_seconds": max(0.0, (_end_dt - _now).total_seconds()),
+            })
+            _kept += 1
+        print(
+            f"[CASE_HIT_SWEEP] term={_term_q} raw={len(_raw_items)} "
+            f"auction={len(_auc_rows)} tracked={_tracked_hits} kept={_kept}"
+        )
+    return _rows, _calls, _rl
+
+
 def _fetch_bin_for_spec(spec: Dict[str, Any]) -> Tuple[List[Dict[str, Any]], bool, int]:
     """
     Fetch BIN (Fixed Price) listings for one player spec, newest first.
@@ -45751,6 +45922,28 @@ def fetch_ending_soon_deals(
         print(f"[INTAKE_STAGE] stage=post_discovery_failsafe count={len(all_auction_items)}")
     fake_serial_dropped = sum(int((_diag or {}).get("fake_serial_dropped_count") or 0) for _diag in list(all_family_diags or []))
     print(f"[SCAN_FILTER_SUMMARY] fake_serial_dropped={fake_serial_dropped}")
+    # ── CASE-HIT TERM SWEEP (2026-07-22): term-first discovery ───────────────
+    try:
+        _sweep_rows, _sweep_calls, _sweep_rl = _fetch_case_hit_sweep_rows(_effective_fetch_window_hours)
+    except Exception as _exc:
+        print(f"[CASE_HIT_SWEEP] sweep_error={type(_exc).__name__}: {str(_exc)[:120]}")
+        _sweep_rows, _sweep_calls, _sweep_rl = [], 0, False
+    queries_done += int(_sweep_calls or 0)
+    if _sweep_rl:
+        rate_limited = True
+    _sweep_added = 0
+    _sweep_pool_ids = {str((_r or {}).get("item_id") or "") for _r in all_auction_items}
+    for _sw in _sweep_rows:
+        _sw_uid = _sw.get("item_id") or _sw.get("url") or _sw.get("title", "")[:60]
+        if not _sw_uid or _sw_uid in seen_ids or str(_sw.get("item_id") or "") in _sweep_pool_ids:
+            continue
+        seen_ids.add(_sw_uid)
+        all_auction_items.append(_sw)
+        _sweep_added += 1
+    print(
+        f"[CASE_HIT_SWEEP_SUMMARY] calls={_sweep_calls} rows={len(_sweep_rows)} "
+        f"added={_sweep_added} pool_after={len(all_auction_items)}"
+    )
     # ── Broad intake diagnostics — post-fetch ────────────────────────────────
     _broad_fetched  = sum(1 for _r in all_auction_items if str(_r.get("_intake_type") or "") == "broad")
     _broad_title    = sum(1 for _r in all_title_items    if str(_r.get("_intake_type") or "") == "broad")
