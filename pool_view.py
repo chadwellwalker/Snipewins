@@ -20,6 +20,23 @@ import json
 import os
 
 from ebay_affiliate import affiliate_url, build_customid, epn_enabled
+
+
+def _card_audit_sold_url(row) -> str:
+    """eBay sold-listings audit URL for this exact card (grade kept), or ''.
+    AUDIT-CLICK-2026-07-22 (owner): the card-level 'use Audit link below'
+    caption is now itself the clickable audit link."""
+    try:
+        _t = str((row or {}).get("title") or (row or {}).get("source_title") or "").strip()
+        if not _t or len(_t) < 8:
+            return ""
+        from urllib.parse import quote_plus as _qp
+        import re as _re
+        _clean = _re.sub(r"\s+", " ", _t).strip()[:140]
+        _url = f"https://www.ebay.com/sch/i.html?_nkw={_qp(_clean)}&LH_Sold=1&LH_Complete=1"
+        return affiliate_url(_url, customid="pool-audit")
+    except Exception:
+        return ""
 import re
 import time
 from datetime import datetime, timezone
@@ -1618,7 +1635,17 @@ def render_morning_briefing(streamlit, *, max_cards: int = 400) -> None:  # 2026
                 _state_sub = f"<div style='font-size:9px;color:#6b7280;margin-top:3px;'>{_err_short}</div>"
             elif _attempted:
                 _state_msg = "no recent comps"
-                _state_sub = "<div style='font-size:9px;color:#6b7280;margin-top:3px;'>use Audit link below</div>"
+                # AUDIT-CLICK-2026-07-22 (owner): caption IS the audit link now.
+                _audit_href_inline = _card_audit_sold_url(row)
+                if _audit_href_inline:
+                    _state_sub = (
+                        "<div style='font-size:10px;margin-top:3px;'>"
+                        f"<a href='{_audit_href_inline}' target='_blank' "
+                        "style='color:#60a5fa;font-weight:600;text-decoration:underline;'>"
+                        "audit on eBay \u2192</a></div>"
+                    )
+                else:
+                    _state_sub = "<div style='font-size:9px;color:#6b7280;margin-top:3px;'>use Audit link below</div>"
             else:
                 _state_msg = "scanning eBay…"
                 _state_sub = "<div style='font-size:9px;color:#6b7280;margin-top:3px;'>comps inbound</div>"
@@ -1654,8 +1681,14 @@ def render_morning_briefing(streamlit, *, max_cards: int = 400) -> None:  # 2026
             target_block = (
                 f'<div style="{_label_css}">Target</div>'
                 f'<div style="{_pending_css}">needs more comps</div>'
-                f'<div style="font-size:9px;color:#6b7280;margin-top:3px;">'
-                f'audit on eBay →</div>'
+                + (
+                    f"<div style='font-size:10px;margin-top:3px;'>"
+                    f"<a href='{_card_audit_sold_url(row)}' target='_blank' "
+                    f"style='color:#60a5fa;font-weight:600;text-decoration:underline;'>"
+                    f"audit on eBay \u2192</a></div>"
+                    if _card_audit_sold_url(row) else
+                    "<div style='font-size:9px;color:#6b7280;margin-top:3px;'>audit on eBay \u2192</div>"
+                )
             )
         else:
             target_block = (
