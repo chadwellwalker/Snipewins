@@ -1299,6 +1299,8 @@ _VETERAN_STAR_PLAYERS: frozenset = frozenset({
     "nikola jokic",
     "luka doncic",
     "tom brady",
+    "aaron rodgers",
+    "tarik skubal",
     "mike trout",
     "aaron judge",
     "clayton kershaw",
@@ -24382,6 +24384,7 @@ _PLAYER_MASTER: List[Dict[str, Any]] = [
     {"name": "Michael Jordan",     "sport": "Basketball", "tier": 1, "tier_label": "0", "rookie_year": 1986},
     {"name": "Kobe Bryant",        "sport": "Basketball", "tier": 1, "tier_label": "0", "rookie_year": 1996},
     {"name": "Tom Brady",          "sport": "Football",   "tier": 1, "tier_label": "0", "rookie_year": 2000},
+    {"name": "Aaron Rodgers",      "sport": "Football",   "tier": 1, "tier_label": "0", "rookie_year": 2005},  # owner-approved 7/22: Kaboom/Tecmo/Zebra legend demand
 
     # ── TIER 1A: GENERATIONAL FACES (cultural icons of their sport) ──────────
     # Sustained 3+ years at apex; drive casual interest beyond hardcore
@@ -24488,6 +24491,7 @@ _PLAYER_MASTER: List[Dict[str, Any]] = [
     {"name": "Corbin Carroll",     "sport": "Baseball",   "tier": 2, "tier_label": "2", "rookie_year": 2022},
     {"name": "Francisco Lindor",   "sport": "Baseball",   "tier": 2, "tier_label": "2", "rookie_year": 2015},
     {"name": "Freddie Freeman",    "sport": "Baseball",   "tier": 2, "tier_label": "2", "rookie_year": 2010},
+    {"name": "Tarik Skubal",       "sport": "Baseball",   "tier": 2, "tier_label": "2", "rookie_year": 2020},  # owner-approved 7/22: back-to-back Cy Young; HFA case-hit demand
     # NBA Tier 2
     {"name": "Shai Gilgeous-Alexander", "sport": "Basketball", "tier": 2, "tier_label": "2", "rookie_year": 2018},
     {"name": "Jalen Brunson",      "sport": "Basketball", "tier": 2, "tier_label": "2", "rookie_year": 2018},

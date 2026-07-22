@@ -114,6 +114,8 @@ def get_default_player_pools() -> Dict[str, List[str]]:
             # RB/TE
             "Christian McCaffrey",
             "Brock Bowers",
+            # Legend (owner-approved 7/22)
+            "Tom Brady",
         ],
         # ── NFL Tier B: strong liquid stars / fast movers ─────────────────────
         "NFL TIER B": [
@@ -145,6 +147,7 @@ def get_default_player_pools() -> Dict[str, List[str]]:
             "Michael Penix Jr.",
             "Bryce Young",
             "Bo Nix",
+            "Aaron Rodgers",
             # WRs
             "Puka Nacua",
             "Malik Nabers",
@@ -192,6 +195,7 @@ def get_default_player_pools() -> Dict[str, List[str]]:
             "Juan Soto",
             "Ronald Acuna Jr.",
             "Mookie Betts",
+            "Tarik Skubal",
         ],
     }
 
