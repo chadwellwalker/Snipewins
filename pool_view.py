@@ -1035,16 +1035,6 @@ def render_morning_briefing(streamlit, *, max_cards: int = 400) -> None:  # 2026
             )
     except Exception:
         pass
-    # FTC + eBay Partner Network require disclosing the affiliate relationship
-    # wherever affiliate links appear. Only shown once EPN is actually enabled.
-    _epn_disclosure = ""
-    if epn_enabled():
-        _epn_disclosure = (
-            '<div style="margin-top:6px;font-size:10px;color:#6b7280;">'
-            'SnipeWins is an eBay Partner Network affiliate \u2014 links to eBay may earn a commission.'
-            '</div>'
-        )
-
     # TARGET-BID-FILTER-2026-05-17: pill becomes an <a> tag styled like the
     # original chip. Two visual states:
     #   inactive: hollow green chip, label "{N} with target bid"
@@ -1083,7 +1073,6 @@ def render_morning_briefing(streamlit, *, max_cards: int = 400) -> None:  # 2026
         f'<div style="font-size:42px;font-weight:700;color:#fff;line-height:1.1;letter-spacing:-0.02em;margin-bottom:2px;">{_hero_n}</div>'
         f'<div style="font-size:14px;color:#b0b0b0;">auctions ending in the next 24 hours</div>'
         f'{_curation_line}'
-        f'{_epn_disclosure}'
         f'</div>'
         f'<div style="text-align:right;">'
         f'<div style="font-size:11px;color:#888888;margin-bottom:6px;">Updated {age_str} ago</div>'
@@ -1804,4 +1793,18 @@ def render_morning_briefing(streamlit, *, max_cards: int = 400) -> None:  # 2026
         st.caption(
             f"Showing top {len(_filtered)} of {len(actionable_rows)}. "
             f"Adjust filter above to see more."
+        )
+
+    # EPN-FOOTER-2026-07-22 (owner): affiliate disclosure moved from the hero
+    # header to a muted page-bottom footer. Still rendered on every page with
+    # affiliate links (FTC/EPN require the disclosure to exist), just small,
+    # dim, and below the fold.
+    if epn_enabled():
+        st.markdown(
+            "<div style='margin-top:28px;padding-top:10px;"
+            "border-top:1px solid rgba(148,163,184,0.06);"
+            "font-size:9px;color:#3f3f46;text-align:center;'>"
+            "SnipeWins is an eBay Partner Network affiliate \u2014 "
+            "links to eBay may earn a commission.</div>",
+            unsafe_allow_html=True,
         )
