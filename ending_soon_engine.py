@@ -178,10 +178,7 @@ def _build_collector_heat_query_lane(
     # _append_collector_heat_query_lanes, we still kill known-impossible combos
     # here before any query is built.
     if not _is_valid_product_parallel_combo(_product, _term):
-        print(
-            f"[INVALID_LANE_KILLED] product={_product} parallel={_term} "
-            f"player={_player_name} reason=invalid_product_parallel_combo"
-        )
+        # LOG-FLOOD-FIX-2026-07-22: silent kill; counts surface in cycle summaries.
         return {}
 
     _query_parts = [_player_name, _product, _term] if _reason == "case_hit" else [_player_name, _term, _product]
@@ -434,7 +431,7 @@ _PRIMARY_PASS_MIN_CANDIDATES = 12
 _DAILY_BROWSE_BUDGET_TOTAL = 5000
 _ENDING_SOON_DAILY_BUDGET = 3200  # 2026-07-21: 2600->3200 — heat lanes (case-hit slots) eat more; post_budget_total was starving to 14 specs
 _BUYING_RADAR_DAILY_BUDGET = 1800
-_VALUATION_DAILY_BUDGET = 700
+_VALUATION_DAILY_BUDGET = 3000  # 2026-07-22: local lookups, not API calls
 _RESERVE_DAILY_BUDGET = 300
 # [LANE_BUDGET_EXPANSION_2026_04_30] — coverage diagnosis revealed the system
 # has 1,790 targets across 120 players but only 16-20 lanes were running per
@@ -444,9 +441,13 @@ _RESERVE_DAILY_BUDGET = 300
 # along with the per-cycle scan_budget cap 48 → 100 (in _allocate_cycle_budget)
 # raises coverage to ~2.8% per scan, ~3x SNIPE NOW opportunity rate.
 _MAX_LANES_PER_CYCLE = 50
-_MAX_ROWS_ADMITTED_PER_CYCLE = 100
-_MAX_ROWS_TO_VALUATION_PER_CYCLE = 24
-_MAX_COMP_LOOKUPS_PER_CYCLE = 24
+# 2026-07-22 (throughput audit): these caps date from when comps cost eBay
+# API calls. Valuation is now LOCAL SQLite (SCP spreadsheets) — near-free.
+# 188-275 candidates were surviving every guard, then dying at the 100 cap
+# with only 5-10 final rows/cycle. Owner target: 150-300 board rows.
+_MAX_ROWS_ADMITTED_PER_CYCLE = 250
+_MAX_ROWS_TO_VALUATION_PER_CYCLE = 120
+_MAX_COMP_LOOKUPS_PER_CYCLE = 120
 _ES_MAX_VISIBLE_BOARD_ROWS = 45
 _ES_MAX_WATCHLIST_ROWS = 10
 _ES_VISIBLE_BOARD_FLOOR = 4
@@ -23994,7 +23995,7 @@ def _allocate_cycle_budget(*, feed_type: str, now_ts: Optional[float] = None) ->
     _primary_lane_cap = max(0, min(_PRIMARY_LANE_SCAN_TARGET, _lane_cap))
     _secondary_lane_cap = min(_SECONDARY_LANE_SCAN_TARGET, max(0, _lane_cap - _primary_lane_cap))
     _valuation_remaining = int(_snap.get("valuation_budget_remaining") or 0)
-    _valuation_cycle_cap = max(0, min(_MAX_ROWS_TO_VALUATION_PER_CYCLE, _valuation_remaining, 12 if _feed == "ending_soon" else 8))
+    _valuation_cycle_cap = max(0, min(_MAX_ROWS_TO_VALUATION_PER_CYCLE, _valuation_remaining, 120 if _feed == "ending_soon" else 40))
     print(
         f"[BUDGET_PASS_AUDIT] feed={_feed} scan_budget={_scan_budget} "
         f"lane_cap={_lane_cap} primary_cap={_primary_lane_cap} "
@@ -27166,11 +27167,7 @@ def _build_premium_target_lanes_for_player(
                     _kill_combo = True
                     _kill_term = _subset
             if _kill_combo:
-                _premium_killed += 1
-                print(
-                    f"[INVALID_LANE_KILLED] product={_lane_product} parallel={_kill_term} "
-                    f"player={_player_name} reason=invalid_product_parallel_combo"
-                )
+                _premium_killed += 1  # LOG-FLOOD-FIX-2026-07-22: counted, not printed
                 continue
 
         # Build the eBay query string.
@@ -31883,6 +31880,58 @@ def _build_es_scan_cohort(
                 _selected.append(_cspec)
                 _sel_keys.add(_ck)
                 _need -= 1
+        # FLOOR-EVICTION-2026-07-22 (throughput audit): the top-up above only
+        # works when the cohort has spare room — the yield-driven selection
+        # filled it first, so MLB sat at 2/49 despite a 26-slot floor. When a
+        # sport is still under floor and the cohort is full, EVICT lanes from
+        # the most over-floor sport (from the back = lowest priority) to make
+        # room, and re-run the top-up. Shortages (no candidates at all) log
+        # loudly so upstream gates that starve a sport are visible.
+        for _pass in range(2):
+            _cnt: Dict[str, int] = {}
+            for _s in _selected:
+                _cnt[_cs_sport(_s)] = _cnt.get(_cs_sport(_s), 0) + 1
+            for _sp2 in _core_by_sport:
+                _floor_total = int(_core_by_sport[_sp2]) + int(_rot_by_sport[_sp2])
+                _have = int(_cnt.get(_sp2, 0))
+                if _have >= _floor_total:
+                    continue
+                _cands2 = [
+                    _p for _p in _cand_by_sport.get(_sp2, [])
+                    if str(_lane_metric_key(_p.get("spec") or _p)) not in _sel_keys
+                ]
+                if not _cands2:
+                    print(f"[CROSS_SPORT_FLOOR_SHORTAGE] sport={_sp2} need={_floor_total - _have} candidates=0 (upstream gates starved this sport)")
+                    continue
+                _cands2.sort(key=lambda _p: _player_heat_tier(_cs_player(_p.get("spec") or _p)))
+                for _prof in _cands2:
+                    if _cnt.get(_sp2, 0) >= _floor_total:
+                        break
+                    if len(_selected) >= _max_total:
+                        # evict from the sport with the biggest surplus over ITS floor
+                        _surplus_sport, _surplus = None, 0
+                        for _osp in _cnt:
+                            _ofloor = int(_core_by_sport.get(_osp, 0)) + int(_rot_by_sport.get(_osp, 0))
+                            _osur = _cnt.get(_osp, 0) - _ofloor
+                            if _osur > _surplus:
+                                _surplus_sport, _surplus = _osp, _osur
+                        if not _surplus_sport:
+                            break
+                        for _i in range(len(_selected) - 1, -1, -1):
+                            if _cs_sport(_selected[_i]) == _surplus_sport:
+                                _evicted = _selected.pop(_i)
+                                _sel_keys.discard(str(_lane_metric_key(_evicted)))
+                                _cnt[_surplus_sport] -= 1
+                                break
+                        else:
+                            break
+                    _cspec2 = _prof.get("spec") or _prof
+                    _ck2 = str(_lane_metric_key(_cspec2))
+                    if _ck2 in _sel_keys:
+                        continue
+                    _selected.append(_cspec2)
+                    _sel_keys.add(_ck2)
+                    _cnt[_sp2] = _cnt.get(_sp2, 0) + 1
         _dbg_floor: Dict[str, int] = {}
         for _s in _selected:
             _kk = _cs_sport(_s)
