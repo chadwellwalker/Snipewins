@@ -81,7 +81,7 @@ _COLLECTOR_HEAT_QUERY_GRADE_TERMS: Tuple[str, ...] = ("PSA 10", "BGS 10", "SGC 1
 _COLLECTOR_HEAT_QUERY_ROOKIE_TERMS: Tuple[str, ...] = ("rookie", "RC", "1st bowman", "1st chrome")
 _COLLECTOR_HEAT_QUERY_SERIAL_TERMS: Tuple[str, ...] = ("/10", "/25", "/50", "/99")
 _COLLECTOR_HEAT_QUERY_AUTO_TERMS: Tuple[str, ...] = ("auto", "autograph")
-_COLLECTOR_HEAT_QUERY_MAX_PER_PLAYER = 5  # 2026-07-22: 3->5 — auction budget at 12%; owner wants fire (autos/serials/case hits) dominant
+_COLLECTOR_HEAT_QUERY_MAX_PER_PLAYER = 8  # 2026-07-22 owner: fire slots are FLOORS not caps — if good stuff exists, take it
 
 
 _COMBO_VALID_MEMO: Dict[Tuple[str, str], bool] = {}
@@ -446,7 +446,7 @@ _RESERVE_DAILY_BUDGET = 300
 # in its 3h SNIPE window was ~2-5%. Bumping _MAX_LANES_PER_CYCLE 20 → 50
 # along with the per-cycle scan_budget cap 48 → 100 (in _allocate_cycle_budget)
 # raises coverage to ~2.8% per scan, ~3x SNIPE NOW opportunity rate.
-_MAX_LANES_PER_CYCLE = 50
+_MAX_LANES_PER_CYCLE = 75  # 2026-07-22: owner wants no artificial volume ceiling; budget has 4x headroom
 # 2026-07-22 (throughput audit): these caps date from when comps cost eBay
 # API calls. Valuation is now LOCAL SQLite (SCP spreadsheets) — near-free.
 # 188-275 candidates were surviving every guard, then dying at the 100 cap
@@ -2571,7 +2571,10 @@ def _build_auction_fetch_params(
             scoped=scoped,
         ),
         "sort": "endingSoonest",
-        "limit": 100,
+        # RECALL-2026-07-22 (owner): eBay Browse max is 200/page — one request
+        # either way. Owner suspects abundant matching listings never surface;
+        # this doubles what every query brings home for free.
+        "limit": 200,
     }
 
 
@@ -23985,7 +23988,7 @@ def _allocate_cycle_budget(*, feed_type: str, now_ts: Optional[float] = None) ->
     # capped at 24 lanes due to the 48-call ceiling). User accepts higher
     # per-scan call cost in exchange for ~3x coverage of the 1,790 target
     # universe per scan.
-    _scan_budget = max(0, min(_feed_remaining, _usable_daily, 100 if _feed == "ending_soon" else 72))
+    _scan_budget = max(0, min(_feed_remaining, _usable_daily, 200 if _feed == "ending_soon" else 72))  # 2026-07-22: auction budget was at 12%
     _lane_cap = max(0, min(_MAX_LANES_PER_CYCLE, _scan_budget // 2))
     # [BUDGET_PASS_AUDIT] — primary_lane_cap fix.
     # Old formula:
@@ -36943,7 +36946,7 @@ def _fetch_auctions_for_spec(
         # popular lanes more room without the brutal scan-time amplification
         # we saw at 200 (more raw rows = more parse + filter + valuation work
         # downstream).
-        "limit": 100,
+        "limit": 200,
     }
 
     print(
@@ -37028,9 +37031,9 @@ def _fetch_bin_for_spec(spec: Dict[str, Any]) -> Tuple[List[Dict[str, Any]], boo
             f"priceCurrency:USD"
         ),
         "sort":  "newlyListed",
-        # 20 → 50 (2.5x baseline). 100 was too aggressive given each lane
-        # also runs comp search on hits. Balance fetch breadth vs scan time.
-        "limit": 50,
+        # RECALL-2026-07-22: 50 -> 200. The old "too aggressive" concern was
+        # eBay comp searches per hit — comps are LOCAL SQLite now.
+        "limit": 200,
     }
 
     try:

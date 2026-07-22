@@ -848,7 +848,7 @@ def _render_comp_summary(streamlit, row: Dict[str, Any]) -> None:
 
 # ── Public API: the briefing renderer ───────────────────────────────────────
 
-def render_morning_briefing(streamlit, *, max_cards: int = 150) -> None:
+def render_morning_briefing(streamlit, *, max_cards: int = 400) -> None:  # 2026-07-22 owner: no card ceiling — more ending = more clicks
     """
     Render the Morning Briefing panel. Pass `streamlit` (the imported `st`
     module) so this module doesn't import streamlit at top level — keeps
