@@ -37282,6 +37282,116 @@ def _fetch_bin_for_spec(spec: Dict[str, Any]) -> Tuple[List[Dict[str, Any]], boo
     return out, False, pre_filter_count
 
 
+_case_hit_bin_sweep_cursor = 0
+
+
+def _fetch_case_hit_bin_sweep_rows(max_terms: int = 4) -> Tuple[List[Dict[str, Any]], int, bool]:
+    """BIN twin of the case-hit term sweep (2026-07-22 owner: 'make sure the
+    buy-it-now function gets the exact same type of cards ending soon hunts').
+    Player-less FIXED_PRICE searches of the case-hit terms, newest first,
+    filtered to tracked players via seed match_tokens. Returns
+    (rows_in_fetch_bin_for_spec_shape, calls_made, rate_limited)."""
+    global _case_hit_bin_sweep_cursor
+    _terms_all = list(_COLLECTOR_HEAT_QUERY_CASE_HIT_TERMS)
+    if not _terms_all:
+        return [], 0, False
+    _n = max(1, int(max_terms or 1))
+    _start = _case_hit_bin_sweep_cursor % len(_terms_all)
+    _terms = [_terms_all[(_start + _i) % len(_terms_all)] for _i in range(min(_n, len(_terms_all)))]
+    _case_hit_bin_sweep_cursor = (_start + len(_terms)) % len(_terms_all)
+    _tok_map = _sweep_seed_token_map()
+    _rows: List[Dict[str, Any]] = []
+    _calls = 0
+    _rl = False
+    for _term in _terms:
+        _term_q = " ".join(str(_term or "").lower().split())
+        if not _term_q:
+            continue
+        _api_throttle()
+        try:
+            _headers = _ebay_auth_headers()
+        except Exception:
+            break
+        _params = {
+            "q":      _term_q,
+            "filter": (
+                f"buyingOptions:{{FIXED_PRICE}},"
+                f"price:[{MIN_PRICE:.0f}..{MAX_PRICE:.0f}],"
+                f"priceCurrency:USD"
+            ),
+            "sort":  "newlyListed",
+            "limit": 200,
+        }
+        _calls += 1
+        try:
+            _resp = requests.get(
+                "https://api.ebay.com/buy/browse/v1/item_summary/search",
+                headers=_headers, params=_params, timeout=20,
+            )
+        except requests.RequestException:
+            continue
+        if _resp.status_code == 429:
+            _rl = True
+            print(f"[CASE_HIT_BIN_SWEEP] term={_term_q} rate_limited=1 — stopping sweep")
+            break
+        if _resp.status_code != 200:
+            print(f"[CASE_HIT_BIN_SWEEP] term={_term_q} http={_resp.status_code}")
+            continue
+        try:
+            _raw_items = _resp.json().get("itemSummaries", []) or []
+        except Exception:
+            continue
+        _kept = 0
+        _tracked_hits = 0
+        for _it in _raw_items:
+            if not isinstance(_it, dict):
+                continue
+            _title = str(_it.get("title") or "")
+            _norm = " " + " ".join(
+                "".join(_ch.lower() if _ch.isalnum() else " " for _ch in _title.replace("'", "")).split()
+            ) + " "
+            if (f" {_term_q} " not in _norm) and (f" {_term_q}s " not in _norm):
+                continue
+            _match = None
+            for _tok, _pname, _psport, _ptier, _pid in _tok_map:
+                if f" {_tok} " in _norm:
+                    _match = (_pname, _psport, _ptier, _pid)
+                    break
+            if _match is None:
+                continue
+            _tracked_hits += 1
+            _pname, _psport, _ptier, _pid = _match
+            _price = _parse_price(_it)
+            if not (MIN_PRICE <= _price <= MAX_PRICE):
+                continue
+            if not _passes_grade_filter(_title):
+                continue
+            if not _passes_card_type_filter(_title, _ptier):
+                continue
+            _rows.append({
+                "item_id":       str(_it.get("itemId") or ""),
+                "title":         _title,
+                "current_price": _price,
+                "end_dt":        None,
+                "end_iso":       "",
+                "url":           str(_it.get("itemWebUrl") or ""),
+                "thumbnail":     (_it.get("image") or {}).get("imageUrl") or "",
+                "player_name":   _pname,
+                "sport":         _psport,
+                "whatnot_tier":  _ptier,
+                "listing_type":  "BIN",
+                "buying_options": list(_it.get("buyingOptions") or []),
+                "_query_variant": "case_hit_bin_sweep",
+                "lane_subset":   _term_q,
+            })
+            _kept += 1
+        print(
+            f"[CASE_HIT_BIN_SWEEP] term={_term_q} raw={len(_raw_items)} "
+            f"tracked={_tracked_hits} kept={_kept}"
+        )
+    return _rows, _calls, _rl
+
+
 # ---------------------------------------------------------------------------
 # Family-level retrieval recovery ladder — fallback variants + diagnostics
 # ---------------------------------------------------------------------------

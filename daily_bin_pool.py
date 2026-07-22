@@ -491,6 +491,28 @@ def fetch_and_update() -> Dict[str, Any]:
         flush=True,
     )
 
+    # CASE-HIT-BIN-SWEEP-2026-07-22 (owner): Steals must hunt the same card
+    # types as Ending Soon. Term-first player-less sweep of the case-hit
+    # terms (4/cycle -> full rotation of all ~31 terms every ~4 hours),
+    # skipped when this cycle already hit the rate limit.
+    sweep_calls = 0
+    if not rate_limited and not aborted_early:
+        try:
+            _sw_rows, sweep_calls, _sw_rl = ese._fetch_case_hit_bin_sweep_rows(4)
+            if _sw_rl:
+                rate_limited = True
+            if _sw_rows:
+                _seen_bin_ids = {str(_r.get("item_id") or "") for _r in all_rows}
+                _sw_added = 0
+                for _r in _sw_rows:
+                    if str(_r.get("item_id") or "") in _seen_bin_ids:
+                        continue
+                    all_rows.append(_r)
+                    _sw_added += 1
+                print(f"[daily_bin_pool] CASE_HIT_BIN_SWEEP added {_sw_added} rows ({sweep_calls} calls)", flush=True)
+        except Exception as _sw_exc:
+            print(f"[daily_bin_pool] CASE_HIT_BIN_SWEEP failed (non-fatal): {type(_sw_exc).__name__}: {_sw_exc}", flush=True)
+
     # RACE-FIX 2026-05-11: re-read the pool from disk RIGHT BEFORE merging.
     # The BIN fetch loop above can run for many minutes (one HTTP call per
     # player spec), during which the valuation_worker may have stamped
@@ -520,6 +542,7 @@ def fetch_and_update() -> Dict[str, Any]:
         "raw_items_returned":     int(len(all_rows)),
         "failed_specs":           int(failed_specs),
         "rate_limited":           bool(rate_limited),
+        "sweep_calls":            int(sweep_calls),
         "merge_counts":           dict(merge_counts),
         "pruned_stale":           int(stale_pruned),
         "items_before":           int(items_before),
@@ -536,7 +559,7 @@ def fetch_and_update() -> Dict[str, Any]:
     # too early than too late.
     try:
         import daily_budget
-        daily_budget.record_calls(specs_attempted, lane="bin")
+        daily_budget.record_calls(specs_attempted + int(sweep_calls), lane="bin")
     except Exception as _bud_err:
         print(f"[daily_bin_pool] daily_budget record failure (non-fatal): {_bud_err}")
 
