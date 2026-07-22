@@ -107,7 +107,7 @@ _INSERT_PHRASES = {
     "go time",  # 2026-07-22: Topps Chrome NBA insert matched base [Pulsar Refractor]
     # 2026-07-22 owner adds (case hits — never comp to base until consoles load)
     "tecmo", "kaiju", "fanatical", "alter egos", "crystalized",
-    "world series at night", "aura",
+    "world series at night", "aura", "stars in the night",
     "anniversary", "stained glass", "color blast", "power players",
     "shadow etch", "transformative", "double headers", "gladiators",
     "stars of mlb", "planetary pursuit", "extraterrestrial",
