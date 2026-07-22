@@ -336,6 +336,7 @@ def _strike_zone_state(
     bin_price: float,
     target_bid: Optional[float],
     accepts_offers: bool = False,
+    mv: Optional[float] = None,
 ) -> Tuple[str, str, str]:
     """For BIN:
         STRIKE   — BIN price <= target (instant buy opportunity)
@@ -356,6 +357,13 @@ def _strike_zone_state(
         return "PENDING", "#888888", "#fafafa"
     if not bin_price or bin_price <= 0:
         return "PENDING", "#888888", "#fafafa"
+    # STEALS-AUDIT-2026-07-22: implausible-discount hold. Top-10 steepest
+    # "steals" audited 0/10 legit — every one was a comp-identity error, not
+    # a bargain. A price >85% below MV on an honest listing is near-always
+    # OUR value being wrong, so hold it for verification instead of
+    # headlining it as a STRIKE.
+    if mv and mv > 0 and bin_price > 0 and (bin_price / mv) < 0.15:
+        return "VERIFY", "#f97316", "#fff"
     ratio = bin_price / target_bid
     if ratio <= 1.0:
         return "STRIKE", "#4ade80", "#fff"
@@ -659,7 +667,7 @@ def render_bin_radar(streamlit, *, max_cards: int = 30) -> None:
         discount = _discount_to_mv(bin_price, mv) if mv else None
         sort_key = -(discount or -1.0)   # negate so high discount = low sort key = top
         actionable.append((sort_key, row))
-        sz_label, _, _ = _strike_zone_state(_eff_bin_cost(row), target, _row_accepts_offers(row))
+        sz_label, _, _ = _strike_zone_state(_eff_bin_cost(row), target, _row_accepts_offers(row), mv=mv)
         if sz_label == "STRIKE":
             strike_count += 1
         elif sz_label == "CLOSE":
@@ -773,7 +781,8 @@ def render_bin_radar(streamlit, *, max_cards: int = 30) -> None:
     for _sort_key, row in actionable:
         bin_price = _row_current_price(row)
         target = _row_target_bid(row) if _row_has_real_mv(row) else None
-        sz_label, _, _ = _strike_zone_state(_eff_bin_cost(row), target, _row_accepts_offers(row))
+        _mv_f = (row.get("true_mv") or row.get("market_value")) if _row_has_real_mv(row) else None
+        sz_label, _, _ = _strike_zone_state(_eff_bin_cost(row), target, _row_accepts_offers(row), mv=_mv_f)
         if _filter_label == "Strikes only" and sz_label != "STRIKE":
             continue
         if _filter_label == "Strike · Close · Offer" and sz_label not in {"STRIKE", "CLOSE", "OFFER"}:
@@ -864,7 +873,7 @@ def render_bin_radar(streamlit, *, max_cards: int = 30) -> None:
                 f'color:#94a3b8;letter-spacing:0.1em;">NEEDS COMPS</div>'
             )
         else:
-            sz_label, sz_bg, sz_fg = _strike_zone_state(_eff_bin_cost(row), target_value, _accepts_offers)
+            sz_label, sz_bg, sz_fg = _strike_zone_state(_eff_bin_cost(row), target_value, _accepts_offers, mv=(mv_value or None))
             sz_rgb = _hex_to_rgb(sz_bg)
             sz_html = (
                 f'<div style="display:inline-block;padding:4px 10px;'

@@ -108,6 +108,7 @@ _INSERT_PHRASES = {
     # 2026-07-22 owner adds (case hits — never comp to base until consoles load)
     "tecmo", "kaiju", "fanatical", "alter egos", "crystalized",
     "world series at night", "aura", "stars in the night",
+    "nba finalists", "all nba",  # 2026-07-22 Steals audit: insert titles were matching base/parallel grails
     "anniversary", "stained glass", "color blast", "power players",
     "shadow etch", "transformative", "double headers", "gladiators",
     "stars of mlb", "planetary pursuit", "extraterrestrial",
@@ -965,7 +966,41 @@ def value_with_comps(title: str, *, min_score: float = 0.45, proxy: bool = True)
         # ("Rose Gold" vs base "[Gold]" -> missing {rose} -> reject exact, use proxy).
         _rarity_mismatch = bool(_low_serial and (_listing_colors - _matched_par))
 
-        if row is not None and not _rarity_mismatch:
+        # STEALS-AUDIT-2026-07-22: three identity guards. 10/10 top "steals"
+        # were fake — right SCP values on the wrong cards.
+        # (a) Card-number gate: listing says #108, matched row is #136 ->
+        #     different card, period. Reject the exact match.
+        _listing_num_g = (_norm(_NUM_RE.search(title).group(1)) if _NUM_RE.search(title) else "")
+        _row_num_g = _norm(str(row["card_number"] or "")) if row is not None else ""
+        if not _row_num_g and row is not None:
+            # letters-only tags (#RSSGA) aren't stored in card_number — read
+            # the tag straight off the matched product name instead.
+            _row_tag_m = re.search(r"#\s*([A-Za-z0-9\-]+)", str(base.get("matched") or ""))
+            _row_num_g = _norm(_row_tag_m.group(1)) if _row_tag_m else ""
+        _num_mismatch = bool(_listing_num_g and _row_num_g and _listing_num_g != _row_num_g)
+        # (b) Big-money year corroboration: a year-less "KOBE GREEN PRIZM"
+        #     title matched the 2012 Prizm grail at $4,200. Sellers of real
+        #     grails always title the year+set. If the matched row is worth
+        #     $300+ and the console's year is absent from the title, the
+        #     match is presumed a lookalike — reject.
+        _row_year_g = str(row["year"] or "").strip() if row is not None else ""
+        _match_mv_g = float(base.get("market_value") or 0.0)
+        _year_uncorroborated = bool(
+            _match_mv_g >= 300.0 and _row_year_g and _row_year_g not in title
+        )
+        # (c) Distinct-family gate: "Premium Stock" is its own SCP console
+        #     (which we don't hold) — a Premium Stock title must never take a
+        #     flagship-console row (matched Prizm Silver #136 $920 for $20
+        #     commons, x19 on the board).
+        _title_norm_fam = _norm(title)
+        _row_console_fam = _norm(str(row["console_name"] or "")) if row is not None else ""
+        _fam_mismatch = any(
+            _ph in _title_norm_fam and _ph not in _row_console_fam
+            for _ph in ("premium stock",)
+        )
+        _identity_reject = bool(_num_mismatch or _year_uncorroborated or _fam_mismatch)
+
+        if row is not None and not _rarity_mismatch and not _identity_reject:
             ladder = _grade_ladder(row)
             headline_col = grade_col
             # Order: the grade we used first (checkmark), then nearest by price.
@@ -980,6 +1015,12 @@ def value_with_comps(title: str, *, min_score: float = 0.45, proxy: bool = True)
                           "used": (e is used_entry)} for e in ordered]
                 return {**base, "valuation_tier": "exact_grade", "source": "scp_exact",
                         "comps": comps, "disclaimer": ""}
+            # STEALS-AUDIT-2026-07-22: grade parity. A RAW listing must never
+            # borrow a graded-column value (raw Wemby gold /49 was shown at the
+            # Grade-8 price, $10,500). Borrowing across grades is only sane
+            # between graded columns.
+            if grade_key == "RAW":
+                ladder = []
             if ladder:  # exact card, no value at this grade -> nearest grade of same card
                 near = min(ladder, key=lambda e: e["price"])
                 rest = sorted([e for e in ladder if e is not near], key=lambda e: e["price"])
@@ -1023,9 +1064,10 @@ def value_with_comps(title: str, *, min_score: float = 0.45, proxy: bool = True)
         # If we deliberately rejected the exact match (rarity mismatch) and the
         # proxy produced nothing, don't surface the rejected base price — a wrong
         # cheap value is worse than NO COMPS. Drop it.
-        if _rarity_mismatch:
+        if _rarity_mismatch or _identity_reject:
+            _rej_tier = "rarity_no_comp" if _rarity_mismatch else "identity_no_comp"
             return {**base, "market_value": None, "matched": None, "source": None,
-                    "valuation_tier": "rarity_no_comp", "comps": []}
+                    "valuation_tier": _rej_tier, "comps": []}
         return {**base, "valuation_tier": "none", "comps": []}
     finally:
         con.close()
