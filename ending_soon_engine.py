@@ -24448,8 +24448,7 @@ _PLAYER_MASTER: List[Dict[str, Any]] = [
     {"name": "Devin Booker",       "sport": "Basketball", "tier": 1, "tier_label": "1B", "rookie_year": 2015},
     {"name": "Damian Lillard",     "sport": "Basketball", "tier": 1, "tier_label": "1B", "rookie_year": 2012},
     {"name": "Giannis Antetokounmpo", "sport": "Basketball", "tier": 1, "tier_label": "1B", "rookie_year": 2013},
-    # WNBA Tier 1B
-    {"name": "A'ja Wilson",        "sport": "Basketball", "tier": 1, "tier_label": "1B", "rookie_year": 2018, "league": "WNBA"},
+    # WNBA (owner 7/22: Clark + Bueckers ONLY)
     {"name": "Paige Bueckers",     "sport": "Basketball", "tier": 1, "tier_label": "1B", "rookie_year": 2025, "league": "WNBA"},  # 2025 ROY
 
     # ── TIER 2: ELITE ACTIVE STARS ───────────────────────────────────────────
@@ -24509,10 +24508,6 @@ _PLAYER_MASTER: List[Dict[str, Any]] = [
     {"name": "Scottie Barnes",     "sport": "Basketball", "tier": 2, "tier_label": "2", "rookie_year": 2021},
     {"name": "Franz Wagner",       "sport": "Basketball", "tier": 2, "tier_label": "2", "rookie_year": 2021},
     {"name": "Scoot Henderson",    "sport": "Basketball", "tier": 2, "tier_label": "2", "rookie_year": 2023},
-    # WNBA Tier 2
-    {"name": "Breanna Stewart",    "sport": "Basketball", "tier": 2, "tier_label": "2", "rookie_year": 2016, "league": "WNBA"},
-    {"name": "Napheesa Collier",   "sport": "Basketball", "tier": 2, "tier_label": "2", "rookie_year": 2019, "league": "WNBA"},
-    {"name": "Sabrina Ionescu",    "sport": "Basketball", "tier": 2, "tier_label": "2", "rookie_year": 2020, "league": "WNBA"},
 
     # ── TIER 3: SPECULATION / EMERGING / UNPROVEN ────────────────────────────
     # Pre-debut prospects, rookies who haven't proven, hobby chase plays.
