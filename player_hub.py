@@ -63,8 +63,12 @@ _PRESET_POOL_LABEL_TO_GROUP_ID = {
 }
 
 DEFAULT_PARALLELS: List[str] = [
-    # Core
-    "silver", "refractor", "prizm", "numbered", "auto",
+    # FIRE-FIRST-2026-07-22 (owner): collectors chase autos, low serials, and
+    # graded slabs — those terms lead so they survive the 24-line per-player
+    # cap. Generic base terms (silver/refractor) moved behind them.
+    "auto", "psa 10", "/25", "/10", "/99",
+    # Core (generic — after the fire terms)
+    "silver", "refractor", "prizm", "numbered",
     # Autos / patches
     "rpa", "rookie patch auto", "shimmer auto", "rated rookie auto",
     # NFL inserts

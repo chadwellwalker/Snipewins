@@ -81,7 +81,7 @@ _COLLECTOR_HEAT_QUERY_GRADE_TERMS: Tuple[str, ...] = ("PSA 10", "BGS 10", "SGC 1
 _COLLECTOR_HEAT_QUERY_ROOKIE_TERMS: Tuple[str, ...] = ("rookie", "RC", "1st bowman", "1st chrome")
 _COLLECTOR_HEAT_QUERY_SERIAL_TERMS: Tuple[str, ...] = ("/10", "/25", "/50", "/99")
 _COLLECTOR_HEAT_QUERY_AUTO_TERMS: Tuple[str, ...] = ("auto", "autograph")
-_COLLECTOR_HEAT_QUERY_MAX_PER_PLAYER = 3
+_COLLECTOR_HEAT_QUERY_MAX_PER_PLAYER = 5  # 2026-07-22: 3->5 — auction budget at 12%; owner wants fire (autos/serials/case hits) dominant
 
 
 _COMBO_VALID_MEMO: Dict[Tuple[str, str], bool] = {}
@@ -326,10 +326,16 @@ def _append_collector_heat_query_lanes(specs: List[Dict[str, Any]]) -> Tuple[Lis
         # Reserve the FIRST slot for a case-hit candidate (own rotation),
         # so every elite player gets a case-hit query EVERY cycle.
         _case_cands = [c for c in _candidates if c[1] == "case_hit"]
-        if _case_cands:
-            _cstart = (_cycle + _rotation_seed) % len(_case_cands)
-            _lead = _case_cands[_cstart]
-            _rotated = [_lead] + [c for c in _rotated if c != _lead]
+        _serial_cands = [c for c in _candidates if c[1] == "serial"]
+        _grade_cands = [c for c in _candidates if c[1] == "psa10"]
+        _leads: List[Tuple[str, str, str]] = []
+        # FIRE-SLOTS-2026-07-22: guarantee one case-hit, one low-serial, and
+        # one graded-slab query per elite player EVERY cycle (own rotations).
+        for _pool in (_case_cands, _serial_cands, _grade_cands):
+            if _pool:
+                _leads.append(_pool[(_cycle + _rotation_seed) % len(_pool)])
+        if _leads:
+            _rotated = _leads + [c for c in _rotated if c not in _leads]
         _added_for_player = 0
         for _product, _reason, _term in _rotated:
             if _added_for_player >= _COLLECTOR_HEAT_QUERY_MAX_PER_PLAYER:
