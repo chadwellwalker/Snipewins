@@ -76,6 +76,10 @@ _COLLECTOR_HEAT_QUERY_CASE_HIT_TERMS: Tuple[str, ...] = (
     "prizmania", "groovy", "sublime",
     # Topps NBA SSP case-hit tier (owner-approved, all six)
     "ultra violet", "helix", "glass canvas", "advisory", "paradox", "patented",
+    # 2026-07-22 owner adds + research (Tecmo red-hot per SI; Fanatical
+    # jumping to 2026 Chrome; Kaiju in Chrome Football AND NBA; WSAN grail)
+    "tecmo", "kaiju", "fanatical", "aura", "alter egos", "crystalized",
+    "world series at night",
 )
 _COLLECTOR_HEAT_QUERY_GRADE_TERMS: Tuple[str, ...] = ("PSA 10", "BGS 10", "SGC 10")
 _COLLECTOR_HEAT_QUERY_ROOKIE_TERMS: Tuple[str, ...] = ("rookie", "RC", "1st bowman", "1st chrome")
@@ -737,12 +741,16 @@ _PRODUCT_PARALLEL_COMPATIBILITY: Dict[str, frozenset] = {
         "home field advantage", "heavy lumber", "radiating rookies",
         "ultra violet", "helix", "glass canvas", "advisory",
         "paradox", "patented",
+        # 2026-07-22 owner adds
+        "tecmo", "kaiju", "fanatical", "alter egos", "world series at night",
     }),
     "bowman chrome": frozenset({
         "superfractor", "gold", "red", "orange", "auto",
         "refractor", "atomic", "blue", "green", "purple",
         "1st bowman", "1st chrome",
         "/50", "/25", "/10", "/5", "1/1",
+        # 2026-07-22 owner adds (Bowman chases)
+        "aura", "crystalized",
     }),
     "mosaic": frozenset({
         "genesis", "honeycomb", "peacock", "stained glass", "color blast",
@@ -784,6 +792,13 @@ _PARALLEL_PRODUCT_EXCLUSIVE: Dict[str, frozenset] = {
     "paradox":        frozenset({"topps chrome"}),
     "patented":       frozenset({"topps chrome"}),
     "helix":          frozenset({"topps chrome"}),
+    "tecmo":          frozenset({"topps chrome"}),
+    "kaiju":          frozenset({"topps chrome"}),
+    "fanatical":      frozenset({"topps", "topps chrome"}),
+    "alter egos":     frozenset({"topps chrome"}),
+    "world series at night": frozenset({"topps", "topps chrome"}),
+    "aura":           frozenset({"bowman"}),
+    "crystalized":    frozenset({"bowman"}),
     "zebra":          frozenset({"prizm", "select"}),
     "tiger":          frozenset({"prizm"}),
     "elephant":       frozenset({"prizm"}),
