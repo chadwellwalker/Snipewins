@@ -37408,10 +37408,14 @@ _PLAYER_WINNER_STATE: Dict[str, Dict[str, Any]] = {}
 _LANE_ZERO_COOLDOWN_STREAK = 3
 _LANE_DEAD_WINDOW_COOLDOWN_STREAK = 2
 # PATCH 4 — Zero-Return Kill Switch: after cooldown triggers, block for this many cycles
-_LANE_COOLDOWN_CYCLES = 10
+_LANE_COOLDOWN_CYCLES = 3  # DEPLETION-2026-07-23: was 10 — at hourly cycles that's a 10h lane blackout; overnight thin supply mass-cooled the whole roster
 _LANE_LIVE_DEAD_BUFFER_SECONDS = 3600.0
+# DEPLETION-2026-07-23: raise selection floors — cooled-out cycles decayed to
+# protected_core=8 + probe=0 and the board starved on ~10 lanes.
+PROTECTED_CORE_LANES = 20
+MAX_PROBE_LANES = 8
 _LANE_LIVE_COOLDOWN_CYCLES = 2
-_MIN_LIVE_FETCH_LANES = 6
+_MIN_LIVE_FETCH_LANES = 24  # DEPLETION-2026-07-23: was 6 — the decay floor WAS the depleted state
 _DISCOVERY_PROBE_CONFIG_LOGGED = False
 _PLAYER_ZERO_COOLDOWN_STREAK = 3
 _PLAYER_COOLDOWN_CYCLES = 5
@@ -45322,6 +45326,61 @@ def fetch_ending_soon_deals(
             f"after=0 restored={len(_final_runtime_specs_pre_budget)}"
         )
         specs = list(_final_runtime_specs_pre_budget)
+    # LANE-AMNESTY-2026-07-23 (feed-depletion postmortem): when overnight thin
+    # supply trips zero-streak/dead-window cooldowns across the roster, the
+    # candidate pool decays to the protected-core floor and STAYS there (8
+    # lanes, probe=0, board starves on ~12 stale cards). If selection comes
+    # up short, wipe the cooldown poison and restore lanes from the full
+    # universe — one thin night must never blind the next morning.
+    _LANE_AMNESTY_FLOOR = 24
+    if len(specs) < _LANE_AMNESTY_FLOOR:
+        try:
+            _amnesty_cleared = 0
+            with _LANE_YIELD_LOCK:
+                for _lk_am, _lstate_am in list(_LANE_YIELD_STATE.items()):
+                    if not isinstance(_lstate_am, dict):
+                        continue
+                    if (
+                        int(_lstate_am.get("live_cooldown_cycles") or 0) > 0
+                        or bool(_lstate_am.get("dead_for_live_window"))
+                        or int(_lstate_am.get("lane_zero_streak") or 0) >= _LANE_ZERO_COOLDOWN_STREAK
+                        or int(_lstate_am.get("lane_dead_window_streak") or 0) >= _LANE_DEAD_WINDOW_COOLDOWN_STREAK
+                    ):
+                        _lstate_am["live_cooldown_cycles"] = 0
+                        _lstate_am["dead_for_live_window"] = False
+                        _lstate_am["lane_zero_streak"] = 0
+                        _lstate_am["lane_dead_window_streak"] = 0
+                        _lstate_am["zero_scan_streak"] = 0
+                        _amnesty_cleared += 1
+            _amnesty_pool = _ensure_probe_lane_budget(
+                list(specs),
+                list(_primary_specs_all) + list(_secondary_specs_all),
+                min_probe_lanes=_LANE_AMNESTY_FLOOR,
+                ignore_cold_penalties=True,
+            )
+            _amnesty_keys = {
+                str(_lane_metric_key(_s) or _live_fetch_spec_key(_s)).strip()
+                for _s in specs
+            }
+            _amnesty_added = 0
+            for _spec_am in list(_amnesty_pool or []):
+                if len(specs) >= _LANE_AMNESTY_FLOOR:
+                    break
+                _k_am = str(_lane_metric_key(_spec_am) or _live_fetch_spec_key(_spec_am)).strip()
+                if not _k_am or _k_am in _amnesty_keys:
+                    continue
+                _spec_am = dict(_spec_am)
+                _spec_am["_runtime_lane_bucket"] = "amnesty"
+                specs.append(_spec_am)
+                _amnesty_keys.add(_k_am)
+                _amnesty_added += 1
+            print(
+                f"[LANE_COOLDOWN_AMNESTY] cleared_states={_amnesty_cleared} "
+                f"restored_lanes={_amnesty_added} total_specs={len(specs)} "
+                f"floor={_LANE_AMNESTY_FLOOR}"
+            )
+        except Exception as _am_exc:
+            print(f"[LANE_COOLDOWN_AMNESTY] error={type(_am_exc).__name__}: {str(_am_exc)[:120]}")
     _protected_core_selected = sum(1 for _spec in specs if str(_spec.get("_runtime_lane_bucket") or "") == "protected_core")
     _probe_selected = sum(1 for _spec in specs if str(_spec.get("_runtime_lane_bucket") or "") == "probe_pool")
     print(
