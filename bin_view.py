@@ -652,6 +652,7 @@ def render_bin_radar(streamlit, *, max_cards: int = 30) -> None:
     actionable: List[Tuple[float, Dict[str, Any]]] = []
     pending_count = 0
     strike_count = 0
+    verify_count = 0
     close_count = 0
     offer_count = 0   # RECOMMENDED-OFFER-2026-05-13
     for row in items.values():
@@ -676,6 +677,8 @@ def render_bin_radar(streamlit, *, max_cards: int = 30) -> None:
             offer_count += 1
         elif sz_label == "PENDING":
             pending_count += 1
+        elif sz_label == "VERIFY":
+            verify_count += 1
     actionable.sort(key=lambda t: t[0])
 
     last_fetch_ts = float(pool.get("last_fetch_ts") or 0)
@@ -721,6 +724,8 @@ def render_bin_radar(streamlit, *, max_cards: int = 30) -> None:
         f'<div style="font-size:22px;font-weight:700;color:#facc15;">{close_count}</div></div>'
         f'<div style="flex:1;"><div style="{_label_css}">Offer</div>'
         f'<div style="font-size:22px;font-weight:700;color:#3b82f6;">{offer_count}</div></div>'
+        f'<div style="flex:1;"><div style="{_label_css}">Verify</div>'
+        f'<div style="font-size:22px;font-weight:700;color:#f97316;">{verify_count}</div></div>'
         f'<div style="flex:1;"><div style="{_label_css}">Pending MV</div>'
         f'<div style="font-size:22px;font-weight:700;color:#fafafa;">{pending_count}</div></div>'
         f'</div>'
