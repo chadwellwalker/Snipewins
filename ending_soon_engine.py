@@ -82,6 +82,8 @@ _COLLECTOR_HEAT_QUERY_CASE_HIT_TERMS: Tuple[str, ...] = (
     "world series at night",
     # 2026-07-22 owner add: Topps Cosmic Chrome grail insert (tier 1-2 players)
     "stars in the night",
+    # 2026-07-26 owner rulings from pass-through audit: real chases
+    "celebracion", "dragon scale", "tie dye", "tyedye",
 )
 _COLLECTOR_HEAT_QUERY_GRADE_TERMS: Tuple[str, ...] = ("PSA 10", "BGS 10", "SGC 10")
 _COLLECTOR_HEAT_QUERY_ROOKIE_TERMS: Tuple[str, ...] = ("rookie", "RC", "1st bowman", "1st chrome")
@@ -705,8 +707,9 @@ _PRODUCT_PARALLEL_COMPATIBILITY: Dict[str, frozenset] = {
         "color blast", "manga", "prizmania", "groovy", "sublime",
     }),
     "select": frozenset({
-        "silver", "gold", "tie-dye", "tie dye", "zebra",
+        "silver", "gold", "tie-dye", "tie dye", "tyedye", "zebra",
         "blue", "red", "white", "club level", "premier level", "field level",
+        "dragon scale",
     }),
     "optic": frozenset({
         "downtown", "holo", "gold vinyl", "auto",
@@ -746,6 +749,7 @@ _PRODUCT_PARALLEL_COMPATIBILITY: Dict[str, frozenset] = {
         # 2026-07-22 owner adds
         "tecmo", "kaiju", "fanatical", "alter egos", "world series at night",
         "stars in the night",
+        "celebracion",
     }),
     "bowman chrome": frozenset({
         "superfractor", "gold", "red", "orange", "auto",
@@ -801,6 +805,9 @@ _PARALLEL_PRODUCT_EXCLUSIVE: Dict[str, frozenset] = {
     "alter egos":     frozenset({"topps chrome"}),
     "world series at night": frozenset({"topps", "topps chrome"}),
     "stars in the night": frozenset({"topps", "cosmic"}),
+    "celebracion":    frozenset({"topps", "topps chrome"}),
+    "dragon scale":   frozenset({"select"}),
+    "tyedye":         frozenset({"select", "prizm"}),
     "aura":           frozenset({"bowman"}),
     "crystalized":    frozenset({"bowman"}),
     "zebra":          frozenset({"prizm", "select"}),
