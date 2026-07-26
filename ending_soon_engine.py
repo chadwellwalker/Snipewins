@@ -443,7 +443,7 @@ _PRIMARY_LANE_SCAN_TARGET = 50
 _SECONDARY_LANE_SCAN_TARGET = 30
 _PRIMARY_PASS_MIN_CANDIDATES = 12
 _DAILY_BROWSE_BUDGET_TOTAL = 5000
-_ENDING_SOON_DAILY_BUDGET = 3200  # 2026-07-21: 2600->3200 — heat lanes (case-hit slots) eat more; post_budget_total was starving to 14 specs
+_ENDING_SOON_DAILY_BUDGET = 3600  # 2026-07-26: +400 from the BIN lane trim (owner: auction-page abundance)  # 2026-07-21: 2600->3200 — heat lanes (case-hit slots) eat more; post_budget_total was starving to 14 specs
 _BUYING_RADAR_DAILY_BUDGET = 1800
 _VALUATION_DAILY_BUDGET = 3000  # 2026-07-22: local lookups, not API calls
 _RESERVE_DAILY_BUDGET = 300
@@ -24016,7 +24016,7 @@ def _allocate_cycle_budget(*, feed_type: str, now_ts: Optional[float] = None) ->
     # capped at 24 lanes due to the 48-call ceiling). User accepts higher
     # per-scan call cost in exchange for ~3x coverage of the 1,790 target
     # universe per scan.
-    _scan_budget = max(0, min(_feed_remaining, _usable_daily, 200 if _feed == "ending_soon" else 72))  # 2026-07-22: auction budget was at 12%
+    _scan_budget = max(0, min(_feed_remaining, _usable_daily, 260 if _feed == "ending_soon" else 72))  # 2026-07-26: 200->260, funded by BIN trim
     _lane_cap = max(0, min(_MAX_LANES_PER_CYCLE, _scan_budget // 2))
     # [BUDGET_PASS_AUDIT] — primary_lane_cap fix.
     # Old formula:
@@ -37044,7 +37044,7 @@ def _fetch_auctions_for_spec(
 # TERMS themselves (player-less, endingSoonest, scoped window) and keeps rows
 # whose title matches a tracked player. ~12 calls/cycle; full rotation of all
 # terms roughly every 3 cycles.
-_CASE_HIT_SWEEP_TERMS_PER_CYCLE = 12
+_CASE_HIT_SWEEP_TERMS_PER_CYCLE = 16  # 2026-07-26: full ~39-term rotation every ~2.4 cycles instead of ~3.3
 _case_hit_sweep_cursor = 0
 _SWEEP_TOKEN_MAP_CACHE: Optional[List[Tuple[str, str, str, int, str]]] = None
 
