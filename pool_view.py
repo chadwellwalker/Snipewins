@@ -1808,7 +1808,7 @@ def render_morning_briefing(streamlit, *, max_cards: int = 400) -> None:  # 2026
                 f'padding:8px 14px;background:rgba(74,222,128,0.12);'
                 f'border:1px solid rgba(74,222,128,0.3);border-radius:8px;'
                 f'font-size:12px;font-weight:600;color:#4ade80;'
-                f'text-decoration:none;">View on eBay →</a>'
+                f'text-decoration:none;">Bid on eBay →</a>'
             )
         else:
             link_html = '<span></span>'
