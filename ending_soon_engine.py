@@ -58150,6 +58150,63 @@ def fetch_ending_soon_deals(
         f"final_feed_total={int(_live_rollup.get('final_feed_total') or 0)}"
     )
     return_rows = list(valuation_feed_rows or filtered_auctions or [])
+    # FIRE-PASSTHROUGH-2026-07-27 (owner: populate-first, comps later).
+    # Conversion audit R2: ~214 fire rows/cycle admitted + routed cleanly,
+    # then died in the post-valuation gauntlet because the SCP consoles for
+    # case hits aren't downloaded yet -> unpriced -> never returned. Owner
+    # call: a great card with NO COMPS on the board beats an empty board.
+    # Re-admit dropped rows that carry fire traits (case-hit term / auto /
+    # serial <=99 / graded 9+), capped, marked, displayed as NO-COMPS with
+    # the audit link. Comps layer on automatically when the data lands.
+    _FIRE_PASSTHROUGH_CAP = 120
+    try:
+        _fp_ids = {
+            str((_d or {}).get("item_id") or (_d or {}).get("itemId") or (_d or {}).get("source_item_id") or "")
+            for _d in list(return_rows or [])
+        }
+        _fp_terms = tuple(_COLLECTOR_HEAT_QUERY_CASE_HIT_TERMS)
+        _fp_candidates = []
+        for _d_fp in list(cleaned_auctions or []):
+            if not isinstance(_d_fp, dict):
+                continue
+            _fp_id = str(_d_fp.get("item_id") or _d_fp.get("itemId") or _d_fp.get("source_item_id") or "")
+            if not _fp_id or _fp_id in _fp_ids:
+                continue
+            _fp_title = str(_d_fp.get("title") or "")
+            _fp_norm = " " + " ".join(
+                "".join(_c.lower() if _c.isalnum() else " " for _c in _fp_title)
+                .split()
+            ) + " "
+            _fp_case_hit = (
+                str(_d_fp.get("query_kind") or "") == "case_hit_sweep"
+                or any((f" {_t} " in _fp_norm or f" {_t}s " in _fp_norm) for _t in _fp_terms)
+            )
+            _fp_auto = (" auto " in _fp_norm or " autograph " in _fp_norm or " rpa " in _fp_norm)
+            _fp_ser = re.search(r"/\s*(\d{1,3})\b", _fp_title)
+            _fp_serial = bool(_fp_ser and int(_fp_ser.group(1)) <= 99)
+            _fp_graded = bool(re.search(r"\b(psa|bgs|sgc|cgc)\s*-?\s*(10|9(\.5)?)\b", _fp_norm))
+            if not (_fp_case_hit or _fp_auto or _fp_serial or _fp_graded):
+                continue
+            _fp_candidates.append((_d_fp, _fp_case_hit, _fp_auto))
+        _fp_candidates.sort(key=lambda _t: (not _t[1], not _t[2]))  # case hits, then autos
+        _fp_added = 0
+        for _d_fp, _fp_ch, _fp_au in _fp_candidates:
+            if _fp_added >= _FIRE_PASSTHROUGH_CAP:
+                break
+            _d_fp = dict(_d_fp)
+            _d_fp["_fire_passthrough"] = True
+            _d_fp["_fire_passthrough_reason"] = (
+                "case_hit" if _fp_ch else ("auto" if _fp_au else "serial_or_graded")
+            )
+            return_rows.append(_d_fp)
+            _fp_ids.add(str(_d_fp.get("item_id") or _d_fp.get("itemId") or _d_fp.get("source_item_id") or ""))
+            _fp_added += 1
+        print(
+            f"[FIRE_PASSTHROUGH] added={_fp_added} candidates={len(_fp_candidates)} "
+            f"cap={_FIRE_PASSTHROUGH_CAP} return_rows_now={len(return_rows)}"
+        )
+    except Exception as _fp_exc:
+        print(f"[FIRE_PASSTHROUGH] error={type(_fp_exc).__name__}: {str(_fp_exc)[:120]}")
     _final_return_by_player: Dict[str, int] = {}
     for _return_row in list(return_rows or []):
         _player_fr = str(
