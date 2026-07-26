@@ -1127,10 +1127,17 @@ def render_morning_briefing(streamlit, *, max_cards: int = 400) -> None:  # 2026
             # dead (3 vs 72 = invisible sliver). sqrt compresses the ratio so
             # quiet hours stay visibly alive without faking the shape.
             _fc_max_s = (_fc_max ** 0.5) or 1.0
-            _fc_now = time.localtime()
+            # ET-2026-07-26 (owner): peak callout pinned to Eastern — the
+            # hobby's clock. Render runs UTC; convert properly via zoneinfo.
+            try:
+                from zoneinfo import ZoneInfo as _FcZone
+                from datetime import datetime as _FcDt
+                _fc_hour_now = _FcDt.now(_FcZone("America/New_York")).hour
+            except Exception:
+                _fc_hour_now = time.localtime().tm_hour
             _fc_bars = []
             for _fc_i, _fc_n in enumerate(_fc_bins):
-                _fc_hh = (_fc_now.tm_hour + _fc_i) % 24
+                _fc_hh = (_fc_hour_now + _fc_i) % 24
                 _fc_pct = int(round(100.0 * (_fc_n ** 0.5) / _fc_max_s))
                 _fc_col = "#4ade80" if _fc_n == _fc_max and _fc_n > 0 else "#2f4f3a"
                 _fc_bars.append(
@@ -1145,7 +1152,7 @@ def render_morning_briefing(streamlit, *, max_cards: int = 400) -> None:  # 2026
                 _fc_w = _fc_bins[_fc_i] + _fc_bins[_fc_i + 1]
                 if _fc_w > _fc_best_n:
                     _fc_best_i, _fc_best_n = _fc_i, _fc_w
-            _fc_pk_start = (_fc_now.tm_hour + _fc_best_i) % 24
+            _fc_pk_start = (_fc_hour_now + _fc_best_i) % 24
             _fc_pk_end = (_fc_pk_start + 2) % 24
             def _fc_ampm(_h):
                 return f"{(_h % 12) or 12}{'AM' if _h < 12 else 'PM'}"
@@ -1156,7 +1163,7 @@ def render_morning_briefing(streamlit, *, max_cards: int = 400) -> None:  # 2026
                 "text-transform:uppercase;margin-bottom:6px;'>Endings forecast · next 12h"
                 f"<span style='color:#4ade80;text-transform:none;letter-spacing:0;"
                 f"font-weight:600;margin-left:10px;'>Peak {_fc_ampm(_fc_pk_start)}\u2013{_fc_ampm(_fc_pk_end)} "
-                f"\u00b7 {_fc_best_n} auctions end \u2014 best time to snipe</span></div>"
+                f"EST \u00b7 {_fc_best_n} auctions end \u2014 best time to snipe</span></div>"
                 f"<div style='display:flex;gap:2px;align-items:flex-end;'>{''.join(_fc_bars)}</div>"
                 "<div style='display:flex;justify-content:space-between;font-size:9px;"
                 "color:#555;margin-top:3px;'><span>now</span><span>+3h</span>"
