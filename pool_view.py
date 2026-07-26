@@ -1109,6 +1109,57 @@ def render_morning_briefing(streamlit, *, max_cards: int = 400) -> None:  # 2026
         f'</div>'
     )
     st.markdown(_headline_html, unsafe_allow_html=True)
+    # ENDINGS-FORECAST-2026-07-26 (owner): Google-style "busy hours" bar,
+    # but forward-looking — the pool already knows every end time, so show
+    # WHEN the next 24h of auctions cluster and call out the peak window.
+    # Thin strip, one caption line: retention hook without hero clutter.
+    try:
+        _fc_bins = [0] * 24
+        for _fc_secs, _fc_row in actionable_rows:
+            _fc_h = int(min(23, max(0, _fc_secs // 3600)))
+            _fc_bins[_fc_h] += 1
+        _fc_total = sum(_fc_bins)
+        if _fc_total >= 8:
+            _fc_max = max(_fc_bins) or 1
+            _fc_now = time.localtime()
+            _fc_bars = []
+            for _fc_i, _fc_n in enumerate(_fc_bins):
+                _fc_hh = (_fc_now.tm_hour + _fc_i) % 24
+                _fc_pct = int(round(100.0 * _fc_n / _fc_max))
+                _fc_col = "#4ade80" if _fc_n == _fc_max and _fc_n > 0 else "#2f4f3a"
+                _fc_bars.append(
+                    f"<div title='{_fc_n} ending ~{_fc_hh:02d}:00' "
+                    f"style='flex:1;display:flex;flex-direction:column;justify-content:flex-end;height:34px;'>"
+                    f"<div style='height:{max(4, _fc_pct) if _fc_n > 0 else 2}%;"
+                    f"background:{_fc_col};border-radius:2px 2px 0 0;'></div></div>"
+                )
+            # peak = best consecutive 2h window
+            _fc_best_i, _fc_best_n = 0, -1
+            for _fc_i in range(23):
+                _fc_w = _fc_bins[_fc_i] + _fc_bins[_fc_i + 1]
+                if _fc_w > _fc_best_n:
+                    _fc_best_i, _fc_best_n = _fc_i, _fc_w
+            _fc_pk_start = (_fc_now.tm_hour + _fc_best_i) % 24
+            _fc_pk_end = (_fc_pk_start + 2) % 24
+            def _fc_ampm(_h):
+                return f"{(_h % 12) or 12}{'AM' if _h < 12 else 'PM'}"
+            st.markdown(
+                "<div style='margin:2px 0 14px 0;padding:10px 16px 8px 16px;"
+                "background:#101010;border-radius:12px;'>"
+                "<div style='font-size:10px;color:#b0b0b0;letter-spacing:0.12em;"
+                "text-transform:uppercase;margin-bottom:6px;'>Endings forecast · next 24h"
+                f"<span style='color:#4ade80;text-transform:none;letter-spacing:0;"
+                f"font-weight:600;margin-left:10px;'>Peak {_fc_ampm(_fc_pk_start)}\u2013{_fc_ampm(_fc_pk_end)} "
+                f"\u00b7 {_fc_best_n} auctions end \u2014 best time to snipe</span></div>"
+                f"<div style='display:flex;gap:2px;align-items:flex-end;'>{''.join(_fc_bars)}</div>"
+                "<div style='display:flex;justify-content:space-between;font-size:9px;"
+                "color:#555;margin-top:3px;'><span>now</span><span>+6h</span>"
+                "<span>+12h</span><span>+18h</span><span>+24h</span></div>"
+                "</div>",
+                unsafe_allow_html=True,
+            )
+    except Exception:
+        pass
     # LEGEND-2026-07-19 (conversion audit): explain Target + statuses once.
     st.caption(
         "Market = SportsCardsPro guide value for the exact card and grade \u00b7 "
