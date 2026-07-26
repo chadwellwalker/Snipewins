@@ -1123,16 +1123,20 @@ def render_morning_briefing(streamlit, *, max_cards: int = 400) -> None:  # 2026
         _fc_total = sum(_fc_bins)
         if _fc_total >= 8:
             _fc_max = max(_fc_bins) or 1
+            # SQRT-SCALE-2026-07-26 (owner): linear scale made off-hours look
+            # dead (3 vs 72 = invisible sliver). sqrt compresses the ratio so
+            # quiet hours stay visibly alive without faking the shape.
+            _fc_max_s = (_fc_max ** 0.5) or 1.0
             _fc_now = time.localtime()
             _fc_bars = []
             for _fc_i, _fc_n in enumerate(_fc_bins):
                 _fc_hh = (_fc_now.tm_hour + _fc_i) % 24
-                _fc_pct = int(round(100.0 * _fc_n / _fc_max))
+                _fc_pct = int(round(100.0 * (_fc_n ** 0.5) / _fc_max_s))
                 _fc_col = "#4ade80" if _fc_n == _fc_max and _fc_n > 0 else "#2f4f3a"
                 _fc_bars.append(
                     f"<div title='{_fc_n} ending ~{_fc_hh:02d}:00' "
                     f"style='flex:1;display:flex;flex-direction:column;justify-content:flex-end;height:34px;'>"
-                    f"<div style='height:{max(4, _fc_pct) if _fc_n > 0 else 2}%;"
+                    f"<div style='height:{max(14, _fc_pct) if _fc_n > 0 else 2}%;"
                     f"background:{_fc_col};border-radius:2px 2px 0 0;'></div></div>"
                 )
             # peak = best consecutive 2h window
