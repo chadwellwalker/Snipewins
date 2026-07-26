@@ -44960,13 +44960,22 @@ def fetch_ending_soon_deals(
     # Priority: (1) lanes with real near-term auctions (density_score), (2) premium
     # quality, (3) historical profitability. Replaces premium-first selection.
     def _lane_density_rank_key(_e: Dict[str, Any]) -> Tuple[Any, ...]:
+        # ALPHA-SKEW-2026-07-26 (pass-through audit): the old tiebreaker was
+        # the lane_key STRING — after a restart wipes yield state, all scores
+        # are equal, so "tiebreaker" became the entire ordering and only
+        # players A–C ever got lanes (211-player roster, ~35 slots). Rotate
+        # ties with an hourly-salted hash so equal-score lanes cycle through
+        # the whole roster instead of alphabet-camping.
+        import zlib as _zlib_rot
+        _rot_salt = int(time.time() // 3600)
+        _rot = _zlib_rot.crc32(f"{_e.get('lane_key') or ''}:{_rot_salt}".encode("utf-8", "ignore"))
         return (
             -float(_e.get("live_end_time_density_score") or 0.0),
             -float(_e.get("premium_score") or 0.0),
             -float(_e.get("last_good_boost") or 0.0),
             -float(_e.get("window_viability_score") or 0.0),
             -float(_e.get("rank_score") or 0.0),
-            str(_e.get("lane_key") or ""),
+            _rot,
         )
     _main_candidate_entries = sorted(_main_candidate_entries, key=_lane_density_rank_key)
 

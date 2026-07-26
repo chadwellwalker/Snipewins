@@ -110,6 +110,7 @@ _INSERT_PHRASES = {
     "world series at night", "aura", "stars in the night",
     "nba finalists", "all nba",  # 2026-07-22 Steals audit: insert titles were matching base/parallel grails
     "serenity",  # 2026-07-22 audit follow-up: no Serenity console held; was matching Prizm base #136
+    "monopoly",  # 2026-07-26: Prizm Monopoly is its own product line; Clark Monopoly Light Blue was pricing off base [Blue] #145
     "anniversary", "stained glass", "color blast", "power players",
     "shadow etch", "transformative", "double headers", "gladiators",
     "stars of mlb", "planetary pursuit", "extraterrestrial",
