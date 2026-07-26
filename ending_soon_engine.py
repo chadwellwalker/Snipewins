@@ -58182,7 +58182,11 @@ def fetch_ending_soon_deals(
         }
         _fp_terms = tuple(_COLLECTOR_HEAT_QUERY_CASE_HIT_TERMS)
         _fp_candidates = []
-        for _d_fp in list(cleaned_auctions or []):
+        # COVERAGE-2026-07-26 (audit R3): cleaned_auctions is the VALUED
+        # subset (120-cap) — sweep rows appended last lost the valuation-slot
+        # race, so kaboom/stained-glass fire never reached the pass-through.
+        # Draw from the full admitted pool as well.
+        for _d_fp in list(cleaned_auctions or []) + list(_valuation_candidates_auctions or []):
             if not isinstance(_d_fp, dict):
                 continue
             _fp_id = str(_d_fp.get("item_id") or _d_fp.get("itemId") or _d_fp.get("source_item_id") or "")

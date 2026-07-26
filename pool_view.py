@@ -32,7 +32,24 @@ def _card_audit_sold_url(row) -> str:
             return ""
         from urllib.parse import quote_plus as _qp
         import re as _re
-        _clean = _re.sub(r"\s+", " ", _t).strip()[:140]
+        # AUDIT-QUERY-TRIM-2026-07-26: raw titles carry seller noise (GEM
+        # MINT, Rare!, SKU codes like Q3668-3) that makes the exact search
+        # show "0 results" before eBay's fewer-words fallback saves it.
+        # Strip the noise so the audit lands on exact matches.
+        _noise = {"gem", "mint", "rare", "hot", "wow", "invest", "look",
+                  "l@@k", "sharp", "nice", "beauty", "fire", "nr", "obo",
+                  "sweet", "grail", "must", "see", "wowza", "gorgeous"}
+        _kept_toks = []
+        for _tok in _t.split():
+            _tl = _tok.strip("!¡*~·•").lower()
+            if not _tl or _tl in _noise:
+                continue
+            # SKU-ish token: letters+digits mash like Q3668-3 (but keep #-prefixed
+            # card numbers, serials 12/25, grades, and years)
+            if _re.fullmatch(r"[A-Za-z]{1,2}\d{3,}(-\d+)?", _tl) and not _tok.startswith("#"):
+                continue
+            _kept_toks.append(_tok.strip("!¡*~"))
+        _clean = _re.sub(r"\s+", " ", " ".join(_kept_toks) or _t).strip()[:140]
         _url = f"https://www.ebay.com/sch/i.html?_nkw={_qp(_clean)}&LH_Sold=1&LH_Complete=1"
         return affiliate_url(_url, customid="pool-audit")
     except Exception:

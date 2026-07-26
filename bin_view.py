@@ -362,7 +362,7 @@ def _strike_zone_state(
     # a bargain. A price >85% below MV on an honest listing is near-always
     # OUR value being wrong, so hold it for verification instead of
     # headlining it as a STRIKE.
-    if mv and mv > 0 and bin_price > 0 and (bin_price / mv) < 0.15:
+    if mv and mv > 0 and bin_price > 0 and (bin_price / mv) < 0.22:  # 2026-07-26: 0.15->0.22, generic-comp reuse was strike-ing at 78-84% spreads
         return "VERIFY", "#f97316", "#fff"
     ratio = bin_price / target_bid
     if ratio <= 1.0:
